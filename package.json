@@ -5,10 +5,22 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./shogi": "./dist/shogi/index.js",
-    "./helpers/string": "./dist/helpers/string.js",
-    "./helpers/time": "./dist/helpers/time.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./shogi": {
+      "types": "./dist/shogi/index.d.ts",
+      "default": "./dist/shogi/index.js"
+    },
+    "./shogi/": {
+      "types": "./dist/shogi/",
+      "default": "./dist/shogi/"
+    },
+    "./helpers/": {
+      "types": "./dist/helpers/",
+      "default": "./dist/helpers/"
+    }
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
