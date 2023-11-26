@@ -1,8 +1,8 @@
 // KIF file format (.kif or .kifu)
 // See http://kakinoki.o.oo7.jp/kif_format.html
 
-import { appendLine } from "@/helpers/string";
-import { millisecondsToHHMMSS, millisecondsToMSS } from "@/helpers/time";
+import { appendLine } from "../helpers/string";
+import { millisecondsToHHMMSS, millisecondsToMSS } from "../helpers/time";
 import {
   Color,
   Move,

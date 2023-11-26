@@ -2,10 +2,6 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    },
     "types": ["vitest/globals"],
     "declaration": true,
     "sourceMap": true,

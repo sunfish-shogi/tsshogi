@@ -1,7 +1,7 @@
 // CSA file format (.csa)
 // See http://www2.computer-shogi.org/protocol/record_v22.html
 
-import { appendLine } from "@/helpers/string";
+import { appendLine } from "../helpers/string";
 import {
   InvalidLineError,
   InvalidMoveError,

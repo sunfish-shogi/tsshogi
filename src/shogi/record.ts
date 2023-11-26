@@ -13,7 +13,7 @@ import {
   specialMove,
   InitialPositionSFEN,
 } from ".";
-import { millisecondsToHHMMSS, millisecondsToMSS } from "@/helpers/time";
+import { millisecondsToHHMMSS, millisecondsToMSS } from "../helpers/time";
 import { formatMove, formatSpecialMove } from "./text";
 
 export enum RecordMetadataKey {
