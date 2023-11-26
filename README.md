@@ -1,0 +1,1 @@
+# electron-shogi-core
