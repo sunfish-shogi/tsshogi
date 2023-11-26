@@ -1,0 +1,35 @@
+{
+  "header": {},
+  "initial": { "preset": "HIRATE" },
+  "moves": [
+    {},
+    {
+      "move": { "piece": "FU", "to": { "x": 2, "y": 6 }, "from": { "x": 2, "y": 7 }, "color": 0 },
+      "time": { "now": { "m": 0, "s": 8 }, "total": { "h": 0, "m": 0, "s": 8 } }
+    },
+    {
+      "move": { "piece": "FU", "to": { "x": 8, "y": 4 }, "from": { "x": 8, "y": 3 }, "color": 1 },
+      "time": { "now": { "m": 0, "s": 17 }, "total": { "h": 0, "m": 0, "s": 17 } }
+    },
+    {
+      "move": { "piece": "FU", "to": { "x": 2, "y": 5 }, "from": { "x": 2, "y": 6 }, "color": 0 },
+      "time": { "now": { "m": 35, "s": 42 }, "total": { "h": 0, "m": 35, "s": 50 } }
+    },
+    {
+      "move": { "piece": "FU", "to": { "x": 8, "y": 5 }, "from": { "x": 8, "y": 4 }, "color": 1 },
+      "time": { "now": { "m": 3, "s": 33 }, "total": { "h": 0, "m": 3, "s": 50 } }
+    },
+    {
+      "move": { "piece": "KI", "to": { "x": 7, "y": 8 }, "from": { "x": 6, "y": 9 }, "color": 0 },
+      "time": { "now": { "m": 42, "s": 21 }, "total": { "h": 1, "m": 18, "s": 11 } }
+    },
+    {
+      "move": { "piece": "KI", "to": { "x": 3, "y": 2 }, "from": { "x": 4, "y": 1 }, "color": 1 },
+      "time": { "now": { "m": 9, "s": 11 }, "total": { "h": 0, "m": 13, "s": 1 } }
+    },
+    {
+      "special": "TORYO",
+      "time": { "now": { "m": 50, "s": 43 }, "total": { "h": 2, "m": 8, "s": 54 } }
+    }
+  ]
+}

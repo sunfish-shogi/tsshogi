@@ -1,0 +1,253 @@
+{
+  "header": {},
+  "moves": [
+    {}
+  ],
+  "initial": {
+    "preset": "OTHER",
+    "data": {
+      "board": [
+        [
+          {
+            "color": 1,
+            "kind": "KY"
+          },
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {},
+          {
+            "color": 0,
+            "kind": "KY"
+          }
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "KE"
+          },
+          {
+            "color": 1,
+            "kind": "KA"
+          },
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "HI"
+          },
+          {
+            "color": 0,
+            "kind": "KE"
+          }
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "GI"
+          },
+          {
+            "color": 1,
+            "kind": "KI"
+          },
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {},
+          {
+            "color": 0,
+            "kind": "GI"
+          }
+        ],
+        [
+          {},
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {},
+          {
+            "color": 0,
+            "kind": "KI"
+          }
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "OU"
+          },
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {},
+          {}
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "KI"
+          },
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {
+            "color": 0,
+            "kind": "OU"
+          },
+          {}
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "GI"
+          },
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {
+            "color": 0,
+            "kind": "KI"
+          },
+          {
+            "color": 0,
+            "kind": "GI"
+          }
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "KE"
+          },
+          {
+            "color": 1,
+            "kind": "HI"
+          },
+          {},
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {
+            "color": 0,
+            "kind": "KA"
+          },
+          {
+            "color": 0,
+            "kind": "KE"
+          }
+        ],
+        [
+          {
+            "color": 1,
+            "kind": "KY"
+          },
+          {},
+          {
+            "color": 1,
+            "kind": "FU"
+          },
+          {},
+          {},
+          {},
+          {
+            "color": 0,
+            "kind": "FU"
+          },
+          {},
+          {
+            "color": 0,
+            "kind": "KY"
+          }
+        ]
+      ],
+      "color": 1,
+      "hands": [
+        {
+          "FU": 0,
+          "KY": 0,
+          "KE": 0,
+          "GI": 0,
+          "KI": 0,
+          "KA": 0,
+          "HI": 0
+        },
+        {
+          "FU": 0,
+          "KY": 0,
+          "KE": 0,
+          "GI": 0,
+          "KI": 0,
+          "KA": 0,
+          "HI": 0
+        }
+      ]
+    }
+  }
+}

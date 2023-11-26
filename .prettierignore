@@ -1,0 +1,5 @@
+dist
+coverage
+.github/*TEMPLATE*
+.gitignore
+LICENSE.md
