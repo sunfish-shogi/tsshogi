@@ -4,7 +4,7 @@
   "description": "Core module of ElectronShogi(https://github.com/sunfish-shogi/electron-shogi)",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "prepare": "npm run build",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
