@@ -5,7 +5,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./shogi": "./dist/shogi/index.js",
+    "./helpers/string": "./dist/helpers/string.js",
+    "./helpers/time": "./dist/helpers/time.js"
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
