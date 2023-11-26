@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "Core module of ElectronShogi(https://github.com/sunfish-shogi/electron-shogi)",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "prepare": "npm run build",
