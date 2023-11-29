@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "commonjs",
-    "types": ["vitest/globals"],
-    "declaration": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "module": "CommonJS",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true,
+    "inlineSourceMap": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": ["vitest/globals"],
+    "lib": ["ESNext"]
   },
   "include": ["src/**/*.ts"]
 }

@@ -9,7 +9,7 @@ import {
   Square,
   PieceType,
   InitialPositionSFEN,
-} from "@/shogi";
+} from "../";
 
 describe("shogi/position", () => {
   it("getters", () => {

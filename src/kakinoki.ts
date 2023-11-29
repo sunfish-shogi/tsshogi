@@ -1,35 +1,38 @@
 // KIF file format (.kif or .kifu)
 // See http://kakinoki.o.oo7.jp/kif_format.html
 
-import { appendLine } from "../helpers/string";
-import { millisecondsToHHMMSS, millisecondsToMSS } from "../helpers/time";
+import { appendLine } from "./helpers/string";
+import { millisecondsToHHMMSS, millisecondsToMSS } from "./helpers/time";
+import { Board } from "./board";
+import { Color } from "./color";
 import {
-  Color,
+  InvalidBoardError,
+  InvalidDestinationError,
+  InvalidHandPieceError,
+  InvalidHandicapError,
+  InvalidLineError,
+  InvalidMoveError,
+  InvalidMoveNumberError,
+} from "./errors";
+import { Hand, ImmutableHand } from "./hand";
+import {
   Move,
-  Position,
-  ImmutablePosition,
+  SpecialMove,
+  SpecialMoveType,
+  anySpecialMove,
+  isKnownSpecialMove,
+  specialMove,
+} from "./move";
+import { Piece, PieceType } from "./piece";
+import { ImmutablePosition, InitialPositionSFEN, Position } from "./position";
+import {
+  ImmutableRecord,
+  ImmutableRecordMetadata,
   Record,
   RecordMetadata,
   RecordMetadataKey,
-  Square,
-  InvalidHandicapError,
-  InvalidBoardError,
-  InvalidHandPieceError,
-  InvalidMoveError,
-  InvalidMoveNumberError,
-  InvalidDestinationError,
-  InvalidLineError,
-  SpecialMoveType,
-  isKnownSpecialMove,
-  anySpecialMove,
-  SpecialMove,
-  specialMove,
-  InitialPositionSFEN,
-} from ".";
-import { Board } from "./board";
-import { Hand, ImmutableHand } from "./hand";
-import { Piece, PieceType } from "./piece";
-import { ImmutableRecord, ImmutableRecordMetadata } from "./record";
+} from "./record";
+import { Square } from "./square";
 import {
   fileToMultiByteChar,
   formatMove as formatMove2,

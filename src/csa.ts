@@ -1,15 +1,14 @@
 // CSA file format (.csa)
 // See http://www2.computer-shogi.org/protocol/record_v22.html
 
-import { appendLine } from "../helpers/string";
+import { appendLine } from "./helpers/string";
 import {
   InvalidLineError,
   InvalidMoveError,
   InvalidPieceNameError,
   InvalidTurnError,
   PieceNotExistsError,
-  Record,
-} from ".";
+} from "./errors";
 import { Color, reverseColor } from "./color";
 import { ImmutableHand } from "./hand";
 import { Move, SpecialMove, SpecialMoveType } from "./move";
@@ -23,6 +22,7 @@ import {
 import {
   ImmutableRecord,
   ImmutableRecordMetadata,
+  Record,
   RecordMetadata,
   RecordMetadataKey,
   getBlackPlayerName,

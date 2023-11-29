@@ -14,7 +14,7 @@ import {
   specialMove,
   anySpecialMove,
   parseMoves,
-} from "@/shogi";
+} from "../";
 
 describe("shogi/text", () => {
   it("formatSpecialMove", () => {

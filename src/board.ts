@@ -1,5 +1,4 @@
-import { Color } from ".";
-import { reverseColor } from "./color";
+import { Color, reverseColor } from "./color";
 import { directions, MoveType, resolveMoveType, reverseDirection } from "./direction";
 import { Piece, PieceType } from "./piece";
 import { Square } from "./square";

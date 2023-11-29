@@ -1,5 +1,4 @@
-import { detectRecordFormat } from "@/shogi";
-import { RecordFormatType } from "@/shogi/detect";
+import { RecordFormatType, detectRecordFormat } from "../";
 
 describe("shogi/detect", () => {
   it("usi", () => {

@@ -8,7 +8,7 @@ import {
   RecordMetadataKey,
   specialMove,
   SpecialMoveType,
-} from "@/shogi";
+} from "../";
 
 describe("shogi/csa", () => {
   it("import/standard", () => {

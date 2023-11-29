@@ -1,4 +1,4 @@
-import { Color, Piece, PieceType, pieceTypeToSFEN, standardPieceName } from "@/shogi";
+import { Color, Piece, PieceType, pieceTypeToSFEN, standardPieceName } from "../";
 
 describe("shogi/piece", () => {
   it("PieceType", () => {

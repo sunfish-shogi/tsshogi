@@ -1,4 +1,4 @@
-import { Square } from "@/shogi";
+import { Square } from "../";
 
 describe("shogi/square", () => {
   it("getters", () => {

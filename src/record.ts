@@ -1,19 +1,8 @@
-import {
-  Position,
-  DoMoveOption,
-  ImmutablePosition,
-  Move,
-  Color,
-  reverseColor,
-  parseUSIMove,
-  InvalidUSIError,
-  InvalidMoveError,
-  SpecialMove,
-  SpecialMoveType,
-  specialMove,
-  InitialPositionSFEN,
-} from ".";
-import { millisecondsToHHMMSS, millisecondsToMSS } from "../helpers/time";
+import { millisecondsToHHMMSS, millisecondsToMSS } from "./helpers/time";
+import { Color, reverseColor } from "./color";
+import { InvalidMoveError, InvalidUSIError } from "./errors";
+import { Move, SpecialMove, SpecialMoveType, parseUSIMove, specialMove } from "./move";
+import { DoMoveOption, ImmutablePosition, InitialPositionSFEN, Position } from "./position";
 import { formatMove, formatSpecialMove } from "./text";
 
 export enum RecordMetadataKey {

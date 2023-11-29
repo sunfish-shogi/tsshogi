@@ -16,7 +16,7 @@ import {
   getBlackPlayerNamePreferShort,
   getWhitePlayerName,
   getWhitePlayerNamePreferShort,
-} from "@/shogi";
+} from "../";
 
 describe("shogi/record", () => {
   it("getBlackPlayerName", () => {

@@ -2,28 +2,14 @@
   "name": "electron-shogi-core",
   "version": "0.1.0",
   "description": "Core module of ElectronShogi(https://github.com/sunfish-shogi/electron-shogi)",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./shogi": {
-      "types": "./dist/shogi/index.d.ts",
-      "default": "./dist/shogi/index.js"
-    },
-    "./shogi/": {
-      "types": "./dist/shogi/",
-      "default": "./dist/shogi/"
-    },
-    "./helpers/": {
-      "types": "./dist/helpers/",
-      "default": "./dist/helpers/"
-    }
-  },
+  "type": "module",
+  "types": "dist/cjs/index.d.ts",
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.mjs",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json && node ./scripts/fix-dist-extension.mjs dist/cjs .cjs",
+    "build:esm": "tsc --project tsconfig.esm.json && node ./scripts/fix-dist-extension.mjs dist/esm .mjs",
+    "build": "npm run build:cjs && npm run build:esm",
     "prepare": "npm run build",
     "test": "vitest run",
     "coverage": "vitest run --coverage",

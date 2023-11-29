@@ -1,4 +1,4 @@
-import { Position } from ".";
+import { Position } from "./position";
 
 export enum RecordFormatType {
   USI,

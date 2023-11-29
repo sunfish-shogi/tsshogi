@@ -16,7 +16,7 @@ import {
   specialMove,
   SpecialMoveType,
   Square,
-} from "@/shogi";
+} from "../";
 
 describe("shogi/kakinoki", () => {
   it("import/standard", () => {
