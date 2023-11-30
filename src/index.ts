@@ -1,5 +1,4 @@
-export * as string from "./helpers/string";
-export * as time from "./helpers/time";
+export * from "./helpers/time";
 export * from "./errors";
 export * from "./piece";
 export * from "./color";
