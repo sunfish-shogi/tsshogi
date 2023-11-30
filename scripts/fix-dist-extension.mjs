@@ -22,7 +22,20 @@ function update(dir, ext) {
       update(path, ext);
     } else if (file.endsWith(".js")) {
       const data = fs.readFileSync(path, "utf8");
-      fs.writeFileSync(path, data.replace(/require\("\.\/([^"]*)"\)/g, `require("./$1${ext}")`));
+      switch (ext) {
+        case ".mjs":
+          fs.writeFileSync(
+            path,
+            data.replace(/(^|\n)(import|export) ([^"]+) "\.\/([^"]+)";/g, '$1$2 $3 "./$4.mjs";'),
+          );
+          break;
+        case ".cjs":
+          fs.writeFileSync(
+            path,
+            data.replace(/(^|[^A-Za-z0-9_])require\("\.\/([^"]*)"\)/g, `$1require("./$2${ext}")`),
+          );
+          break;
+      }
       fs.renameSync(path, `${path.substring(0, path.length - 3)}${ext}`);
     }
   }
