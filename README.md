@@ -43,7 +43,9 @@ while (record.goForward()) {
   console.log(record.current.ply, record.current.displayText);
 }
 
-// 指し手を追加する。
+/*
+ * 指し手を追加する。
+ */
 const move = record.position.createMoveByUSI("4a3b");
 if (!move) {
   throw new Error("Invalid SFEN");
