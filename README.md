@@ -7,7 +7,9 @@ KIF や KI2、CSA、JKF、SFEN/USI といった幅広いフォーマットでの
 
 ## インストール
 
-準備中
+```
+npm install electron-shogi-core
+```
 
 ## 基本的な使用方法
 
