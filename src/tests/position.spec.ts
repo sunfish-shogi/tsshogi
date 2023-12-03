@@ -429,6 +429,65 @@ describe("shogi/position", () => {
     });
   });
 
+  it("isValidEditing", () => {
+    const position = Position.newBySFEN("ln1gkg1nl/1r1s3s1/pppppp1pp/6B2/9/2P4P1/PP1PPPP1P/1S5R1/LN1GKGSNL w Pb 10") as Position;
+    // Good: ☗49金 => 85
+    expect(position.isValidEditing(new Square(4, 9), new Square(8, 5))).toBeTruthy();
+    // Good: ☗49金 <=> ⛉83歩
+    expect(position.isValidEditing(new Square(4, 9), new Square(8, 3))).toBeTruthy();
+    // Bad: 48 => 85
+    expect(position.isValidEditing(new Square(4, 8), new Square(8, 5))).toBeFalsy();
+    // Good: ⛉82飛 => ☗
+    expect(position.isValidEditing(new Square(8, 2), Color.BLACK)).toBeTruthy();
+    // Good: ⛉82飛 => ⛉
+    expect(position.isValidEditing(new Square(8, 2), Color.WHITE)).toBeTruthy();
+    // Bad: 72 => ⛉
+    expect(position.isValidEditing(new Square(7, 2), Color.WHITE)).toBeFalsy();
+    // Good: ☗持歩 => ⛉
+    expect(position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), Color.WHITE)).toBeTruthy();
+    // Bad: ☗持銀 => ⛉
+    expect(position.isValidEditing(new Piece(Color.BLACK, PieceType.BISHOP), Color.WHITE)).toBeFalsy();
+    // Good: ⛉持角 => ☗
+    expect(position.isValidEditing(new Piece(Color.WHITE, PieceType.BISHOP), Color.BLACK)).toBeTruthy();
+    // Bad: ⛉持銀 => ☗
+    expect(position.isValidEditing(new Piece(Color.WHITE, PieceType.PAWN), Color.BLACK)).toBeFalsy();
+    // Good: ☗持歩 => 31
+    expect(position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), new Square(3, 1))).toBeTruthy();
+    // Bad: ☗持歩 => ⛉41金
+    expect(position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), new Square(4, 1))).toBeFalsy();
+    // Bad: ⛉51玉 => ⛉
+    expect(position.isValidEditing(new Square(5, 1), Color.WHITE)).toBeFalsy();
+  });
+
+  it("edit", () => {
+    const position = Position.newBySFEN("ln1gkg1nl/1r1s3s1/pppppp1pp/6B2/9/2P4P1/PP1PPPP1P/1S5R1/LN1GKGSNL w Pb 10") as Position;
+    // Good: ☗49金 => 85
+    expect(position.edit({ move: { from: new Square(4, 9), to: new Square(8, 5) } })).toBeTruthy();
+    expect(position.board.at(new Square(4, 9))).toBeNull();
+    expect(position.board.at(new Square(8, 5))).toStrictEqual(new Piece(Color.BLACK, PieceType.GOLD));
+    // Bad: ☗49金 => 85
+    expect(position.edit({ move: { from: new Square(4, 9), to: new Square(8, 5) } })).toBeFalsy();
+    expect(position.board.at(new Square(4, 9))).toBeNull();
+    expect(position.board.at(new Square(8, 5))).toStrictEqual(new Piece(Color.BLACK, PieceType.GOLD));
+    // Good: ☗持歩 => 31
+    expect(position.edit({ move: { from: new Piece(Color.BLACK, PieceType.PAWN), to:new Square(3, 1)}})).toBeTruthy();
+    expect(position.board.at(new Square(3, 1))).toStrictEqual(new Piece(Color.BLACK, PieceType.PAWN));
+    // Good: ☗31歩 => ☗31と
+    expect(position.edit({ rotate: new Square(3, 1) })).toBeTruthy();
+    expect(position.board.at(new Square(3, 1))).toStrictEqual(new Piece(Color.BLACK, PieceType.PROM_PAWN));
+    // Good: ☗31と => ⛉31歩
+    expect(position.edit({ rotate: new Square(3, 1) })).toBeTruthy();
+    expect(position.board.at(new Square(3, 1))).toStrictEqual(new Piece(Color.WHITE, PieceType.PAWN));
+    // Good: ⛉持角 => ☗
+    expect(position.edit({ move: { from: new Piece(Color.WHITE, PieceType.BISHOP), to: Color.BLACK } })).toBeTruthy();
+    expect(position.hand(Color.WHITE).count(PieceType.BISHOP)).toBe(0);
+    expect(position.hand(Color.BLACK).count(PieceType.BISHOP)).toBe(1);
+    // Good: ⛉81桂 => ⛉
+    expect(position.edit({ move: { from: new Square(8, 1), to: Color.WHITE } })).toBeTruthy();
+    expect(position.board.at(new Square(8, 1))).toBeNull();
+    expect(position.hand(Color.WHITE).count(PieceType.KNIGHT)).toBe(1);
+  });
+
   it("sfen", () => {
     const sfen = "l2R2s1+P/4gg1k1/p1+P2lPp1/4p1p+b1/1p3G3/3pP1nS1/PP3KSP1/R8/L4G2+b b NL4Ps2np 1";
     const position = Position.newBySFEN(sfen);
