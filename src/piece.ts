@@ -36,7 +36,7 @@ const standardPieceNameMap: { [pieceType: string]: string } = {
 
 /**
  * 標準的な駒の名前を返します。
- * @param type 
+ * @param type
  */
 export function standardPieceName(type: PieceType): string {
   const val = standardPieceNameMap[type];
@@ -89,7 +89,7 @@ const promotable: { [pieceType: string]: boolean } = {
 
 /**
  * 成ることができる駒かどうかを返します。
- * @param pieceType 
+ * @param pieceType
  */
 export function isPromotable(pieceType: PieceType): boolean {
   return !!promotable[pieceType];
@@ -106,7 +106,7 @@ const promoteMap: { [pieceType: string]: PieceType } = {
 
 /**
  * 成った時の駒の種類を返します。
- * @param pieceType 
+ * @param pieceType
  */
 export function promotedPieceType(pieceType: PieceType): PieceType {
   return promoteMap[pieceType] || pieceType;
@@ -123,7 +123,7 @@ const unpromoteMap: { [pieceType: string]: PieceType } = {
 
 /**
  * 成る前の駒の種類を返します。
- * @param pieceType 
+ * @param pieceType
  */
 export function unpromotedPieceType(pieceType: PieceType): PieceType {
   return unpromoteMap[pieceType] || pieceType;
@@ -148,7 +148,7 @@ const toSFENCharBlack: { [pieceType: string]: string } = {
 
 /**
  * SFEN形式の駒種を表す文字列を返します。
- * @param type 
+ * @param type
  */
 export function pieceTypeToSFEN(type: PieceType): string {
   return toSFENCharBlack[type];
@@ -316,7 +316,7 @@ export class Piece {
   }
 
   /**
-   * 成った駒を返します。 
+   * 成った駒を返します。
    */
   promoted(): Piece {
     const type = promoteMap[this.type];
@@ -324,7 +324,7 @@ export class Piece {
   }
 
   /**
-   * 成る前の駒を返します。 
+   * 成る前の駒を返します。
    */
   unpromoted(): Piece {
     const type = unpromoteMap[this.type];
@@ -373,7 +373,7 @@ export class Piece {
 
   /**
    * 指定した文字列が正しいSFEN形式の駒かどうかを判定します。
-   * @param sfen 
+   * @param sfen
    */
   static isValidSFEN(sfen: string): boolean {
     return !!sfenCharToTypeMap[sfen];
@@ -381,7 +381,7 @@ export class Piece {
 
   /**
    * SFEN形式の文字列から駒を生成します。
-   * @param sfen 
+   * @param sfen
    */
   static newBySFEN(sfen: string): Piece | null {
     const type = sfenCharToTypeMap[sfen];

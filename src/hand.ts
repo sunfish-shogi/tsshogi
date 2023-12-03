@@ -19,7 +19,7 @@ export interface ImmutableHand {
   count(pieceType: PieceType): number;
   /**
    * 駒の種類ごとにハンドラーを呼び出します。
-   * @param handler 
+   * @param handler
    */
   forEach(handler: (pieceType: PieceType, n: number) => void): void;
   /**
@@ -82,8 +82,8 @@ export class Hand {
   }
 
   /**
-   * 持ち駒の枚数を設定します。 
-   * @param pieceType 
+   * 持ち駒の枚数を設定します。
+   * @param pieceType
    * @param count
    */
   set(pieceType: PieceType, count: number): void {
@@ -92,8 +92,8 @@ export class Hand {
 
   /**
    * 持ち駒を追加します。
-   * @param pieceType 
-   * @param n 
+   * @param pieceType
+   * @param n
    */
   add(pieceType: PieceType, n: number): number {
     let c = this.pieces.get(pieceType) as number;
@@ -104,8 +104,8 @@ export class Hand {
 
   /**
    * 持ち駒を減らします。
-   * @param pieceType 
-   * @param n 
+   * @param pieceType
+   * @param n
    */
   reduce(pieceType: PieceType, n: number): number {
     let c = this.pieces.get(pieceType) as number;
@@ -116,7 +116,7 @@ export class Hand {
 
   /**
    * 駒の種類ごとにハンドラーを呼び出します。
-   * @param handler 
+   * @param handler
    */
   forEach(handler: (pieceType: PieceType, n: number) => void): void {
     handler(PieceType.PAWN, this.pieces.get(PieceType.PAWN) as number);
@@ -163,8 +163,8 @@ export class Hand {
 
   /**
    * SFEN形式の文字列を取得します。
-   * @param black 
-   * @param white 
+   * @param black
+   * @param white
    */
   static formatSFEN(black: Hand, white: Hand): string {
     const b = black.sfenBlack;
@@ -183,7 +183,7 @@ export class Hand {
 
   /**
    * 指定した文字列が正しい持ち駒のSFENであるかどうかを判定します。
-   * @param sfen 
+   * @param sfen
    */
   static isValidSFEN(sfen: string): boolean {
     if (sfen === "-") {
@@ -194,7 +194,7 @@ export class Hand {
 
   /**
    * 持ち駒のSFENを解析します。
-   * @param sfen 
+   * @param sfen
    */
   static parseSFEN(sfen: string): { black: Hand; white: Hand } | null {
     if (sfen === "-") {
@@ -224,7 +224,7 @@ export class Hand {
 
   /**
    * 別のオブジェクトからコピーします。
-   * @param hand 
+   * @param hand
    */
   copyFrom(hand: Hand): void {
     hand.pieces.forEach((n, pieceType) => {

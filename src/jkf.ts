@@ -250,7 +250,7 @@ const directionModifierToJKF: { [m: string]: string } = {
 
 /**
  * JSON棋譜フォーマットの文字列を読み取ります。
- * @param data 
+ * @param data
  */
 export function importJKFString(data: string): Record | Error {
   try {
@@ -262,7 +262,7 @@ export function importJKFString(data: string): Record | Error {
 
 /**
  * JSON棋譜フォーマットのオブジェクトを読み取ります。
- * @param jkf 
+ * @param jkf
  */
 export function importJKF(jkf: JKF): Record | Error {
   try {
@@ -485,7 +485,7 @@ function buildJKFMoves(
 
 /**
  * JSON棋譜フォーマットの文字列を出力します。
- * @param record 
+ * @param record
  */
 export function exportJKFString(record: ImmutableRecord): string {
   return JSON.stringify(exportJKF(record));
@@ -493,7 +493,7 @@ export function exportJKFString(record: ImmutableRecord): string {
 
 /**
  * JSON棋譜フォーマットのオブジェクトを出力します。
- * @param record 
+ * @param record
  */
 export function exportJKF(record: ImmutableRecord): JKF {
   const header: { [key: string]: string } = {};

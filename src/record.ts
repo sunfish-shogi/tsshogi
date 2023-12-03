@@ -49,7 +49,7 @@ export interface ImmutableRecordMetadata {
   get standardMetadataKeys(): IterableIterator<RecordMetadataKey>;
   /**
    * 定義済みのメタデータを取得します。
-   * @param key 
+   * @param key
    */
   getStandardMetadata(key: RecordMetadataKey): string | undefined;
   /**
@@ -58,14 +58,14 @@ export interface ImmutableRecordMetadata {
   get customMetadataKeys(): IterableIterator<string>;
   /**
    * カスタムメタデータを取得します。
-   * @param key 
+   * @param key
    */
   getCustomMetadata(key: string): string | undefined;
 }
 
 /**
  * 先手の対局者名をフルネーム優先で取得します。
- * @param metadata 
+ * @param metadata
  */
 export function getBlackPlayerName(metadata: ImmutableRecordMetadata): string | undefined {
   return (
@@ -77,7 +77,7 @@ export function getBlackPlayerName(metadata: ImmutableRecordMetadata): string | 
 
 /**
  * 後手の対局者名をフルネーム優先で取得します。
- * @param metadata 
+ * @param metadata
  */
 export function getWhitePlayerName(metadata: ImmutableRecordMetadata): string | undefined {
   return (
@@ -89,7 +89,7 @@ export function getWhitePlayerName(metadata: ImmutableRecordMetadata): string | 
 
 /**
  * 先手の対局者名を省略名優先で取得します。
- * @param metadata 
+ * @param metadata
  */
 export function getBlackPlayerNamePreferShort(
   metadata: ImmutableRecordMetadata,
@@ -103,7 +103,7 @@ export function getBlackPlayerNamePreferShort(
 
 /**
  * 後手の対局者名を省略名優先で取得します。
- * @param metadata 
+ * @param metadata
  */
 export function getWhitePlayerNamePreferShort(
   metadata: ImmutableRecordMetadata,
@@ -131,7 +131,7 @@ export class RecordMetadata {
 
   /**
    * 定義済みのメタデータを取得します。
-   * @param key 
+   * @param key
    */
   getStandardMetadata(key: RecordMetadataKey): string | undefined {
     return this.standard.get(key);
@@ -139,8 +139,8 @@ export class RecordMetadata {
 
   /**
    * 定義済みのメタデータを設定します。
-   * @param key 
-   * @param value 
+   * @param key
+   * @param value
    */
   setStandardMetadata(key: RecordMetadataKey, value: string): void {
     if (value) {
@@ -159,7 +159,7 @@ export class RecordMetadata {
 
   /**
    * カスタムメタデータを取得します。
-   * @param key 
+   * @param key
    */
   getCustomMetadata(key: string): string | undefined {
     return this.custom.get(key);
@@ -167,8 +167,8 @@ export class RecordMetadata {
 
   /**
    * カスタムメタデータを設定します。
-   * @param key 
-   * @param value 
+   * @param key
+   * @param value
    */
   setCustomMetadata(key: string, value: string): void {
     if (value) {
@@ -438,7 +438,7 @@ export class Record {
 
   /**
    * 指定した局面で棋譜を初期化します。
-   * @param position 
+   * @param position
    */
   clear(position?: ImmutablePosition): void {
     this.metadata = new RecordMetadata();
@@ -507,7 +507,7 @@ export class Record {
 
   /**
    * アクティブな経路上で指定した手数まで移動します。
-   * @param ply 
+   * @param ply
    */
   goto(ply: number): void {
     const orgPly = this._current.ply;
@@ -537,7 +537,7 @@ export class Record {
 
   /**
    * インデクスを指定して兄弟ノードを選択します。
-   * @param index 
+   * @param index
    */
   switchBranchByIndex(index: number): boolean {
     if (this.current.branchIndex === index) {
@@ -750,7 +750,7 @@ export class Record {
 
   /**
    * 指定したしおりがある局面まで移動します。
-   * @param bookmark 
+   * @param bookmark
    */
   jumpToBookmark(bookmark: string): boolean {
     // 既に該当する局面にいる場合は何もしない。
@@ -842,7 +842,7 @@ export class Record {
 
   /**
    * USI形式の文字列を返します。
-   * @param opts 
+   * @param opts
    */
   getUSI(opts?: USIFormatOptions): string {
     const sfen = this.initialPosition.sfen;
@@ -942,7 +942,7 @@ export class Record {
 
   /**
    * USI形式の文字列から棋譜を読み込みます。
-   * @param data 
+   * @param data
    */
   static newByUSI(data: string): Record | Error {
     const prefixPositionStartpos = "position startpos ";
@@ -1006,7 +1006,7 @@ export class Record {
 
 /**
  * USI形式の文字列から次の手番を取得します。
- * @param usi 
+ * @param usi
  */
 export function getNextColorFromUSI(usi: string): Color {
   const sections = usi.trim().split(" ");

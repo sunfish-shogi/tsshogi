@@ -32,7 +32,7 @@ const reverseMap = {
 
 /**
  * 反転した方向を返します。
- * @param dir 
+ * @param dir
  */
 export function reverseDirection(dir: Direction): Direction {
   return reverseMap[dir];
@@ -257,8 +257,8 @@ const movableDirectionMap: {
 };
 
 /**
- * 指定した駒の移動可能な方向を返します。 
- * @param piece 
+ * 指定した駒の移動可能な方向を返します。
+ * @param piece
  */
 export function movableDirections(piece: Piece): Direction[] {
   return Object.keys(movableDirectionMap[piece.color as string][piece.type]) as Direction[];
@@ -266,8 +266,8 @@ export function movableDirections(piece: Piece): Direction[] {
 
 /**
  * 指定した駒と方向に対して、1マスのみ移動可能か遠距離移動可能かを返します。
- * @param piece 
- * @param direction 
+ * @param piece
+ * @param direction
  */
 export function resolveMoveType(piece: Piece, direction: Direction): MoveType | undefined {
   return movableDirectionMap[piece.color as string][piece.type][direction];
@@ -292,8 +292,8 @@ export const directionToDeltaMap: {
 
 /**
  * ベクトルを方向と距離に変換します。
- * @param x 
- * @param y 
+ * @param x
+ * @param y
  */
 export function vectorToDirectionAndDistance(
   x: number,
@@ -364,7 +364,7 @@ export enum VDirection {
 
 /**
  * 垂直方向の動きを取り出します。
- * @param direction 
+ * @param direction
  */
 export function directionToVDirection(direction: Direction): VDirection {
   switch (direction) {
@@ -393,7 +393,7 @@ export enum HDirection {
 
 /**
  * 水平方向の動きを取り出します。
- * @param direction 
+ * @param direction
  */
 export function directionToHDirection(direction: Direction): HDirection {
   switch (direction) {

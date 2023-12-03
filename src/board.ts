@@ -39,7 +39,7 @@ type PowerDetectionOption = {
 export interface ImmutableBoard {
   /**
    * 指定したマスの駒を取得します。
-   * @param square 
+   * @param square
    */
   at(square: Square): Piece | null;
   /**
@@ -48,15 +48,15 @@ export interface ImmutableBoard {
   listNonEmptySquares(): Square[];
   /**
    * 指定したマスに指定した手番の駒の利きがあるかどうかを判定します。
-   * @param target 
-   * @param color 
-   * @param option 
+   * @param target
+   * @param color
+   * @param option
    */
   hasPower(target: Square, color: Color, option?: PowerDetectionOption): boolean;
   /**
    * 指定した手番の玉に対して王手がかかっているかどうかを判定します。
-   * @param kingColor 
-   * @param option 
+   * @param kingColor
+   * @param option
    */
   isChecked(kingColor: Color, option?: PowerDetectionOption): boolean;
   /**
@@ -81,7 +81,7 @@ export class Board {
 
   /**
    * 指定したマスの駒を取得します。
-   * @param square 
+   * @param square
    */
   at(square: Square): Piece | null {
     return this.squares[square.index];
@@ -89,8 +89,8 @@ export class Board {
 
   /**
    * 指定したマスに駒を配置します。
-   * @param square 
-   * @param piece 
+   * @param square
+   * @param piece
    */
   set(square: Square, piece: Piece): void {
     this.squares[square.index] = piece;
@@ -98,8 +98,8 @@ export class Board {
 
   /**
    * 指定した2マスの駒を入れ替えます。
-   * @param square1 
-   * @param square2 
+   * @param square1
+   * @param square2
    */
   swap(square1: Square, square2: Square): void {
     const tmp = this.squares[square1.index];
@@ -109,7 +109,7 @@ export class Board {
 
   /**
    * 指定したマスの駒を取り除きます。
-   * @param square 
+   * @param square
    */
   remove(square: Square): Piece | null {
     const removed = this.squares[square.index];
@@ -128,7 +128,7 @@ export class Board {
 
   /**
    * 指定した手番の駒があるマスの一覧を取得します。
-   * @param color 
+   * @param color
    */
   listSquaresByColor(color: Color): Square[] {
     return Square.all.filter((square) => {
@@ -139,7 +139,7 @@ export class Board {
 
   /**
    * 指定した駒があるマスの一覧を取得します。
-   * @param target 
+   * @param target
    */
   listSquaresByPiece(target: Piece): Square[] {
     return Square.all.filter((square) => {
@@ -189,7 +189,7 @@ export class Board {
 
   /**
    * SFENで盤面を初期化します。
-   * @param sfen 
+   * @param sfen
    */
   resetBySFEN(sfen: string): boolean {
     if (!Board.isValidSFEN(sfen)) {
@@ -219,7 +219,7 @@ export class Board {
 
   /**
    * 指定した手番の玉のマスを返します。
-   * @param color 
+   * @param color
    */
   findKing(color: Color): Square | undefined {
     const king = new Piece(color, PieceType.KING);
@@ -234,9 +234,9 @@ export class Board {
 
   /**
    * 指定したマスに指定した手番の駒の利きがあるかどうかを判定します。
-   * @param target 
-   * @param color 
-   * @param option 
+   * @param target
+   * @param color
+   * @param option
    */
   hasPower(target: Square, color: Color, option?: PowerDetectionOption): boolean {
     return !!directions.find((dir) => {
@@ -265,8 +265,8 @@ export class Board {
 
   /**
    * 指定した手番の玉に対して王手がかかっているかどうかを判定します。
-   * @param kingColor 
-   * @param option 
+   * @param kingColor
+   * @param option
    */
   isChecked(kingColor: Color, option?: PowerDetectionOption): boolean {
     const square = this.findKing(kingColor);
@@ -281,7 +281,7 @@ export class Board {
 
   /**
    * 文字列が正しいSFEN形式であるか判定します。
-   * @param sfen 
+   * @param sfen
    */
   static isValidSFEN(sfen: string): boolean {
     const rows = sfen.split("/");
@@ -314,7 +314,7 @@ export class Board {
 
   /**
    * 別のオブジェクトから盤面をコピーします。
-   * @param board 
+   * @param board
    */
   copyFrom(board: Board): void {
     Square.all.forEach((square) => {

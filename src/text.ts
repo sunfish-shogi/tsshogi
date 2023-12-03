@@ -176,7 +176,7 @@ const specialMoveToDisplayStringMap = {
 
 /**
  * 特殊な指し手の表示用の文字列を返します。
- * @param move 
+ * @param move
  */
 export function formatSpecialMove(move: SpecialMove | SpecialMoveType): string {
   if (typeof move === "string") {
@@ -190,8 +190,8 @@ export function formatSpecialMove(move: SpecialMove | SpecialMoveType): string {
 
 /**
  * 「上」や「引」など指し手の移動方向を修飾する文字列を返します。
- * @param move 
- * @param position 
+ * @param move
+ * @param position
  */
 export function getDirectionModifier(move: Move, position: ImmutablePosition): string {
   const piece = new Piece(move.color, move.pieceType);

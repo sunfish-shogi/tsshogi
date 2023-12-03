@@ -71,13 +71,13 @@ export class Square {
 
   /**
    * 相対座標を指定して近隣のマスを取得します。
-   * @param dx 
-   * @param dy 
+   * @param dx
+   * @param dy
    */
   neighbor(dx: number, dy: number): Square;
   /**
    * 方向を指定して隣接(桂馬とびを含む)のマスを取得します。
-   * @param dir 
+   * @param dir
    */
   neighbor(dir: Direction): Square;
   neighbor(arg0: number | Direction, arg1?: number): Square {
@@ -129,8 +129,8 @@ export class Square {
 
   /**
    * 座標を指定してマスを取得します。
-   * @param x 
-   * @param y 
+   * @param x
+   * @param y
    */
   static newByXY(x: number, y: number): Square {
     return new Square(9 - x, y + 1);
@@ -138,7 +138,7 @@ export class Square {
 
   /**
    * インデクスを指定してマスを取得します。
-   * @param index 
+   * @param index
    */
   static newByIndex(index: number): Square {
     return new Square(9 - (index % 9), Math.trunc(index / 9) + 1);
@@ -158,7 +158,7 @@ export class Square {
 
   /**
    * SFEN形式のマス目をパースします。
-   * @param sfen 
+   * @param sfen
    */
   static parseSFENSquare(sfen: string): Square | null {
     const file = sfenFileToNumber(sfen[0]);

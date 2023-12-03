@@ -304,8 +304,8 @@ export function getSpecialMoveByName(name: string, color: Color): SpecialMoveTyp
 
 /**
  * CSA形式の指し手を読み取ります。
- * @param position 
- * @param line 
+ * @param position
+ * @param line
  */
 export function parseCSAMove(position: ImmutablePosition, line: string): Move | Error {
   return parseMove(line, position);
@@ -313,7 +313,7 @@ export function parseCSAMove(position: ImmutablePosition, line: string): Move | 
 
 /**
  * CSA形式の棋譜を読み取ります。
- * @param data 
+ * @param data
  */
 export function importCSA(data: string): Record | Error {
   const metadata = new RecordMetadata();
@@ -539,7 +539,7 @@ function formatSquare(square: Square | PieceType): string {
 /**
  * 特殊な指し手のCSA形式文字列を取得します。
  * 先頭の % は含みません。
- * @param move 
+ * @param move
  * @param color 手番を指定します。 +ILLEGAL_ACTION や -ILLEGAL_ACTION の出力に使用します。
  */
 export function getCSASpecialMoveName(move: SpecialMove, color: Color): string | undefined {
@@ -571,7 +571,7 @@ export function getCSASpecialMoveName(move: SpecialMove, color: Color): string |
 
 /**
  * CSA形式の指し手を出力します。
- * @param move 
+ * @param move
  */
 export function formatCSAMove(move: Move): string {
   return (
@@ -584,8 +584,8 @@ export function formatCSAMove(move: Move): string {
 
 /**
  * CSA形式の棋譜を出力します。
- * @param record 
- * @param options 
+ * @param record
+ * @param options
  */
 export function exportCSA(record: ImmutableRecord, options: CSAExportOptions): string {
   let ret = "";

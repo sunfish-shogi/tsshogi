@@ -51,7 +51,7 @@ export enum InitialPositionSFEN {
 
 /**
  * InitialPositionType から SFEN 形式の文字列に変換します。
- * @param type 
+ * @param type
  */
 export function initialPositionTypeToSFEN(type: InitialPositionType): string {
   return {
@@ -148,7 +148,7 @@ export interface ImmutablePosition {
   readonly whiteHand: ImmutableHand;
   /**
    * 指定した手番の持ち駒を取得します。
-   * @param color 
+   * @param color
    */
   hand(color: Color): ImmutableHand;
   /**
@@ -157,29 +157,29 @@ export interface ImmutablePosition {
   readonly checked: boolean;
   /**
    * 現在の局面における指し手を生成します。
-   * @param from 
-   * @param to 
+   * @param from
+   * @param to
    */
   createMove(from: Square | PieceType, to: Square): Move | null;
   /**
    * USI形式の指し手から Move オブジェクトを生成します。
-   * @param usiMove 
+   * @param usiMove
    */
   createMoveByUSI(usiMove: string): Move | null;
   /**
    * 打ち歩詰めかどうかを判定します。
-   * @param move 
+   * @param move
    */
   isPawnDropMate(move: Move): boolean;
   /**
    * 指定したマスに利いている指定した駒のマス目を列挙します。
-   * @param to 
-   * @param piece 
+   * @param to
+   * @param piece
    */
   listAttackersByPiece(to: Square, piece: Piece): Square[];
   /**
    * 合法手かどうかを判定します。
-   * @param move 
+   * @param move
    */
   isValidMove(move: Move): boolean;
   /**
@@ -194,7 +194,7 @@ export interface ImmutablePosition {
   readonly sfen: string;
   /**
    * 手数を指定してSFEN形式の文字列を取得します。
-   * @param nextPly 
+   * @param nextPly
    */
   getSFEN(nextPly: number): string;
   /**
@@ -246,7 +246,7 @@ export class Position {
 
   /**
    * 指定した手番の持ち駒を取得します。
-   * @param color 
+   * @param color
    */
   hand(color: Color): Hand {
     if (color === Color.BLACK) {
@@ -264,8 +264,8 @@ export class Position {
 
   /**
    * 現在の局面における指し手を生成します。
-   * @param from 
-   * @param to 
+   * @param from
+   * @param to
    */
   createMove(from: Square | PieceType, to: Square): Move | null {
     let pieceType: PieceType;
@@ -291,7 +291,7 @@ export class Position {
 
   /**
    * USI形式の指し手から Move オブジェクトを生成します。
-   * @param usiMove 
+   * @param usiMove
    */
   createMoveByUSI(usiMove: string): Move | null {
     const m = parseUSIMove(usiMove);
@@ -310,7 +310,7 @@ export class Position {
 
   /**
    * 打ち歩詰めかどうかを判定します。
-   * @param move 
+   * @param move
    */
   isPawnDropMate(move: Move): boolean {
     if (move.from instanceof Square) {
@@ -352,8 +352,8 @@ export class Position {
 
   /**
    * 指定したマスに利いている指定した駒のマス目を列挙します。
-   * @param to 
-   * @param piece 
+   * @param to
+   * @param piece
    */
   listAttackersByPiece(to: Square, piece: Piece): Square[] {
     return this.board.listSquaresByPiece(piece).filter((from) => {
@@ -363,7 +363,7 @@ export class Position {
 
   /**
    * 合法手かどうかを判定します。
-   * @param move 
+   * @param move
    */
   isValidMove(move: Move): boolean {
     if (move.from instanceof Square) {
@@ -434,8 +434,8 @@ export class Position {
 
   /**
    * 指定した指し手で駒を動かします。
-   * @param move 
-   * @param opt 
+   * @param move
+   * @param opt
    */
   doMove(move: Move, opt?: DoMoveOption): boolean {
     if (!(opt && opt.ignoreValidation) && !this.isValidMove(move)) {
@@ -459,8 +459,8 @@ export class Position {
 
   /**
    * 指定した指し手を元に戻します。
-   * @param move 
-   * @param opt 
+   * @param move
+   * @param opt
    */
   undoMove(move: Move): void {
     this._color = reverseColor(this.color);
@@ -483,8 +483,8 @@ export class Position {
 
   /**
    * 有効な編集作業かどうかを判定します。
-   * @param from 
-   * @param to 
+   * @param from
+   * @param to
    */
   isValidEditing(from: Square | Piece, to: Square | Color): boolean {
     if (from instanceof Square) {
@@ -519,7 +519,7 @@ export class Position {
 
   /**
    * 盤面を編集します。
-   * @param change 
+   * @param change
    */
   edit(change: PositionChange): boolean {
     if (change.move) {
@@ -563,7 +563,7 @@ export class Position {
 
   /**
    * 手数を指定してSFEN形式の文字列を取得します。
-   * @param nextPly 
+   * @param nextPly
    */
   getSFEN(nextPly: number): string {
     let ret = `${this._board.sfen} ${colorToSFEN(this.color)} `;
@@ -574,7 +574,7 @@ export class Position {
 
   /**
    * SFENで盤面を初期化します。
-   * @param sfen 
+   * @param sfen
    */
   resetBySFEN(sfen: string): boolean {
     if (!Position.isValidSFEN(sfen)) {
@@ -594,7 +594,7 @@ export class Position {
 
   /**
    * 手番を設定します。
-   * @param color 
+   * @param color
    */
   setColor(color: Color): void {
     this._color = color;
@@ -602,7 +602,7 @@ export class Position {
 
   /**
    * 正しいSFEN形式の文字列かどうかを判定します。
-   * @param sfen 
+   * @param sfen
    */
   static isValidSFEN(sfen: string): boolean {
     const sections = sfen.split(" ");
@@ -672,7 +672,7 @@ export class Position {
 
   /**
    * 別のオブジェクトからコピーします。
-   * @param position 
+   * @param position
    */
   copyFrom(position: Position): void {
     this._board.copyFrom(position._board);

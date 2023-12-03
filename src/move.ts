@@ -17,7 +17,7 @@ export class Move {
 
   /**
    * 指し手が等しいかどうかを判定します。
-   * @param move 
+   * @param move
    */
   equals(move: Move | null | undefined): boolean {
     if (!move) {
@@ -65,7 +65,7 @@ export class Move {
 
 /**
  * USI形式の文字列を解析します。
- * @param usiMove 
+ * @param usiMove
  */
 export function parseUSIMove(usiMove: string): {
   from: Square | PieceType;
@@ -123,8 +123,8 @@ export type AnySpecialMove = {
 export type SpecialMove = PredefinedSpecialMove | AnySpecialMove;
 
 /**
- * 定義済みの特殊な指し手を作成します。 
- * @param type 
+ * 定義済みの特殊な指し手を作成します。
+ * @param type
  */
 export function specialMove(type: SpecialMoveType): PredefinedSpecialMove {
   return { type };
@@ -132,7 +132,7 @@ export function specialMove(type: SpecialMoveType): PredefinedSpecialMove {
 
 /**
  * 未定義の特殊な指し手を作成します。
- * @param name 
+ * @param name
  */
 export function anySpecialMove(name: string): AnySpecialMove {
   return { type: "any", name };
@@ -140,7 +140,7 @@ export function anySpecialMove(name: string): AnySpecialMove {
 
 /**
  * 定義済みの特殊な指し手かどうかを判定します。
- * @param move 
+ * @param move
  */
 export function isKnownSpecialMove(move: Move | SpecialMove): move is PredefinedSpecialMove {
   return !(move instanceof Move) && move.type !== "any";
