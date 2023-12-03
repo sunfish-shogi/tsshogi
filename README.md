@@ -1,5 +1,8 @@
 # electron-shogi-core
 
+[![Test](https://github.com/sunfish-shogi/electron-shogi-core/actions/workflows/test.yml/badge.svg)](https://github.com/sunfish-shogi/electron-shogi-core/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/sunfish-shogi/electron-shogi-core/graph/badge.svg?token=SS0SJW8196)](https://codecov.io/gh/sunfish-shogi/electron-shogi-core)
+
 electron-shogi-core は [electron-shogi](https://github.com/sunfish-shogi/electron-shogi) (Electron将棋) で使用している将棋の局面や棋譜を取り扱う実装です。
 TypeScript や JavaScript のアプリケーションに組み込むことができます。
 
