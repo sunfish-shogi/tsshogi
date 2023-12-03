@@ -2,7 +2,7 @@
 // See https://github.com/na2hiro/Kifu-for-JS/blob/master/packages/json-kifu-format/README.md
 
 import { Color, reverseColor } from "./color";
-import { getSpecialMoveByName, getSpecialMoveName } from "./csa";
+import { getSpecialMoveByName, getCSASpecialMoveName } from "./csa";
 import { kakinokiToMetadataKey, metadataKeyToKakinoki } from "./kakinoki";
 import { Move } from "./move";
 import { Piece, PieceType, isPromotable } from "./piece";
@@ -449,7 +449,7 @@ function buildJKFMoves(
         entry.move.relative = relative;
       }
     } else {
-      const command = getSpecialMoveName(node.move, reverseColor(node.nextColor));
+      const command = getCSASpecialMoveName(node.move, reverseColor(node.nextColor));
       if (!command) {
         break;
       }

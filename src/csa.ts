@@ -522,16 +522,7 @@ function formatSquare(square: Square | PieceType): string {
   return square instanceof Square ? `${square.file}${square.rank}` : "00";
 }
 
-function formatMove(move: Move): string {
-  return (
-    (move.color === Color.BLACK ? "+" : "-") +
-    formatSquare(move.from) +
-    formatSquare(move.to) +
-    pieceTypeToString[move.promote ? promotedPieceType(move.pieceType) : move.pieceType]
-  );
-}
-
-export function getSpecialMoveName(move: SpecialMove, color: Color): string | undefined {
+export function getCSASpecialMoveName(move: SpecialMove, color: Color): string | undefined {
   switch (move.type) {
     case SpecialMoveType.INTERRUPT:
       return "CHUDAN";
@@ -558,15 +549,13 @@ export function getSpecialMoveName(move: SpecialMove, color: Color): string | un
   }
 }
 
-function formatSpecialMove(move: SpecialMove, color: Color): string | undefined {
-  const name = getSpecialMoveName(move, color);
-  if (name) {
-    return "%" + name;
-  }
-}
-
 export function formatCSAMove(move: Move): string {
-  return formatMove(move);
+  return (
+    (move.color === Color.BLACK ? "+" : "-") +
+    formatSquare(move.from) +
+    formatSquare(move.to) +
+    pieceTypeToString[move.promote ? promotedPieceType(move.pieceType) : move.pieceType]
+  );
 }
 
 export function exportCSA(record: ImmutableRecord, options: CSAExportOptions): string {
@@ -580,9 +569,12 @@ export function exportCSA(record: ImmutableRecord, options: CSAExportOptions): s
     if (node.ply !== 0) {
       let move: string | undefined;
       if (node.move instanceof Move) {
-        move = formatMove(node.move);
+        move = formatCSAMove(node.move);
       } else {
-        move = formatSpecialMove(node.move, reverseColor(node.nextColor));
+        const name = getCSASpecialMoveName(node.move, reverseColor(node.nextColor));
+        if (name) {
+          move = "%" + name;
+        }
       }
       if (move) {
         ret += move + returnCode;

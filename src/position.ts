@@ -158,10 +158,6 @@ export class Position {
   }
 
   hand(color: Color): Hand {
-    return this._hand(color);
-  }
-
-  _hand(color: Color): Hand {
     if (color === Color.BLACK) {
       return this._blackHand;
     }
@@ -330,10 +326,10 @@ export class Position {
       this._board.remove(move.from);
       this._board.set(move.to, move.promote ? target.promoted() : target);
       if (captured && captured.type !== PieceType.KING) {
-        this._hand(this.color).add(captured.unpromoted().type, 1);
+        this.hand(this.color).add(captured.unpromoted().type, 1);
       }
     } else {
-      this._hand(this.color).reduce(move.from, 1);
+      this.hand(this.color).reduce(move.from, 1);
       this._board.set(move.to, new Piece(this.color, move.from));
     }
     this._color = reverseColor(this.color);
@@ -348,13 +344,13 @@ export class Position {
         const capturedPiece = new Piece(reverseColor(this.color), move.capturedPieceType);
         this._board.set(move.to, capturedPiece);
         if (capturedPiece.type !== PieceType.KING) {
-          this._hand(this.color).reduce(capturedPiece.unpromoted().type, 1);
+          this.hand(this.color).reduce(capturedPiece.unpromoted().type, 1);
         }
       } else {
         this._board.remove(move.to);
       }
     } else {
-      this._hand(this.color).add(move.from, 1);
+      this.hand(this.color).add(move.from, 1);
       this._board.remove(move.to);
     }
   }
@@ -396,15 +392,15 @@ export class Position {
         return false;
       }
       if (!(change.move.from instanceof Square)) {
-        this._hand(change.move.from.color).reduce(change.move.from.type, 1);
+        this.hand(change.move.from.color).reduce(change.move.from.type, 1);
         if (change.move.to instanceof Square) {
           this._board.set(change.move.to, change.move.from);
         } else {
-          this._hand(change.move.to).add(change.move.from.type, 1);
+          this.hand(change.move.to).add(change.move.from.type, 1);
         }
       } else if (!(change.move.to instanceof Square)) {
         const piece = this._board.remove(change.move.from) as Piece;
-        this._hand(change.move.to).add(piece.unpromoted().type, 1);
+        this.hand(change.move.to).add(piece.unpromoted().type, 1);
       } else {
         this._board.swap(change.move.from, change.move.to);
       }
