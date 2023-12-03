@@ -9,6 +9,11 @@ export enum RecordFormatType {
   JKF,
 }
 
+/**
+ * 文字列から棋譜形式を推定します。
+ * 一部の文字の並びや出現頻度による簡易的な判定であり、判定結果のフォーマットに準拠していることを保証するものではありません。
+ * @param data 
+ */
 export function detectRecordFormat(data: string): RecordFormatType {
   // USI
   if (

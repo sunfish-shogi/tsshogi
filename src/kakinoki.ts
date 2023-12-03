@@ -81,6 +81,10 @@ const metadataKeyMap: { [key: string]: RecordMetadataKey | undefined } = {
   受賞: RecordMetadataKey.AWARD,
 };
 
+/**
+ * 柿木形式のメタデータのキー名を RecordMetadataKey へ変換します。
+ * @param key 
+ */
 export function kakinokiToMetadataKey(key: string): RecordMetadataKey | undefined {
   return metadataKeyMap[key];
 }
@@ -116,6 +120,10 @@ const metadataNameMap = {
   [RecordMetadataKey.AWARD]: "受賞",
 };
 
+/**
+ * RecordMetadataKey を柿木形式のメタデータのキー名へ変換します。
+ * @param key 
+ */
 export function metadataKeyToKakinoki(key: RecordMetadataKey): string {
   return metadataNameMap[key];
 }
@@ -512,10 +520,18 @@ function readEndOfGame(record: Record, data: string): void {
   }
 }
 
+/**
+ * KIF 形式の文字列を読み込みます。 
+ * @param data 
+ */
 export function importKIF(data: string): Record | Error {
   return importKakinoki(data, KakinokiFormatType.KIF);
 }
 
+/**
+ * KI2 形式の文字列を読み込みます。 
+ * @param data 
+ */
 export function importKI2(data: string): Record | Error {
   return importKakinoki(data, KakinokiFormatType.KI2);
 }
@@ -764,6 +780,11 @@ function formatHand(hand: ImmutableHand): string {
   return ret;
 }
 
+/**
+ * KIF形式の文字列を出力します。
+ * @param record 
+ * @param options 
+ */
 export function exportKIF(record: ImmutableRecord, options: KIFExportOptions): string {
   let ret = "";
   const returnCode = options.returnCode ? options.returnCode : "\n";
@@ -811,6 +832,11 @@ type KI2ExportOptions = {
   returnCode?: string;
 };
 
+/**
+ * KI2形式の文字列を出力します。
+ * @param record 
+ * @param options 
+ */
 export function exportKI2(record: ImmutableRecord, options: KI2ExportOptions): string {
   let ret = "";
   let moveCountInLine = 0;

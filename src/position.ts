@@ -14,7 +14,7 @@ import {
 } from "./direction";
 
 // Deprecated: Use InitialPositionSFEN instead.
-// NOTICE: GameSetting で使用しているため互換性のために残す。
+// NOTICE: Electron将棋のgame_setting.jsonで使用しているため互換性のために残す。
 export enum InitialPositionType {
   STANDARD = "standard",
   EMPTY = "empty",
@@ -49,6 +49,10 @@ export enum InitialPositionSFEN {
   TSUME_SHOGI_2KINGS = "4k4/9/9/9/9/9/9/9/4K4 b 2r2b4g4s4n4l18p 1",
 }
 
+/**
+ * InitialPositionType から SFEN 形式の文字列に変換します。
+ * @param type 
+ */
 export function initialPositionTypeToSFEN(type: InitialPositionType): string {
   return {
     [InitialPositionType.STANDARD]: InitialPositionSFEN.STANDARD,
@@ -107,27 +111,95 @@ function pawnExists(color: Color, board: Board, file: number): boolean {
 
 export type PositionChange = {
   move?: {
+    /**
+     * 移動元のマスまたは持ち駒を指定します。
+     */
     from: Square | Piece;
+    /**
+     * 移動先のマスまたは駒台を指定します。
+     */
     to: Square | Color;
   };
+  /**
+   * 指定したマスの駒をローテートします。
+   */
   rotate?: Square;
 };
 
+/**
+ * 局面(読み取り専用)
+ */
 export interface ImmutablePosition {
+  /**
+   * 盤面
+   */
   readonly board: ImmutableBoard;
+  /**
+   * 手番
+   */
   readonly color: Color;
+  /**
+   * 先手の持ち駒
+   */
   readonly blackHand: ImmutableHand;
+  /**
+   * 後手の持ち駒
+   */
   readonly whiteHand: ImmutableHand;
+  /**
+   * 指定した手番の持ち駒を取得します。
+   * @param color 
+   */
   hand(color: Color): ImmutableHand;
+  /**
+   * 王手がかかっているかどうかを判定します。
+   */
   readonly checked: boolean;
+  /**
+   * 現在の局面における指し手を生成します。
+   * @param from 
+   * @param to 
+   */
   createMove(from: Square | PieceType, to: Square): Move | null;
+  /**
+   * USI形式の指し手から Move オブジェクトを生成します。
+   * @param usiMove 
+   */
   createMoveByUSI(usiMove: string): Move | null;
+  /**
+   * 打ち歩詰めかどうかを判定します。
+   * @param move 
+   */
   isPawnDropMate(move: Move): boolean;
+  /**
+   * 指定したマスに利いている指定した駒のマス目を列挙します。
+   * @param to 
+   * @param piece 
+   */
   listAttackersByPiece(to: Square, piece: Piece): Square[];
+  /**
+   * 合法手かどうかを判定します。
+   * @param move 
+   */
   isValidMove(move: Move): boolean;
+  /**
+   * 有効な編集作業かどうかを判定します。
+   * @param from 移動元のマスまたは持ち駒を指定します。
+   * @param to 移動先のマスまたは駒台を指定します。
+   */
   isValidEditing(from: Square | Piece, to: Square | Color): boolean;
+  /**
+   * SFEN形式の文字列を返します。
+   */
   readonly sfen: string;
+  /**
+   * 手数を指定してSFEN形式の文字列を取得します。
+   * @param nextPly 
+   */
   getSFEN(nextPly: number): string;
+  /**
+   * クローンを生成します。
+   */
   clone(): Position;
 }
 
@@ -135,28 +207,47 @@ export type DoMoveOption = {
   ignoreValidation?: boolean;
 };
 
+/**
+ * 局面
+ */
 export class Position {
   private _board = new Board();
   private _color = Color.BLACK;
   private _blackHand = new Hand();
   private _whiteHand = new Hand();
 
+  /**
+   * 盤面
+   */
   get board(): Board {
     return this._board;
   }
 
+  /**
+   * 手番
+   */
   get color(): Color {
     return this._color;
   }
 
+  /**
+   * 先手の持ち駒
+   */
   get blackHand(): Hand {
     return this._blackHand;
   }
 
+  /**
+   * 後手の持ち駒
+   */
   get whiteHand(): Hand {
     return this._whiteHand;
   }
 
+  /**
+   * 指定した手番の持ち駒を取得します。
+   * @param color 
+   */
   hand(color: Color): Hand {
     if (color === Color.BLACK) {
       return this._blackHand;
@@ -164,10 +255,18 @@ export class Position {
     return this._whiteHand;
   }
 
+  /**
+   * 王手がかかっているかどうかを判定します。
+   */
   get checked(): boolean {
     return this._board.isChecked(this.color);
   }
 
+  /**
+   * 現在の局面における指し手を生成します。
+   * @param from 
+   * @param to 
+   */
   createMove(from: Square | PieceType, to: Square): Move | null {
     let pieceType: PieceType;
     if (from instanceof Square) {
@@ -190,6 +289,10 @@ export class Position {
     );
   }
 
+  /**
+   * USI形式の指し手から Move オブジェクトを生成します。
+   * @param usiMove 
+   */
   createMoveByUSI(usiMove: string): Move | null {
     const m = parseUSIMove(usiMove);
     if (!m) {
@@ -205,6 +308,10 @@ export class Position {
     return move;
   }
 
+  /**
+   * 打ち歩詰めかどうかを判定します。
+   * @param move 
+   */
   isPawnDropMate(move: Move): boolean {
     if (move.from instanceof Square) {
       return false;
@@ -243,12 +350,21 @@ export class Position {
     });
   }
 
+  /**
+   * 指定したマスに利いている指定した駒のマス目を列挙します。
+   * @param to 
+   * @param piece 
+   */
   listAttackersByPiece(to: Square, piece: Piece): Square[] {
     return this.board.listSquaresByPiece(piece).filter((from) => {
       return this.isMovable(from, to);
     });
   }
 
+  /**
+   * 合法手かどうかを判定します。
+   * @param move 
+   */
   isValidMove(move: Move): boolean {
     if (move.from instanceof Square) {
       const target = this._board.at(move.from);
@@ -316,6 +432,11 @@ export class Position {
     return true;
   }
 
+  /**
+   * 指定した指し手で駒を動かします。
+   * @param move 
+   * @param opt 
+   */
   doMove(move: Move, opt?: DoMoveOption): boolean {
     if (!(opt && opt.ignoreValidation) && !this.isValidMove(move)) {
       return false;
@@ -336,6 +457,11 @@ export class Position {
     return true;
   }
 
+  /**
+   * 指定した指し手を元に戻します。
+   * @param move 
+   * @param opt 
+   */
   undoMove(move: Move): void {
     this._color = reverseColor(this.color);
     if (move.from instanceof Square) {
@@ -355,6 +481,11 @@ export class Position {
     }
   }
 
+  /**
+   * 有効な編集作業かどうかを判定します。
+   * @param from 
+   * @param to 
+   */
   isValidEditing(from: Square | Piece, to: Square | Color): boolean {
     if (from instanceof Square) {
       const piece = this._board.at(from);
@@ -386,6 +517,10 @@ export class Position {
     return true;
   }
 
+  /**
+   * 盤面を編集します。
+   * @param change 
+   */
   edit(change: PositionChange): boolean {
     if (change.move) {
       if (!this.isValidEditing(change.move.from, change.move.to)) {
@@ -419,10 +554,17 @@ export class Position {
     this.resetBySFEN(initialPositionTypeToSFEN(type));
   }
 
+  /**
+   * SFEN形式の文字列を返します。
+   */
   get sfen(): string {
     return this.getSFEN(1);
   }
 
+  /**
+   * 手数を指定してSFEN形式の文字列を取得します。
+   * @param nextPly 
+   */
   getSFEN(nextPly: number): string {
     let ret = `${this._board.sfen} ${colorToSFEN(this.color)} `;
     ret += Hand.formatSFEN(this._blackHand, this._whiteHand);
@@ -430,6 +572,10 @@ export class Position {
     return ret;
   }
 
+  /**
+   * SFENで盤面を初期化します。
+   * @param sfen 
+   */
   resetBySFEN(sfen: string): boolean {
     if (!Position.isValidSFEN(sfen)) {
       return false;
@@ -446,10 +592,18 @@ export class Position {
     return true;
   }
 
+  /**
+   * 手番を設定します。
+   * @param color 
+   */
   setColor(color: Color): void {
     this._color = color;
   }
 
+  /**
+   * 正しいSFEN形式の文字列かどうかを判定します。
+   * @param sfen 
+   */
   static isValidSFEN(sfen: string): boolean {
     const sections = sfen.split(" ");
     if (sections.length === 5 && sections[0] === "sfen") {
@@ -473,6 +627,9 @@ export class Position {
     return true;
   }
 
+  /**
+   * SFEN形式の文字列から局面を生成します。
+   */
   static newBySFEN(sfen: string): Position | null {
     const position = new Position();
     return position.resetBySFEN(sfen) ? position : null;
@@ -513,6 +670,10 @@ export class Position {
     }
   }
 
+  /**
+   * 別のオブジェクトからコピーします。
+   * @param position 
+   */
   copyFrom(position: Position): void {
     this._board.copyFrom(position._board);
     this._color = position.color;
@@ -520,6 +681,9 @@ export class Position {
     this._whiteHand.copyFrom(position._whiteHand);
   }
 
+  /**
+   * クローンを生成します。
+   */
   clone(): Position {
     const position = new Position();
     position.copyFrom(this);

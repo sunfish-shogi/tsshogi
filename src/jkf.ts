@@ -248,6 +248,10 @@ const directionModifierToJKF: { [m: string]: string } = {
   打: "H",
 };
 
+/**
+ * JSON棋譜フォーマットの文字列を読み取ります。
+ * @param data 
+ */
 export function importJKFString(data: string): Record | Error {
   try {
     return importJKF(JSON.parse(data) as JKF);
@@ -256,6 +260,10 @@ export function importJKFString(data: string): Record | Error {
   }
 }
 
+/**
+ * JSON棋譜フォーマットのオブジェクトを読み取ります。
+ * @param jkf 
+ */
 export function importJKF(jkf: JKF): Record | Error {
   try {
     const position = new Position();
@@ -475,10 +483,18 @@ function buildJKFMoves(
   return moves;
 }
 
+/**
+ * JSON棋譜フォーマットの文字列を出力します。
+ * @param record 
+ */
 export function exportJKFString(record: ImmutableRecord): string {
   return JSON.stringify(exportJKF(record));
 }
 
+/**
+ * JSON棋譜フォーマットのオブジェクトを出力します。
+ * @param record 
+ */
 export function exportJKF(record: ImmutableRecord): JKF {
   const header: { [key: string]: string } = {};
   for (const key of record.metadata.standardMetadataKeys) {

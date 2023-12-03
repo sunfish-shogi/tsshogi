@@ -39,13 +39,34 @@ export enum RecordMetadataKey {
   AWARD = "award", // 受賞
 }
 
+/**
+ * 棋譜メタデータ(読み取り専用)
+ */
 export interface ImmutableRecordMetadata {
+  /**
+   * 定義済みのメタデータのキーの一覧を取得します。
+   */
   get standardMetadataKeys(): IterableIterator<RecordMetadataKey>;
+  /**
+   * 定義済みのメタデータを取得します。
+   * @param key 
+   */
   getStandardMetadata(key: RecordMetadataKey): string | undefined;
+  /**
+   * カスタムメタデータのキーの一覧を取得します。
+   */
   get customMetadataKeys(): IterableIterator<string>;
+  /**
+   * カスタムメタデータを取得します。
+   * @param key 
+   */
   getCustomMetadata(key: string): string | undefined;
 }
 
+/**
+ * 先手の対局者名をフルネーム優先で取得します。
+ * @param metadata 
+ */
 export function getBlackPlayerName(metadata: ImmutableRecordMetadata): string | undefined {
   return (
     metadata.getStandardMetadata(RecordMetadataKey.BLACK_NAME) ||
@@ -54,6 +75,10 @@ export function getBlackPlayerName(metadata: ImmutableRecordMetadata): string | 
   );
 }
 
+/**
+ * 後手の対局者名をフルネーム優先で取得します。
+ * @param metadata 
+ */
 export function getWhitePlayerName(metadata: ImmutableRecordMetadata): string | undefined {
   return (
     metadata.getStandardMetadata(RecordMetadataKey.WHITE_NAME) ||
@@ -62,6 +87,10 @@ export function getWhitePlayerName(metadata: ImmutableRecordMetadata): string | 
   );
 }
 
+/**
+ * 先手の対局者名を省略名優先で取得します。
+ * @param metadata 
+ */
 export function getBlackPlayerNamePreferShort(
   metadata: ImmutableRecordMetadata,
 ): string | undefined {
@@ -72,6 +101,10 @@ export function getBlackPlayerNamePreferShort(
   );
 }
 
+/**
+ * 後手の対局者名を省略名優先で取得します。
+ * @param metadata 
+ */
 export function getWhitePlayerNamePreferShort(
   metadata: ImmutableRecordMetadata,
 ): string | undefined {
@@ -82,18 +115,33 @@ export function getWhitePlayerNamePreferShort(
   );
 }
 
+/**
+ * 棋譜メタデータ
+ */
 export class RecordMetadata {
   private standard = new Map<RecordMetadataKey, string>();
   private custom = new Map<string, string>();
 
+  /**
+   * 定義済みのメタデータのキーの一覧を取得します。
+   */
   get standardMetadataKeys(): IterableIterator<RecordMetadataKey> {
     return this.standard.keys();
   }
 
+  /**
+   * 定義済みのメタデータを取得します。
+   * @param key 
+   */
   getStandardMetadata(key: RecordMetadataKey): string | undefined {
     return this.standard.get(key);
   }
 
+  /**
+   * 定義済みのメタデータを設定します。
+   * @param key 
+   * @param value 
+   */
   setStandardMetadata(key: RecordMetadataKey, value: string): void {
     if (value) {
       this.standard.set(key, value);
@@ -102,14 +150,26 @@ export class RecordMetadata {
     }
   }
 
+  /**
+   * カスタムメタデータのキーの一覧を取得します。
+   */
   get customMetadataKeys(): IterableIterator<string> {
     return this.custom.keys();
   }
 
+  /**
+   * カスタムメタデータを取得します。
+   * @param key 
+   */
   getCustomMetadata(key: string): string | undefined {
     return this.custom.get(key);
   }
 
+  /**
+   * カスタムメタデータを設定します。
+   * @param key 
+   * @param value 
+   */
   setCustomMetadata(key: string, value: string): void {
     if (value) {
       this.custom.set(key, value);
@@ -119,6 +179,9 @@ export class RecordMetadata {
   }
 }
 
+/**
+ * 棋譜を構成するノード(読み取り専用)
+ */
 export interface ImmutableNode {
   readonly ply: number;
   readonly prev: Node | null;
@@ -141,6 +204,9 @@ export interface ImmutableNode {
   readonly bookmark: string;
 }
 
+/**
+ * 棋譜を構成するノード
+ */
 export interface Node extends ImmutableNode {
   comment: string;
   customData: unknown;
@@ -242,6 +308,9 @@ export type USIFormatOptions = {
   allMoves?: boolean;
 };
 
+/**
+ * 棋譜(読み取り専用)
+ */
 export interface ImmutableRecord {
   readonly metadata: ImmutableRecordMetadata;
   readonly initialPosition: ImmutablePosition;
@@ -262,6 +331,9 @@ export interface ImmutableRecord {
   on(event: "changePosition", handler: () => void): void;
 }
 
+/**
+ * 棋譜
+ */
 export class Record {
   public metadata: RecordMetadata;
   private _initialPosition: ImmutablePosition;
@@ -283,22 +355,39 @@ export class Record {
     this.incrementRepetition();
   }
 
+  /**
+   * 初期局面を返します。
+   */
   get initialPosition(): ImmutablePosition {
     return this._initialPosition;
   }
 
+  /**
+   * 現在の局面を返します。
+   */
   get position(): ImmutablePosition {
     return this._position;
   }
 
+  /**
+   * 初期局面のノードを返します。
+   * このノードには必ず SpecialMoveType.START が設定されます。
+   * first.next が1手目に該当します。
+   */
   get first(): Node {
     return this._first;
   }
 
+  /**
+   * 現在の局面のノードを返します。
+   */
   get current(): Node {
     return this._current;
   }
 
+  /**
+   * アクティブな経路の指し手の一覧を返します。
+   */
   get moves(): Array<Node> {
     const moves = this.movesBefore;
     for (let p = this._current.next; p; p = p.next) {
@@ -310,6 +399,9 @@ export class Record {
     return moves;
   }
 
+  /**
+   * 現在の局面までの指し手の一覧を返します。
+   */
   get movesBefore(): Array<Node> {
     return this._movesBefore;
   }
@@ -323,6 +415,9 @@ export class Record {
     return moves;
   }
 
+  /**
+   * アクティブな経路の総手数を返します。
+   */
   get length(): number {
     let len = this._current.ply;
     for (let p = this._current.next; p; p = p.next) {
@@ -334,10 +429,17 @@ export class Record {
     return len;
   }
 
+  /**
+   * 最初の兄弟ノードを返します。
+   */
   get branchBegin(): Node {
     return this._current.prev ? (this._current.prev.next as Node) : this._current;
   }
 
+  /**
+   * 指定した局面で棋譜を初期化します。
+   * @param position 
+   */
   clear(position?: ImmutablePosition): void {
     this.metadata = new RecordMetadata();
     if (position) {
@@ -352,6 +454,9 @@ export class Record {
     this.onChangePosition();
   }
 
+  /**
+   * 1手前に戻ります。
+   */
   goBack(): boolean {
     if (this._goBack()) {
       this.onChangePosition();
@@ -372,6 +477,9 @@ export class Record {
     return false;
   }
 
+  /**
+   * 1手先に進みます。
+   */
   goForward(): boolean {
     if (this._goForward()) {
       this.onChangePosition();
@@ -397,6 +505,10 @@ export class Record {
     return false;
   }
 
+  /**
+   * アクティブな経路上で指定した手数まで移動します。
+   * @param ply 
+   */
   goto(ply: number): void {
     const orgPly = this._current.ply;
     while (ply < this._current.ply) {
@@ -414,12 +526,19 @@ export class Record {
     }
   }
 
+  /**
+   * 全ての分岐選択を初期化して最初のノードをアクティブにします。
+   */
   resetAllBranchSelection(): void {
     this._forEach((node) => {
       node.activeBranch = node.isFirstBranch;
     });
   }
 
+  /**
+   * インデクスを指定して兄弟ノードを選択します。
+   * @param index 
+   */
   switchBranchByIndex(index: number): boolean {
     if (this.current.branchIndex === index) {
       return true;
@@ -453,6 +572,11 @@ export class Record {
     return ok;
   }
 
+  /**
+   * 指し手を追加して1手先に進みます。
+   * 現在のノードが特殊な指し手(ex. 投了)の場合は前のノードに戻ってから追加します。
+   * 既に同じ指し手が存在する場合はそのノードへ移動します。
+   */
   append(move: Move | SpecialMove | SpecialMoveType, opt?: DoMoveOption): boolean {
     // convert SpecialMoveType to SpecialMove
     if (typeof move === "string") {
@@ -536,6 +660,9 @@ export class Record {
     return true;
   }
 
+  /**
+   * 次の兄弟ノードと順序を入れ替えます。
+   */
   swapWithNextBranch(): boolean {
     if (!this._current.branch) {
       return false;
@@ -543,6 +670,9 @@ export class Record {
     return Record.swapWithPreviousBranch(this._current.branch);
   }
 
+  /**
+   * 前の兄弟ノードと順序を入れ替えます。
+   */
   swapWithPreviousBranch(): boolean {
     return Record.swapWithPreviousBranch(this._current);
   }
@@ -573,6 +703,9 @@ export class Record {
     return false;
   }
 
+  /**
+   * 現在の指し手を削除します。
+   */
   removeCurrentMove(): boolean {
     const target = this._current;
     if (!this.goBack()) {
@@ -604,6 +737,9 @@ export class Record {
     return true;
   }
 
+  /**
+   * 後続の手を全て削除します。
+   */
   removeNextMove(): boolean {
     if (this._current.next) {
       this._current.next = null;
@@ -612,6 +748,10 @@ export class Record {
     return false;
   }
 
+  /**
+   * 指定したしおりがある局面まで移動します。
+   * @param bookmark 
+   */
   jumpToBookmark(bookmark: string): boolean {
     // 既に該当する局面にいる場合は何もしない。
     if (this._current.bookmark === bookmark) {
@@ -658,10 +798,18 @@ export class Record {
     }
   }
 
+  /**
+   * 千日手かどうかを判定します。
+   * 現在の局面が4回目以上の同一局面である場合に true を返します。
+   */
   get repetition(): boolean {
     return this.repetitionCounts[this.position.sfen] >= 4;
   }
 
+  /**
+   * 連続王手の千日手かどうかを判定します。
+   * 現在の局面が4回目以上の同一局面であり、かつ同一局面が最初に出現したときから一方の王手が連続している場合に true を返します。
+   */
   get perpetualCheck(): Color | null {
     if (!this.repetition) {
       return null;
@@ -692,6 +840,10 @@ export class Record {
     return this.getUSI();
   }
 
+  /**
+   * USI形式の文字列を返します。
+   * @param opts 
+   */
   getUSI(opts?: USIFormatOptions): string {
     const sfen = this.initialPosition.sfen;
     const useStartpos =
@@ -714,10 +866,16 @@ export class Record {
     return ret;
   }
 
+  /**
+   * 現在の局面のSFEN形式の文字列を返します。
+   */
   get sfen(): string {
     return this.position.getSFEN(this._current.ply + 1);
   }
 
+  /**
+   * しおりの一覧を返します。
+   */
   get bookmarks(): string[] {
     const bookmarks: string[] = [];
     const existed: { [name: string]: boolean } = {};
@@ -782,6 +940,10 @@ export class Record {
     }
   }
 
+  /**
+   * USI形式の文字列から棋譜を読み込みます。
+   * @param data 
+   */
   static newByUSI(data: string): Record | Error {
     const prefixPositionStartpos = "position startpos ";
     const prefixPositionSfen = "position sfen ";
@@ -842,6 +1004,10 @@ export class Record {
   }
 }
 
+/**
+ * USI形式の文字列から次の手番を取得します。
+ * @param usi 
+ */
 export function getNextColorFromUSI(usi: string): Color {
   const sections = usi.trim().split(" ");
   if (sections[1] === "startpos" || sections[3] === "b") {

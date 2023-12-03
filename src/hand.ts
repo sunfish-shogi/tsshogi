@@ -8,15 +8,42 @@ function buildSFEN(n: number, piece: Piece): string {
   return (n !== 1 ? n : "") + piece.sfen;
 }
 
+/**
+ * 持ち駒(読み取り専用)
+ */
 export interface ImmutableHand {
+  /**
+   * 持ち駒の枚数を取得します。
+   * @param pieceType
+   */
   count(pieceType: PieceType): number;
+  /**
+   * 駒の種類ごとにハンドラーを呼び出します。
+   * @param handler 
+   */
   forEach(handler: (pieceType: PieceType, n: number) => void): void;
+  /**
+   * 持ち駒の種類と枚数の一覧を取得します。
+   */
   readonly counts: { type: PieceType; count: number }[];
+  /**
+   * 先手の持ち駒に対してSFEN形式の文字列を取得します。
+   */
   readonly sfenBlack: string;
+  /**
+   * 後手の持ち駒に対してSFEN形式の文字列を取得します。
+   */
   readonly sfenWhite: string;
+  /**
+   * SFEN形式の文字列を取得します。
+   * @param color
+   */
   formatSFEN(color: Color): string;
 }
 
+/**
+ * 持ち駒
+ */
 export class Hand {
   private pieces: Map<PieceType, number>;
 
@@ -31,6 +58,9 @@ export class Hand {
     this.pieces.set(PieceType.ROOK, 0);
   }
 
+  /**
+   * 持ち駒の種類と枚数の一覧を取得します。
+   */
   get counts(): { type: PieceType; count: number }[] {
     return [
       { type: PieceType.ROOK, count: this.count(PieceType.ROOK) },
@@ -43,14 +73,28 @@ export class Hand {
     ];
   }
 
+  /**
+   * 持ち駒の枚数を取得します。
+   * @param pieceType
+   */
   count(pieceType: PieceType): number {
     return this.pieces.get(pieceType) as number;
   }
 
+  /**
+   * 持ち駒の枚数を設定します。 
+   * @param pieceType 
+   * @param count
+   */
   set(pieceType: PieceType, count: number): void {
     this.pieces.set(pieceType, count);
   }
 
+  /**
+   * 持ち駒を追加します。
+   * @param pieceType 
+   * @param n 
+   */
   add(pieceType: PieceType, n: number): number {
     let c = this.pieces.get(pieceType) as number;
     c += n;
@@ -58,6 +102,11 @@ export class Hand {
     return c;
   }
 
+  /**
+   * 持ち駒を減らします。
+   * @param pieceType 
+   * @param n 
+   */
   reduce(pieceType: PieceType, n: number): number {
     let c = this.pieces.get(pieceType) as number;
     c -= n;
@@ -65,6 +114,10 @@ export class Hand {
     return c;
   }
 
+  /**
+   * 駒の種類ごとにハンドラーを呼び出します。
+   * @param handler 
+   */
   forEach(handler: (pieceType: PieceType, n: number) => void): void {
     handler(PieceType.PAWN, this.pieces.get(PieceType.PAWN) as number);
     handler(PieceType.LANCE, this.pieces.get(PieceType.LANCE) as number);
@@ -75,14 +128,24 @@ export class Hand {
     handler(PieceType.ROOK, this.pieces.get(PieceType.ROOK) as number);
   }
 
+  /**
+   * 先手の持ち駒に対してSFEN形式の文字列を取得します。
+   */
   get sfenBlack(): string {
     return this.formatSFEN(Color.BLACK);
   }
 
+  /**
+   * 後手の持ち駒に対してSFEN形式の文字列を取得します。
+   */
   get sfenWhite(): string {
     return this.formatSFEN(Color.WHITE);
   }
 
+  /**
+   * SFEN形式の文字列を取得します。
+   * @param color
+   */
   formatSFEN(color: Color): string {
     let ret = "";
     ret += buildSFEN(this.count(PieceType.ROOK) as number, new Piece(color, PieceType.ROOK));
@@ -98,6 +161,11 @@ export class Hand {
     return ret;
   }
 
+  /**
+   * SFEN形式の文字列を取得します。
+   * @param black 
+   * @param white 
+   */
   static formatSFEN(black: Hand, white: Hand): string {
     const b = black.sfenBlack;
     const w = white.sfenWhite;
@@ -113,6 +181,10 @@ export class Hand {
     return b + w;
   }
 
+  /**
+   * 指定した文字列が正しい持ち駒のSFENであるかどうかを判定します。
+   * @param sfen 
+   */
   static isValidSFEN(sfen: string): boolean {
     if (sfen === "-") {
       return true;
@@ -120,6 +192,10 @@ export class Hand {
     return !!sfen.match(/^(?:[0-9]*[PLNSGBRplnsgbr])*$/);
   }
 
+  /**
+   * 持ち駒のSFENを解析します。
+   * @param sfen 
+   */
   static parseSFEN(sfen: string): { black: Hand; white: Hand } | null {
     if (sfen === "-") {
       return { black: new Hand(), white: new Hand() };
@@ -146,6 +222,10 @@ export class Hand {
     return { black, white };
   }
 
+  /**
+   * 別のオブジェクトからコピーします。
+   * @param hand 
+   */
   copyFrom(hand: Hand): void {
     hand.pieces.forEach((n, pieceType) => {
       this.pieces.set(pieceType, n);

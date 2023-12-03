@@ -268,6 +268,11 @@ function parseMove(line: string, position: ImmutablePosition): Move | Error {
   return move;
 }
 
+/**
+ * CSA形式の特殊な指し手の名前をSpecialMoveTypeに変換します。
+ * @param name 先頭の % 記号を含めない名前をしていします。
+ * @param color 手番を指定します。 +ILLEGAL_ACTION や -ILLEGAL_ACTION の読み取りに使用します。
+ */
 export function getSpecialMoveByName(name: string, color: Color): SpecialMoveType | undefined {
   switch (name) {
     case "CHUDAN":
@@ -297,10 +302,19 @@ export function getSpecialMoveByName(name: string, color: Color): SpecialMoveTyp
   }
 }
 
+/**
+ * CSA形式の指し手を読み取ります。
+ * @param position 
+ * @param line 
+ */
 export function parseCSAMove(position: ImmutablePosition, line: string): Move | Error {
   return parseMove(line, position);
 }
 
+/**
+ * CSA形式の棋譜を読み取ります。
+ * @param data 
+ */
 export function importCSA(data: string): Record | Error {
   const metadata = new RecordMetadata();
   const record = new Record();
@@ -522,6 +536,12 @@ function formatSquare(square: Square | PieceType): string {
   return square instanceof Square ? `${square.file}${square.rank}` : "00";
 }
 
+/**
+ * 特殊な指し手のCSA形式文字列を取得します。
+ * 先頭の % は含みません。
+ * @param move 
+ * @param color 手番を指定します。 +ILLEGAL_ACTION や -ILLEGAL_ACTION の出力に使用します。
+ */
 export function getCSASpecialMoveName(move: SpecialMove, color: Color): string | undefined {
   switch (move.type) {
     case SpecialMoveType.INTERRUPT:
@@ -549,6 +569,10 @@ export function getCSASpecialMoveName(move: SpecialMove, color: Color): string |
   }
 }
 
+/**
+ * CSA形式の指し手を出力します。
+ * @param move 
+ */
 export function formatCSAMove(move: Move): string {
   return (
     (move.color === Color.BLACK ? "+" : "-") +
@@ -558,6 +582,11 @@ export function formatCSAMove(move: Move): string {
   );
 }
 
+/**
+ * CSA形式の棋譜を出力します。
+ * @param record 
+ * @param options 
+ */
 export function exportCSA(record: ImmutableRecord, options: CSAExportOptions): string {
   let ret = "";
   const returnCode = options.returnCode ? options.returnCode : "\n";

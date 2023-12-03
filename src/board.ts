@@ -33,14 +33,41 @@ type PowerDetectionOption = {
   ignore?: Square;
 };
 
+/**
+ * 盤面 (読み取り専用)
+ */
 export interface ImmutableBoard {
+  /**
+   * 指定したマスの駒を取得します。
+   * @param square 
+   */
   at(square: Square): Piece | null;
+  /**
+   * 空ではないマスの一覧を取得します。
+   */
   listNonEmptySquares(): Square[];
+  /**
+   * 指定したマスに指定した手番の駒の利きがあるかどうかを判定します。
+   * @param target 
+   * @param color 
+   * @param option 
+   */
   hasPower(target: Square, color: Color, option?: PowerDetectionOption): boolean;
+  /**
+   * 指定した手番の玉に対して王手がかかっているかどうかを判定します。
+   * @param kingColor 
+   * @param option 
+   */
   isChecked(kingColor: Color, option?: PowerDetectionOption): boolean;
+  /**
+   * SFEN形式の文字列を取得します。
+   */
   readonly sfen: string;
 }
 
+/**
+ * 盤面
+ */
 export class Board {
   private squares: Array<Piece | null>;
 
@@ -52,32 +79,57 @@ export class Board {
     this.resetBySFEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL");
   }
 
+  /**
+   * 指定したマスの駒を取得します。
+   * @param square 
+   */
   at(square: Square): Piece | null {
     return this.squares[square.index];
   }
 
+  /**
+   * 指定したマスに駒を配置します。
+   * @param square 
+   * @param piece 
+   */
   set(square: Square, piece: Piece): void {
     this.squares[square.index] = piece;
   }
 
+  /**
+   * 指定した2マスの駒を入れ替えます。
+   * @param square1 
+   * @param square2 
+   */
   swap(square1: Square, square2: Square): void {
     const tmp = this.squares[square1.index];
     this.squares[square1.index] = this.squares[square2.index];
     this.squares[square2.index] = tmp;
   }
 
+  /**
+   * 指定したマスの駒を取り除きます。
+   * @param square 
+   */
   remove(square: Square): Piece | null {
     const removed = this.squares[square.index];
     this.squares[square.index] = null;
     return removed;
   }
 
+  /**
+   * 空ではないマスの一覧を取得します。
+   */
   listNonEmptySquares(): Square[] {
     return Square.all.filter((square) => {
       return this.squares[square.index];
     });
   }
 
+  /**
+   * 指定した手番の駒があるマスの一覧を取得します。
+   * @param color 
+   */
   listSquaresByColor(color: Color): Square[] {
     return Square.all.filter((square) => {
       const piece = this.squares[square.index];
@@ -85,6 +137,10 @@ export class Board {
     });
   }
 
+  /**
+   * 指定した駒があるマスの一覧を取得します。
+   * @param target 
+   */
   listSquaresByPiece(target: Piece): Square[] {
     return Square.all.filter((square) => {
       const piece = this.squares[square.index];
@@ -92,12 +148,18 @@ export class Board {
     });
   }
 
+  /**
+   * 全てのマスの駒を取り除きます。
+   */
   clear(): void {
     Square.all.forEach((square) => {
       this.squares[square.index] = null;
     });
   }
 
+  /**
+   * SFEN形式の文字列を取得します。
+   */
   get sfen(): string {
     let ret = "";
     let empty = 0;
@@ -125,6 +187,10 @@ export class Board {
     return ret;
   }
 
+  /**
+   * SFENで盤面を初期化します。
+   * @param sfen 
+   */
   resetBySFEN(sfen: string): boolean {
     if (!Board.isValidSFEN(sfen)) {
       return false;
@@ -151,6 +217,10 @@ export class Board {
     return true;
   }
 
+  /**
+   * 指定した手番の玉のマスを返します。
+   * @param color 
+   */
   findKing(color: Color): Square | undefined {
     const king = new Piece(color, PieceType.KING);
     return Square.all.find((square) => {
@@ -162,6 +232,12 @@ export class Board {
     });
   }
 
+  /**
+   * 指定したマスに指定した手番の駒の利きがあるかどうかを判定します。
+   * @param target 
+   * @param color 
+   * @param option 
+   */
   hasPower(target: Square, color: Color, option?: PowerDetectionOption): boolean {
     return !!directions.find((dir) => {
       let step = 0;
@@ -187,6 +263,11 @@ export class Board {
     });
   }
 
+  /**
+   * 指定した手番の玉に対して王手がかかっているかどうかを判定します。
+   * @param kingColor 
+   * @param option 
+   */
   isChecked(kingColor: Color, option?: PowerDetectionOption): boolean {
     const square = this.findKing(kingColor);
     if (!square) {
@@ -198,6 +279,10 @@ export class Board {
     });
   }
 
+  /**
+   * 文字列が正しいSFEN形式であるか判定します。
+   * @param sfen 
+   */
   static isValidSFEN(sfen: string): boolean {
     const rows = sfen.split("/");
     if (rows.length !== 9) {
@@ -227,6 +312,10 @@ export class Board {
     return true;
   }
 
+  /**
+   * 別のオブジェクトから盤面をコピーします。
+   * @param board 
+   */
   copyFrom(board: Board): void {
     Square.all.forEach((square) => {
       this.squares[square.index] = board.at(square);

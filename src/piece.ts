@@ -34,6 +34,10 @@ const standardPieceNameMap: { [pieceType: string]: string } = {
   dragon: "竜",
 };
 
+/**
+ * 標準的な駒の名前を返します。
+ * @param type 
+ */
 export function standardPieceName(type: PieceType): string {
   const val = standardPieceNameMap[type];
   return val || "";
@@ -83,6 +87,10 @@ const promotable: { [pieceType: string]: boolean } = {
   dragon: false,
 };
 
+/**
+ * 成ることができる駒かどうかを返します。
+ * @param pieceType 
+ */
 export function isPromotable(pieceType: PieceType): boolean {
   return !!promotable[pieceType];
 }
@@ -96,6 +104,10 @@ const promoteMap: { [pieceType: string]: PieceType } = {
   rook: PieceType.DRAGON,
 };
 
+/**
+ * 成った時の駒の種類を返します。
+ * @param pieceType 
+ */
 export function promotedPieceType(pieceType: PieceType): PieceType {
   return promoteMap[pieceType] || pieceType;
 }
@@ -109,6 +121,10 @@ const unpromoteMap: { [pieceType: string]: PieceType } = {
   dragon: PieceType.ROOK,
 };
 
+/**
+ * 成る前の駒の種類を返します。
+ * @param pieceType 
+ */
 export function unpromotedPieceType(pieceType: PieceType): PieceType {
   return unpromoteMap[pieceType] || pieceType;
 }
@@ -130,6 +146,10 @@ const toSFENCharBlack: { [pieceType: string]: string } = {
   dragon: "+R",
 };
 
+/**
+ * SFEN形式の駒種を表す文字列を返します。
+ * @param type 
+ */
 export function pieceTypeToSFEN(type: PieceType): string {
   return toSFENCharBlack[type];
 }
@@ -258,42 +278,70 @@ rotateMap.set(PieceType.PROM_SILVER, {
 rotateMap.set(PieceType.HORSE, { type: PieceType.BISHOP, reverseColor: true });
 rotateMap.set(PieceType.DRAGON, { type: PieceType.ROOK, reverseColor: true });
 
+/**
+ * 駒(手番を含む)
+ */
 export class Piece {
   constructor(
     public color: Color,
     public type: PieceType,
   ) {}
 
+  /**
+   * 先手番の駒に変換します。
+   */
   black(): Piece {
     return this.withColor(Color.BLACK);
   }
 
+  /**
+   * 後手番の駒に変換します。
+   */
   white(): Piece {
     return this.withColor(Color.WHITE);
   }
 
+  /**
+   * 手番を変更した駒を返します。
+   */
   withColor(color: Color): Piece {
     return new Piece(color, this.type);
   }
 
+  /**
+   * 等しい駒かどうかを判定します。
+   */
   equals(piece: Piece): boolean {
     return this.type === piece.type && this.color === piece.color;
   }
 
+  /**
+   * 成った駒を返します。 
+   */
   promoted(): Piece {
     const type = promoteMap[this.type];
     return new Piece(this.color, type || this.type);
   }
 
+  /**
+   * 成る前の駒を返します。 
+   */
   unpromoted(): Piece {
     const type = unpromoteMap[this.type];
     return new Piece(this.color, type || this.type);
   }
 
+  /**
+   * 成ることが可能な駒かどうかを返します。
+   */
   isPromotable(): boolean {
     return isPromotable(this.type);
   }
 
+  /**
+   * 駒の向きと種類をローテートします。
+   * ex) 先手・歩 -> 先手・と -> 後手・歩 -> 後手・と -> 先手・歩
+   */
   rotate(): Piece {
     const r = rotateMap.get(this.type);
     const piece = new Piece(this.color, r ? r.type : this.type);
@@ -303,10 +351,16 @@ export class Piece {
     return piece;
   }
 
+  /**
+   * 手番と種類を一意に識別する ID を返します。
+   */
   get id(): string {
     return this.color + "_" + this.type;
   }
 
+  /**
+   * SFEN形式の文字列を取得します。
+   */
   get sfen(): string {
     switch (this.color) {
       default:
@@ -317,10 +371,18 @@ export class Piece {
     }
   }
 
+  /**
+   * 指定した文字列が正しいSFEN形式の駒かどうかを判定します。
+   * @param sfen 
+   */
   static isValidSFEN(sfen: string): boolean {
     return !!sfenCharToTypeMap[sfen];
   }
 
+  /**
+   * SFEN形式の文字列から駒を生成します。
+   * @param sfen 
+   */
   static newBySFEN(sfen: string): Piece | null {
     const type = sfenCharToTypeMap[sfen];
     if (!type) {

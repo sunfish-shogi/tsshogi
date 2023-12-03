@@ -1,11 +1,23 @@
+/**
+ * ミリ秒をHH:MM:SS形式に変換します。秒未満は切り捨てられます。
+ * @param ms 
+ */
 export function millisecondsToHHMMSS(ms: number): string {
   return secondsToHHMMSS(Math.floor(ms / 1e3));
 }
 
+/**
+ * ミリ秒をM:SS形式に変換します。10分以上の場合は分の部分が2桁になります。秒未満は切り捨てられます。
+ * @param ms 
+ */
 export function millisecondsToMSS(ms: number): string {
   return secondsToMSS(Math.floor(ms / 1e3));
 }
 
+/**
+ * 秒をHH:MM:SS形式に変換します。
+ * @param seconds 
+ */
 export function secondsToHHMMSS(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds - h * 3600) / 60);
@@ -15,6 +27,10 @@ export function secondsToHHMMSS(seconds: number): string {
   );
 }
 
+/**
+ * 秒をM:SS形式に変換します。10分以上の場合は分の部分が2桁になります。
+ * @param seconds 
+ */
 export function secondsToMSS(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
