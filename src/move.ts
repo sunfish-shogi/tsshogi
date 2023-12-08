@@ -109,6 +109,7 @@ export enum SpecialMoveType {
   ENTERING_OF_KING = "enteringOfKing",
   WIN_BY_DEFAULT = "winByDefault",
   LOSE_BY_DEFAULT = "loseByDefault",
+  TRY = "try", // トライ成立,
 }
 
 export type PredefinedSpecialMove = {

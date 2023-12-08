@@ -759,3 +759,105 @@ export function countNotExistingPieces(position: ImmutablePosition): PieceCounts
     dragon: 0,
   };
 }
+
+export enum JishogiDeclarationRule {
+  GENERAL24 = "general24", // 24点法
+  GENERAL27 = "general27", // 27点法
+}
+
+export enum JishogiDeclarationResult {
+  WIN = "win",
+  LOSE = "lose",
+  DRAW = "draw",
+}
+
+function invadingPieces(board: ImmutableBoard, color: Color): Piece[] {
+  return board
+    .listNonEmptySquares()
+    .filter((square) => {
+      if (!isPromotableRank(color, square.rank)) {
+        return false;
+      }
+      const piece = board.at(square);
+      return piece?.color === color && piece?.type !== PieceType.KING;
+    })
+    .map((square) => board.at(square) as Piece);
+}
+
+export function countJishogiDeclarationPoint(position: ImmutablePosition, color: Color): number {
+  let point = 0;
+  for (const piece of invadingPieces(position.board, color)) {
+    const type = piece.unpromoted().type;
+    point += type === PieceType.BISHOP || type === PieceType.ROOK ? 5 : 1;
+  }
+  const hand = position.hand(color);
+  point +=
+    hand.count(PieceType.PAWN) +
+    hand.count(PieceType.LANCE) +
+    hand.count(PieceType.KNIGHT) +
+    hand.count(PieceType.SILVER) +
+    hand.count(PieceType.GOLD) +
+    hand.count(PieceType.BISHOP) * 5 +
+    hand.count(PieceType.ROOK) * 5;
+  if (color === Color.WHITE) {
+    // 駒落ちの場合は上手に落とした駒を加点する。
+    const notExisting = countNotExistingPieces(position);
+    point +=
+      notExisting.pawn +
+      notExisting.lance +
+      notExisting.knight +
+      notExisting.silver +
+      notExisting.gold +
+      notExisting.bishop * 5 +
+      notExisting.rook * 5;
+  }
+  return point;
+}
+
+export function judgeJishogiDeclaration(
+  rule: JishogiDeclarationRule,
+  position: ImmutablePosition,
+  color: Color,
+): JishogiDeclarationResult {
+  // 自分の手番か。
+  if (position.color !== color) {
+    return JishogiDeclarationResult.LOSE;
+  }
+
+  // 玉が敵陣に入っているか。
+  const king = position.board.findKing(color);
+  if (!king || !isPromotableRank(color, king.rank)) {
+    return JishogiDeclarationResult.LOSE;
+  }
+
+  // 王手されていないか。
+  if (position.board.isChecked(color)) {
+    return JishogiDeclarationResult.LOSE;
+  }
+
+  // 敵陣に 10 枚以上駒が侵入しているか。
+  if (invadingPieces(position.board, color).length < 10) {
+    return JishogiDeclarationResult.LOSE;
+  }
+
+  // 点数を計算する。
+  const point = countJishogiDeclarationPoint(position, color);
+
+  // 24 点法
+  if (rule === JishogiDeclarationRule.GENERAL24) {
+    return point >= 31
+      ? JishogiDeclarationResult.WIN
+      : point >= 24
+        ? JishogiDeclarationResult.DRAW
+        : JishogiDeclarationResult.LOSE;
+  }
+
+  // 27 点法
+  if (color === Color.BLACK) {
+    // 先手は 28 点以上で勝ち
+    return point >= 28 ? JishogiDeclarationResult.WIN : JishogiDeclarationResult.DRAW;
+  } else {
+    // 後手は 27 点以上で勝ち
+    return point >= 27 ? JishogiDeclarationResult.WIN : JishogiDeclarationResult.DRAW;
+  }
+}

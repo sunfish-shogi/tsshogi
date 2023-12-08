@@ -668,6 +668,7 @@ const specialMoveToString = {
   [SpecialMoveType.ENTERING_OF_KING]: "入玉勝ち",
   [SpecialMoveType.WIN_BY_DEFAULT]: "不戦勝",
   [SpecialMoveType.LOSE_BY_DEFAULT]: "不戦敗",
+  [SpecialMoveType.TRY]: "トライ",
 };
 
 type KIFExportOptions = {
