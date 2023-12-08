@@ -59,6 +59,29 @@ if (!record.append(move)) {
 }
 ```
 
+## 主なデータ型
+
+### `class Record`
+棋譜を表すクラスです。分岐付きのKIF形式と同等の情報に加えて、現在の局面を管理します。
+
+### `class Position`
+局面を表すクラスです。
+
+### `class Board`
+盤面を表すクラスです。
+
+### `class Hand`
+駒台を表すクラスです。
+
+### `class Move`
+指し手を表すクラスです。手番や動かした駒の種類、取られた駒の情報も含みます。
+
+### `class Square`
+盤上のマス目を表すクラスです。
+
+### `enum Color`
+手番を表す列挙体です。
+
 ## 読み取り専用型
 
 接頭辞 `Immutable` が付いた interface 型は各クラスの読み取り専用インターフェースです。
@@ -66,14 +89,29 @@ if (!record.append(move)) {
 
 ## 補助的な関数や定数
 
-- `function detectRecordFormat` 文字列から棋譜のフォーマットを判別します。
-- `enum InitialPositionSFEN` 一般的に用いられる初形配置の SFEN です。
-- `function countExistingPieces` 局面に配置された駒を種類ごとに数えます。
-- `function countNotExistingPieces` 平手と比べて不足している駒の枚数を数えます。
-- `function getBlackPlayerName` 先手または下手の対局者名をフルネーム優先で取得します。
-- `function getWhitePlayerName` 後手または上手の対局者名をフルネーム優先で取得します。
-- `function getBlackPlayerNamePreferShort` 先手または下手の対局者名を省略表記優先で取得します。
-- `function getWhitePlayerNamePreferShort` 後手または上手の対局者名を省略表記優先で取得します。
+### `function detectRecordFormat`
+文字列から棋譜のフォーマットを判別します。
+
+### `enum InitialPositionSFEN`
+一般的に用いられる初形配置の SFEN です。
+
+### `function countExistingPieces`
+局面に配置された駒を種類ごとに数えます。
+
+### `function countNotExistingPieces`
+平手と比べて不足している駒の枚数を数えます。
+
+### `function getBlackPlayerName`
+先手または下手の対局者名をフルネーム優先で取得します。
+
+### `function getWhitePlayerName`
+後手または上手の対局者名をフルネーム優先で取得します。
+
+### `function getBlackPlayerNamePreferShort`
+先手または下手の対局者名を省略表記優先で取得します。
+
+### `function getWhitePlayerNamePreferShort`
+後手または上手の対局者名を省略表記優先で取得します。
 
 ## 注意点
 
