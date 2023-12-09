@@ -9,6 +9,10 @@ import {
   Square,
   PieceType,
   InitialPositionSFEN,
+  judgeJishogiDeclaration,
+  JishogiDeclarationRule,
+  JishogiDeclarationResult,
+  countJishogiDeclarationPoint,
 } from "../";
 
 describe("shogi/position", () => {
@@ -543,5 +547,156 @@ describe("shogi/position", () => {
     expect(position?.whiteHand.count(PieceType.KNIGHT)).toBe(2);
     expect(position?.whiteHand.count(PieceType.SILVER)).toBe(1);
     expect(position?.sfen).toBe(sfen);
+  });
+
+  describe("judgeJishogiDeclaration", () => {
+    const testCases = [
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+t_test1_test2-600-2F+aobazero+aobazerotest+20221201210630
+        title: "sente_10pieces_28points",
+        sfen: "2GK1+L3/2+P+S+R1G+N1/3+B1GG2/9/+r8/1+bs6/+p+p3+n3/2+n2k3/6+p2 b 2SN7P3l7p 375",
+        blackInvading: 10,
+        whiteInvading: 5,
+        blackPoint: 28,
+        whitePoint: 15,
+        black24: JishogiDeclarationResult.DRAW,
+        black27: JishogiDeclarationResult.WIN,
+        white24: JishogiDeclarationResult.LOSE,
+        white27: JishogiDeclarationResult.LOSE,
+      },
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+t_test1_test2-600-2F+aobazero+aobazerotest+20221201210630 (終局1手前)
+        title: "gote_5pieces_15points",
+        sfen: "2GK1+L3/2+P+S+R1G+N1/3+B1GG2/9/9/+r+bs6/+p+p3+n3/2+n2k3/6+p2 w 2SN7P3l7p 374",
+        blackInvading: 10,
+        whiteInvading: 5,
+        blackPoint: 28,
+        whitePoint: 15,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.LOSE,
+        white27: JishogiDeclarationResult.LOSE,
+      },
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+dr3prda-8-top_joyful_dlshogi30b-600-2F+joyful+dlshogi30b+20221204183543
+        title: "gote_10pieces_44points",
+        sfen: "1+N2+N4/1K7/1+N+P6/9/5g3/4L1s2/1+l2pPg1+s/1s2b1b1+p/1+r4+p1k w 2Pr2gsn2l11p 378",
+        blackInvading: 4,
+        whiteInvading: 10,
+        blackPoint: 6,
+        whitePoint: 44,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.WIN,
+        white27: JishogiDeclarationResult.WIN,
+      },
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+t_test1_test2-600-2F+irohakiramekitest+aobazero+20221203014727/306
+        title: "gote_10pieces_28points",
+        sfen: "1+N4+B1+P/1K4+N+P1/1+L+P3B2/7P1/2G6/9/2G3+l1g/1+r1sppppg/1+l6k w 7Pr3s2nl3p 306",
+        blackInvading: 8,
+        whiteInvading: 10,
+        blackPoint: 23,
+        whitePoint: 28,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.DRAW,
+        white27: JishogiDeclarationResult.WIN,
+      },
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+dr3prdb-10_shotgun_aobazero-600-2F+shotgun+aobazero+20221204151512/411
+        title: "gote_10pieces_39points",
+        sfen: "K6n1/+PG7/+P3G4/1P+P6/9/4P4/9/3p+bp+pps/3+pk1rr+b w SNL4P2g2s2n3l4p 416",
+        blackInvading: 4,
+        whiteInvading: 10,
+        blackPoint: 11,
+        whitePoint: 39,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.WIN,
+        white27: JishogiDeclarationResult.WIN,
+      },
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+dr3prdb-10_shotgun_aobazero-600-2F+shotgun+aobazero+20221204151512/411 (終局2手前)
+        title: "gote_10pieces_38points_cheked", // 点数は足りているが先手による王手がかかっている。
+        sfen: "K6n1/+PG7/+P3G4/1P+P6/9/9/4P4/3pGp+pps/3+pkbrr+b w SNL4Pg2s2n3l4p 414",
+        blackInvading: 4,
+        whiteInvading: 10,
+        blackPoint: 11,
+        whitePoint: 38,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.LOSE,
+        white27: JishogiDeclarationResult.LOSE,
+      },
+      {
+        // https://denryu-sen.jp/denryusen/dr3_production/dist/#/dr3prd+dr3prdb-10_shotgun_aobazero-600-2F+shotgun+aobazero+20221204151512/411 (終局4手前)
+        title: "gote_9pieces_38points",
+        sfen: "K6n1/+PG7/+P3G4/1P+P6/9/9/4P4/3p1p+pps/3+pkbr1+b w GSNL4Prg2s2n3l4p 412",
+        blackInvading: 4,
+        whiteInvading: 9,
+        blackPoint: 12,
+        whitePoint: 38,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.LOSE,
+        white27: JishogiDeclarationResult.LOSE,
+      },
+      {
+        title: "uwate_9pieces_38points",
+        sfen: "K6n1/+PG7/+P3G4/1P+P6/9/9/4P4/2+pp1p+ppp/1+p1+pkb3 w GSNL4Pr2n3lp 1", // 6枚落ち
+        blackInvading: 4,
+        whiteInvading: 9,
+        blackPoint: 12,
+        whitePoint: 38,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.LOSE,
+        white27: JishogiDeclarationResult.LOSE,
+      },
+      {
+        title: "uwate_10pieces_38points",
+        sfen: "K6n1/+PG1P5/+P3G4/1P+P6/9/9/4P4/1p+pp1p+ppp/1+p1+pkb3 w GSNL3Pr2n3l 1", // 6枚落ち
+        blackInvading: 4,
+        whiteInvading: 10,
+        blackPoint: 12,
+        whitePoint: 38,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.WIN,
+        white27: JishogiDeclarationResult.WIN,
+      },
+      {
+        title: "hirate_initial",
+        sfen: InitialPositionSFEN.STANDARD,
+        blackInvading: 0,
+        whileInvading: 0,
+        blackPoint: 0,
+        whitePoint: 0,
+        black24: JishogiDeclarationResult.LOSE,
+        black27: JishogiDeclarationResult.LOSE,
+        white24: JishogiDeclarationResult.LOSE,
+        white27: JishogiDeclarationResult.LOSE,
+      },
+    ];
+    for (const tc of testCases) {
+      it(tc.title, () => {
+        const position = Position.newBySFEN(tc.sfen) as Position;
+        expect(countJishogiDeclarationPoint(position, Color.BLACK)).toBe(tc.blackPoint);
+        expect(countJishogiDeclarationPoint(position, Color.WHITE)).toBe(tc.whitePoint);
+        expect(
+          judgeJishogiDeclaration(JishogiDeclarationRule.GENERAL24, position, Color.BLACK),
+        ).toBe(tc.black24);
+        expect(
+          judgeJishogiDeclaration(JishogiDeclarationRule.GENERAL27, position, Color.BLACK),
+        ).toBe(tc.black27);
+        expect(
+          judgeJishogiDeclaration(JishogiDeclarationRule.GENERAL24, position, Color.WHITE),
+        ).toBe(tc.white24);
+        expect(
+          judgeJishogiDeclaration(JishogiDeclarationRule.GENERAL27, position, Color.WHITE),
+        ).toBe(tc.white27);
+      });
+    }
   });
 });

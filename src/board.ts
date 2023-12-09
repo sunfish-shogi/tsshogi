@@ -47,6 +47,11 @@ export interface ImmutableBoard {
    */
   listNonEmptySquares(): Square[];
   /**
+   * 指定した手番の玉のマスを返します。
+   * @param color
+   */
+  findKing(color: Color): Square | undefined;
+  /**
    * 指定したマスに指定した手番の駒の利きがあるかどうかを判定します。
    * @param target
    * @param color
