@@ -112,6 +112,14 @@ if (!record.append(move)) {
 
 平手と比べて不足している駒の枚数を数えます。
 
+### `function countJishogiDeclarationPoint`
+
+持将棋の判定に適用される点数を計算します。
+
+### `function judgeJishogiDeclaration`
+
+入玉宣言法の合否を判定します。
+
 ### `function getBlackPlayerName`
 
 先手または下手の対局者名をフルネーム優先で取得します。
