@@ -10,14 +10,7 @@ export default defineConfig({
     dir: "./src/tests",
     globals: true,
     coverage: {
-      exclude: [
-        "sample",
-        "scripts",
-        "src/tests",
-        "vite.config.ts",
-        ".*.*",
-        "**/*.d.ts",
-      ]
-    }
+      exclude: ["sample", "scripts", "src/tests", "vite.config.ts", ".*.*", "**/*.d.ts"],
+    },
   },
 });
