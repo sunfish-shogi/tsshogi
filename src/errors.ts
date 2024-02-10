@@ -47,6 +47,9 @@ export class InvalidLineError extends Error {
   }
 }
 
+/**
+ * @deprecated
+ */
 export class InvalidHandicapError extends Error {
   constructor(public data: string) {
     super(`Invalid handicap: ${data}`);

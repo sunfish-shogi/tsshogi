@@ -938,6 +938,40 @@ describe("shogi/kakinoki", () => {
     expect(record.current.comment).toBe("25手目のコメント\n");
   });
 
+  it("import/tsumeshogi", () => {
+    // 東大将棋6の詰将棋生成機能で作られた問題。
+    // 東大将棋6は手合割が「詰将棋」になっている。
+    const data = `
+# ---- 分岐棋譜(BKF)形式棋譜ファイル
+# ----   saved by IS-SHOGI
+手数：5手詰(参考)
+手合割：詰将棋　
+後手の持駒：飛二　角　金四　銀三　桂四　香四　歩十四　
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|一
+| ・ ・ ・ ・ ・ ・ ・ 銀 ・|二
+| ・ ・ ・ ・ ・ 歩 ・v玉 ・|三
+| ・ ・ ・ ・ ・ ・ ・v歩 歩|四
+| ・ ・ ・ ・ ・ ・ 歩 ・ ・|五
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|六
+| ・ ・ 角 ・ ・ ・ ・ ・ ・|七
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|九
++---------------------------+
+先手の持駒：なし
+先手番
+先手：
+後手：
+手数----指手---------消費時間--
+#--separator--
+`;
+    const record = importKIF(data) as Record;
+    expect(record).toBeInstanceOf(Record);
+    expect(record.moves).toHaveLength(1);
+    expect(record.position.sfen).toBe("9/7S1/5P1k1/7pP/6P2/9/2B6/9/9 b 2rb4g3s4n4l14p 1");
+  });
+
   it("import/ki2", () => {
     const data = `
 開始日時：1582/06/02 04:00:00

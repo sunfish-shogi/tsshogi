@@ -9,7 +9,6 @@ import {
   InvalidBoardError,
   InvalidDestinationError,
   InvalidHandPieceError,
-  InvalidHandicapError,
   InvalidLineError,
   InvalidMoveError,
   InvalidMoveNumberError,
@@ -266,7 +265,7 @@ function parseLine(line: string): Line {
   };
 }
 
-function readHandicap(position: Position, data: string): Error | undefined {
+function readHandicap(position: Position, data: string) {
   switch (data.trim()) {
     case "平手":
       position.resetBySFEN(InitialPositionSFEN.STANDARD);
@@ -305,7 +304,10 @@ function readHandicap(position: Position, data: string): Error | undefined {
       position.resetBySFEN(InitialPositionSFEN.EMPTY);
       return;
   }
-  return new InvalidHandicapError(data);
+  // マイナビ系のソフトウェアは「手合割：詰将棋」を使用する場合がある。
+  // それを含め柿木将棋で規定していない値が使われるケースがしばしばあり、
+  // それらに対して適切な処理を判断しようがなく、
+  // エラーを返すわけにも行かないためここでは何もしない。
 }
 
 const stringToSpecialMoveType: { [move: string]: SpecialMoveType | undefined } = {
@@ -573,7 +575,7 @@ function importKakinoki(data: string, formatType: KakinokiFormatType): Record | 
         break;
       }
       case LineType.HANDICAP:
-        e = readHandicap(position, parsed.data);
+        readHandicap(position, parsed.data);
         break;
       case LineType.BLACK_HAND:
         e = readHand(position.blackHand, parsed.data);
