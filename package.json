@@ -33,6 +33,7 @@
     "prepare": "npm run build",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui --coverage",
     "lint": "eslint --fix --max-warnings 0 . && prettier --write .",
     "release:patch": "npm version patch",
     "release:minor": "npm version minor",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@vitest/coverage-v8": "^1.0.4",
+    "@vitest/ui": "^1.3.1",
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-import-resolver-typescript": "^3.6.1",
