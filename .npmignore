@@ -12,6 +12,7 @@ vite.config.ts
 .eslintrc.cjs
 .prettierignore
 .prettierrc.cjs
+.github
 /src
 /coverage
 
