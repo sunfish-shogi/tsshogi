@@ -184,9 +184,9 @@ export class RecordMetadata {
  */
 export interface ImmutableNode {
   readonly ply: number;
-  readonly prev: Node | null;
-  readonly next: Node | null;
-  readonly branch: Node | null;
+  readonly prev: ImmutableNode | null;
+  readonly next: ImmutableNode | null;
+  readonly branch: ImmutableNode | null;
   readonly branchIndex: number;
   readonly activeBranch: boolean;
   readonly nextColor: Color;
@@ -208,6 +208,9 @@ export interface ImmutableNode {
  * 棋譜を構成するノード
  */
 export interface Node extends ImmutableNode {
+  readonly prev: Node | null;
+  readonly next: Node | null;
+  readonly branch: Node | null;
   comment: string;
   customData: unknown;
   setElapsedMs(elapsedMs: number): void;
