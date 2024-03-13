@@ -73,7 +73,7 @@ export function initialPositionTypeToSFEN(type: InitialPositionType): string {
 }
 
 const invalidRankMap: {
-  [color: string]: { [pieceType: string]: { [rank: number]: boolean } };
+  [color: string]: { [pieceType in PieceType]?: { [rank: number]: boolean } };
 } = {
   black: {
     pawn: { 1: true },
@@ -692,20 +692,7 @@ export class Position {
 }
 
 type PieceCounts = {
-  pawn: number;
-  lance: number;
-  knight: number;
-  silver: number;
-  gold: number;
-  bishop: number;
-  rook: number;
-  king: number;
-  promPawn: number;
-  promLance: number;
-  promKnight: number;
-  promSilver: number;
-  horse: number;
-  dragon: number;
+  [pieceType in PieceType]: number;
 };
 
 export function countExistingPieces(position: ImmutablePosition): PieceCounts {

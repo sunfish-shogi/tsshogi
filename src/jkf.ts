@@ -35,7 +35,7 @@ export type JKFSquare = {
   kind?: JKFKind | null;
 };
 
-export type JKFHands = JKFHand[]; // 必ず 2 つの要素を持つ。
+export type JKFHands = [JKFHand, JKFHand];
 
 export type JKFHand = {
   FU?: number;

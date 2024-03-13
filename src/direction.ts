@@ -1,4 +1,4 @@
-import { Piece } from "./piece";
+import { Piece, PieceType } from "./piece";
 
 export enum Direction {
   UP = "up",
@@ -15,7 +15,9 @@ export enum Direction {
   RIGHT_DOWN_KNIGHT = "right_down_knight",
 }
 
-const reverseMap = {
+const reverseMap: {
+  [direction in Direction]: Direction;
+} = {
   up: Direction.DOWN,
   down: Direction.UP,
   left: Direction.RIGHT,
@@ -38,7 +40,7 @@ export function reverseDirection(dir: Direction): Direction {
   return reverseMap[dir];
 }
 
-export const directions = [
+export const directions: Direction[] = [
   Direction.UP,
   Direction.DOWN,
   Direction.LEFT,
@@ -60,7 +62,7 @@ export enum MoveType {
 
 const movableDirectionMap: {
   [color: string]: {
-    [pieceType: string]: { [direction: string]: MoveType | undefined };
+    [pieceType in PieceType]: { [direction in Direction]?: MoveType | undefined };
   };
 } = {
   black: {
@@ -274,7 +276,7 @@ export function resolveMoveType(piece: Piece, direction: Direction): MoveType | 
 }
 
 export const directionToDeltaMap: {
-  [direction: string]: { x: number; y: number };
+  [direction in Direction]: { x: number; y: number };
 } = {
   up: { x: 0, y: -1 },
   down: { x: 0, y: 1 },

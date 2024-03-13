@@ -115,7 +115,9 @@ export function rankToKanji(rank: number): string {
   return kanjiNumberStrings[rank - 1];
 }
 
-const pieceTypeToStringForMoveMap = {
+const pieceTypeToStringForMoveMap: {
+  [pieceType in PieceType]: string;
+} = {
   king: "玉",
   rook: "飛",
   dragon: "龍",
@@ -136,7 +138,9 @@ export function pieceTypeToStringForMove(pieceType: PieceType): string {
   return pieceTypeToStringForMoveMap[pieceType];
 }
 
-const pieceTypeToStringForBoardMap = {
+const pieceTypeToStringForBoardMap: {
+  [pieceType in PieceType]: string;
+} = {
   king: "玉",
   rook: "飛",
   dragon: "龍",
@@ -157,7 +161,9 @@ export function pieceTypeToStringForBoard(pieceType: PieceType): string {
   return pieceTypeToStringForBoardMap[pieceType];
 }
 
-const specialMoveToDisplayStringMap = {
+const specialMoveToDisplayStringMap: {
+  [specialMoveType in SpecialMoveType]: string;
+} = {
   [SpecialMoveType.START]: "開始局面",
   [SpecialMoveType.RESIGN]: "投了",
   [SpecialMoveType.INTERRUPT]: "中断",

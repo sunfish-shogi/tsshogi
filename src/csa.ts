@@ -52,7 +52,11 @@ enum SectionType {
   NEUTRAL,
 }
 
-const linePatterns = [
+const linePatterns: {
+  pattern: RegExp;
+  type: LineType;
+  sectionType: SectionType;
+}[] = [
   {
     pattern: /^V/,
     type: LineType.VERSION,
@@ -462,7 +466,9 @@ function formatMetadata(metadata: ImmutableRecordMetadata, options: CSAExportOpt
   return ret;
 }
 
-const pieceTypeToString = {
+const pieceTypeToString: {
+  [pieceType in PieceType]: string;
+} = {
   king: "OU",
   rook: "HI",
   dragon: "RY",
