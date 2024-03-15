@@ -17,7 +17,7 @@ export enum PieceType {
   DRAGON = "dragon",
 }
 
-const standardPieceNameMap: { [pieceType: string]: string } = {
+const standardPieceNameMap: { [pieceType in PieceType]: string } = {
   pawn: "歩",
   lance: "香",
   knight: "桂",
@@ -70,7 +70,7 @@ export const handPieceTypes: PieceType[] = [
   PieceType.ROOK,
 ];
 
-const promotable: { [pieceType: string]: boolean } = {
+const promotable: { [pieceType in PieceType]: boolean } = {
   pawn: true,
   lance: true,
   knight: true,
@@ -112,7 +112,7 @@ export function promotedPieceType(pieceType: PieceType): PieceType {
   return promoteMap[pieceType] || pieceType;
 }
 
-const unpromoteMap: { [pieceType: string]: PieceType } = {
+const unpromoteMap: { [pieceType in PieceType]?: PieceType } = {
   promPawn: PieceType.PAWN,
   promLance: PieceType.LANCE,
   promKnight: PieceType.KNIGHT,
@@ -129,7 +129,7 @@ export function unpromotedPieceType(pieceType: PieceType): PieceType {
   return unpromoteMap[pieceType] || pieceType;
 }
 
-const toSFENCharBlack: { [pieceType: string]: string } = {
+const toSFENCharBlack: { [pieceType in PieceType]: string } = {
   pawn: "P",
   lance: "L",
   knight: "N",
@@ -154,7 +154,7 @@ export function pieceTypeToSFEN(type: PieceType): string {
   return toSFENCharBlack[type];
 }
 
-const toSFENCharWhite: { [pieceType: string]: string } = {
+const toSFENCharWhite: { [pieceType in PieceType]: string } = {
   pawn: "p",
   lance: "l",
   knight: "n",

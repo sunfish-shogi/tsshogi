@@ -88,7 +88,9 @@ export function kakinokiToMetadataKey(key: string): RecordMetadataKey | undefine
   return metadataKeyMap[key];
 }
 
-const metadataNameMap = {
+const metadataNameMap: {
+  [recordMetadataKey in RecordMetadataKey]: string;
+} = {
   [RecordMetadataKey.BLACK_NAME]: "先手",
   [RecordMetadataKey.WHITE_NAME]: "後手",
   [RecordMetadataKey.SHITATE_NAME]: "下手",
@@ -145,7 +147,12 @@ enum LineType {
   UNKNOWN,
 }
 
-const linePatterns = [
+const linePatterns: {
+  prefix: RegExp;
+  type: LineType;
+  removePrefix: boolean;
+  isPosition: boolean;
+}[] = [
   {
     prefix: /^#/,
     type: LineType.PROGRAM_COMMENT,
@@ -655,7 +662,9 @@ function importKakinoki(data: string, formatType: KakinokiFormatType): Record | 
   return record;
 }
 
-const specialMoveToString = {
+const specialMoveToString: {
+  [specialMoveType in SpecialMoveType]: string;
+} = {
   [SpecialMoveType.START]: "",
   [SpecialMoveType.RESIGN]: "投了",
   [SpecialMoveType.INTERRUPT]: "中断",
