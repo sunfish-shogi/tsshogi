@@ -849,8 +849,7 @@ export class Record {
    */
   getUSI(opts?: USIFormatOptions): string {
     const sfen = this.initialPosition.sfen;
-    const useStartpos =
-      (opts?.startpos === undefined || opts.startpos) && sfen === InitialPositionSFEN.STANDARD;
+    const useStartpos = opts?.startpos !== false && sfen === InitialPositionSFEN.STANDARD;
     const position = "position " + (useStartpos ? "startpos" : "sfen " + this.initialPosition.sfen);
     const moves = [];
     for (let p = this.first; ; p = p.next) {
