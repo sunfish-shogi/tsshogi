@@ -851,22 +851,25 @@ export class Record {
     const sfen = this.initialPosition.sfen;
     const useStartpos =
       (opts?.startpos === undefined || opts.startpos) && sfen === InitialPositionSFEN.STANDARD;
-    let ret =
-      "position " + (useStartpos ? "startpos" : "sfen " + this.initialPosition.sfen) + " moves";
+    const position = "position " + (useStartpos ? "startpos" : "sfen " + this.initialPosition.sfen);
+    const moves = [];
     for (let p = this.first; ; p = p.next) {
       while (!p.activeBranch) {
         p = p.branch as NodeImpl;
       }
       if (p.move instanceof Move) {
-        ret += " " + p.move.usi;
+        moves.push(p.move.usi);
       } else if (opts?.resign && p.move.type === SpecialMoveType.RESIGN) {
-        ret += " resign";
+        moves.push("resign");
       }
       if (!p.next || (!opts?.allMoves && p === this.current)) {
         break;
       }
     }
-    return ret;
+    if (moves.length === 0) {
+      return position;
+    }
+    return [position, "moves"].concat(moves).join(" ");
   }
 
   /**
