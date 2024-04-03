@@ -147,7 +147,7 @@ describe("shogi/record", () => {
     expect(onChangePosition).toBeCalledTimes(9);
     expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(10);
-    expect(record.usi).toBe("position startpos moves");
+    expect(record.usi).toBe("position startpos");
     expect(record.goBack()).toBeFalsy();
     expect(onChangePosition).toBeCalledTimes(10); // not called
 
