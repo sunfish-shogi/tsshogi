@@ -1015,8 +1015,14 @@ export class Record {
  */
 export function getNextColorFromUSI(usi: string): Color {
   const sections = usi.trim().split(" ");
-  if (sections[1] === "startpos" || sections[3] === "b") {
-    return sections.length % 2 === 1 ? Color.BLACK : Color.WHITE;
-  }
-  return sections.length % 2 === 0 ? Color.BLACK : Color.WHITE;
+  const baseColor = sections[1] === "startpos" || sections[3] === "b" ? Color.BLACK : Color.WHITE;
+  const firstMoveIndex =
+    sections[1] === "startpos"
+      ? sections[2] === "moves"
+        ? 3
+        : 2
+      : sections[6] === "moves"
+        ? 7
+        : 6;
+  return (sections.length - firstMoveIndex) % 2 === 0 ? baseColor : reverseColor(baseColor);
 }

@@ -107,13 +107,17 @@ describe("shogi/record", () => {
   });
 
   it("getNextColorFromUSI", () => {
+    expect(getNextColorFromUSI("position startpos")).toBe(Color.BLACK);
+    expect(getNextColorFromUSI("position startpos ")).toBe(Color.BLACK);
+    expect(getNextColorFromUSI("position startpos moves")).toBe(Color.BLACK);
     expect(getNextColorFromUSI("position startpos moves ")).toBe(Color.BLACK);
     expect(getNextColorFromUSI("position startpos moves 2g2f 8c8d 2f2e")).toBe(Color.WHITE);
-    expect(
-      getNextColorFromUSI(
-        "position sfen lnsgkgsnl/1r5b1/p1ppppppp/1p7/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL w - 1 moves 8d8e",
-      ),
-    ).toBe(Color.BLACK);
+    const sfenBlack = "lnsgkgsnl/1r5b1/p1ppppppp/9/1p5P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL b - 1";
+    expect(getNextColorFromUSI(`position sfen ${sfenBlack}`)).toBe(Color.BLACK);
+    expect(getNextColorFromUSI(`position sfen ${sfenBlack} moves 6i7h 4a3b`)).toBe(Color.BLACK);
+    const sfenWhite = "lnsgkgsnl/1r5b1/p1ppppppp/1p7/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL w - 1";
+    expect(getNextColorFromUSI(`position sfen ${sfenWhite}`)).toBe(Color.WHITE);
+    expect(getNextColorFromUSI(`position sfen ${sfenWhite} moves 8d8e`)).toBe(Color.BLACK);
   });
 
   it("append/goBack/goForward/goto", () => {
