@@ -756,6 +756,46 @@ export class Record {
   }
 
   /**
+   * 棋譜をマージします。
+   * 経過時間やコメント、しおりが両方にある場合は自分の側を優先します。
+   * @param record
+   */
+  merge(record: ImmutableRecord): boolean {
+    // 初期局面が異なる場合はマージできない。
+    if (this.initialPosition.sfen !== record.initialPosition.sfen) {
+      return false;
+    }
+    // 元居た局面までのパスを記憶する。
+    const path = this.movesBefore;
+    // 指し手をマージする。
+    record.forEach((node) => {
+      if (node.ply === 0) {
+        return;
+      }
+      this.goto(node.ply - 1);
+      this.append(node.move, { ignoreValidation: true });
+      if (node.elapsedMs && !this.current.elapsedMs) {
+        this.current.setElapsedMs(node.elapsedMs);
+      }
+      if (node.comment && !this.current.comment) {
+        this.current.comment = node.comment;
+      }
+      if (node.bookmark && !this.current.bookmark) {
+        this.current.bookmark = node.bookmark;
+      }
+      if (node.customData && !this.current.customData) {
+        this.current.customData = node.customData;
+      }
+    });
+    // 元居た局面まで戻す。
+    this.goto(0);
+    for (let i = 1; i < path.length; i++) {
+      this.append(path[i].move, { ignoreValidation: true });
+    }
+    return true;
+  }
+
+  /**
    * 指定したしおりがある局面まで移動します。
    * @param bookmark
    */
