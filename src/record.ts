@@ -1,7 +1,14 @@
 import { millisecondsToHHMMSS, millisecondsToMSS } from "./helpers/time";
 import { Color, reverseColor } from "./color";
 import { InvalidMoveError, InvalidUSIError } from "./errors";
-import { Move, SpecialMove, SpecialMoveType, parseUSIMove, specialMove } from "./move";
+import {
+  Move,
+  SpecialMove,
+  SpecialMoveType,
+  areSameMoves,
+  parseUSIMove,
+  specialMove,
+} from "./move";
 import { DoMoveOption, ImmutablePosition, InitialPositionSFEN, Position } from "./position";
 import { formatMove, formatSpecialMove } from "./text";
 
@@ -604,7 +611,7 @@ export class Record {
 
     // 特殊な指し手のノードの場合は前のノードに戻る。
     if (this._current !== this.first && !(this._current.move instanceof Move)) {
-      this.goBack();
+      this._goBack();
     }
 
     // 最終ノードの場合は単に新しいノードを追加する。
@@ -634,10 +641,7 @@ export class Record {
     // 同じ指し手が既に存在する場合はそのノードへ移動して終わる。
     let lastBranch = this._current.next;
     for (p = this._current.next; p; p = p.branch) {
-      if (
-        (p.move instanceof Move && move instanceof Move && move.equals(p.move)) ||
-        move === p.move
-      ) {
+      if (areSameMoves(move, p.move)) {
         this._current = p;
         this._current.activeBranch = true;
         this.onChangePosition();

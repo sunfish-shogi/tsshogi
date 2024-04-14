@@ -146,3 +146,20 @@ export function anySpecialMove(name: string): AnySpecialMove {
 export function isKnownSpecialMove(move: Move | SpecialMove): move is PredefinedSpecialMove {
   return !(move instanceof Move) && move.type !== "any";
 }
+
+export function areSameSpecialMoves(a: SpecialMove, b: SpecialMove): boolean {
+  if (a.type === "any" && b.type === "any") {
+    return a.name === b.name;
+  }
+  return a.type === b.type;
+}
+
+export function areSameMoves(a: Move | SpecialMove, b: Move | SpecialMove): boolean {
+  if (a instanceof Move && b instanceof Move) {
+    return a.equals(b);
+  }
+  if (a instanceof Move || b instanceof Move) {
+    return false;
+  }
+  return areSameSpecialMoves(a, b);
+}

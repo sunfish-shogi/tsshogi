@@ -1057,30 +1057,28 @@ describe("shogi/kakinoki", () => {
     record.goto(1);
     expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.RESIGN));
     record.switchBranchByIndex(1);
-    expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.RESIGN));
-    record.switchBranchByIndex(2);
     expect(record.current.move as SpecialMove).toStrictEqual(
       specialMove(SpecialMoveType.INTERRUPT),
     );
-    record.switchBranchByIndex(3);
+    record.switchBranchByIndex(2);
     expect(record.current.move as SpecialMove).toStrictEqual(
       specialMove(SpecialMoveType.REPETITION_DRAW),
     );
-    record.switchBranchByIndex(4);
+    record.switchBranchByIndex(3);
     expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.IMPASS));
-    record.switchBranchByIndex(5);
+    record.switchBranchByIndex(4);
     expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.TIMEOUT));
-    record.switchBranchByIndex(6);
+    record.switchBranchByIndex(5);
     expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.FOUL_WIN));
-    record.switchBranchByIndex(7);
+    record.switchBranchByIndex(6);
     expect(record.current.move as SpecialMove).toStrictEqual(
       specialMove(SpecialMoveType.FOUL_LOSE),
     );
-    record.switchBranchByIndex(8);
+    record.switchBranchByIndex(7);
     expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.MATE));
-    record.switchBranchByIndex(9);
+    record.switchBranchByIndex(8);
     expect(record.current.move as SpecialMove).toStrictEqual(specialMove(SpecialMoveType.NO_MATE));
-    record.switchBranchByIndex(10);
+    record.switchBranchByIndex(9);
     expect(record.current.move as SpecialMove).toStrictEqual(
       specialMove(SpecialMoveType.ENTERING_OF_KING),
     );
