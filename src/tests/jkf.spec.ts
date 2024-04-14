@@ -464,7 +464,7 @@ describe("shogi/jkf", () => {
       const data = fs.readFileSync(testCase.testData, "utf-8");
       const record = importJKFString(data) as Record;
       expect(record).toBeInstanceOf(Record);
-      expect(exportKIF(record, {})).toBe(testCase.expected);
+      expect(exportKIF(record)).toBe(testCase.expected);
     }
   });
 

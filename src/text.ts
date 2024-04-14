@@ -167,6 +167,7 @@ const specialMoveToDisplayStringMap: {
   [SpecialMoveType.START]: "開始局面",
   [SpecialMoveType.RESIGN]: "投了",
   [SpecialMoveType.INTERRUPT]: "中断",
+  [SpecialMoveType.MAX_MOVES]: "最大手数",
   [SpecialMoveType.IMPASS]: "持将棋",
   [SpecialMoveType.DRAW]: "引き分け",
   [SpecialMoveType.REPETITION_DRAW]: "千日手",
