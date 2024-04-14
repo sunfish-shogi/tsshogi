@@ -127,49 +127,82 @@ describe("shogi/record", () => {
     const move = (ff: number, fr: number, tf: number, tr: number): Move => {
       return record.position.createMove(new Square(ff, fr), new Square(tf, tr)) as Move;
     };
+    // 76歩
     expect(record.append(move(7, 7, 7, 6))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(1);
     expect(record.current.nextColor).toBe(Color.WHITE);
+    // 34歩
     expect(record.append(move(3, 3, 3, 4))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(2);
     expect(record.current.nextColor).toBe(Color.BLACK);
+    // 26歩
     expect(record.append(move(2, 7, 2, 6))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(3);
     expect(record.current.nextColor).toBe(Color.WHITE);
+    // go back
     expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(4);
+    // go back
     expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(5);
-    expect(record.append(move(8, 3, 8, 4))).toBeTruthy();
+    // 34歩 (again)
+    expect(record.append(move(3, 3, 3, 4))).toBeTruthy();
+    expect(record.current.hasBranch).toBeFalsy(); // 登録済みの指し手なので分岐は作られない。
     expect(onChangePosition).toBeCalledTimes(6);
-    expect(record.append(move(7, 9, 7, 8))).toBeTruthy();
+    // go back
+    expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(7);
-
-    expect(record.goBack()).toBeTruthy();
+    // 84歩
+    expect(record.append(move(8, 3, 8, 4))).toBeTruthy();
+    expect(record.current.hasBranch).toBeTruthy(); // 分岐が作られる。
     expect(onChangePosition).toBeCalledTimes(8);
-    expect(record.goBack()).toBeTruthy();
+    // 78金
+    expect(record.append(move(7, 9, 7, 8))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(9);
+
+    // go back
     expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(10);
-    expect(record.usi).toBe("position startpos");
-    expect(record.goBack()).toBeFalsy();
-    expect(onChangePosition).toBeCalledTimes(10); // not called
-
-    expect(record.goForward()).toBeTruthy();
+    // go back
+    expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(11);
-    record.goto(Number.MAX_SAFE_INTEGER);
+    // go back
+    expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(12);
-    expect(record.usi).toBe("position startpos moves 7g7f 8c8d 7i7h");
-    expect(record.goForward()).toBeFalsy();
+    expect(record.usi).toBe("position startpos");
+    // go back (failed)
+    expect(record.goBack()).toBeFalsy();
     expect(onChangePosition).toBeCalledTimes(12); // not called
 
-    record.goto(2);
+    // go forward
+    expect(record.goForward()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(13);
-    expect(record.usi).toBe("position startpos moves 7g7f 8c8d");
-    record.goto(2);
-    expect(onChangePosition).toBeCalledTimes(13); // not called
-    expect(record.switchBranchByIndex(0)).toBeTruthy();
+    // go end
+    record.goto(Number.MAX_SAFE_INTEGER);
     expect(onChangePosition).toBeCalledTimes(14);
+    expect(record.usi).toBe("position startpos moves 7g7f 8c8d 7i7h");
+    // go forward (failed)
+    expect(record.goForward()).toBeFalsy();
+    expect(onChangePosition).toBeCalledTimes(14); // not called
+
+    // interrupt
+    expect(record.append(SpecialMoveType.INTERRUPT)).toBeTruthy();
+    expect(onChangePosition).toBeCalledTimes(15);
+    // interrupt (again)
+    expect(record.append(SpecialMoveType.INTERRUPT)).toBeTruthy();
+    expect(record.current.hasBranch).toBeFalsy(); // 登録済みの指し手なので分岐は増やさない。
+    expect(onChangePosition).toBeCalledTimes(16);
+
+    // go to 2nd move
+    record.goto(2);
+    expect(onChangePosition).toBeCalledTimes(17);
+    expect(record.usi).toBe("position startpos moves 7g7f 8c8d");
+    // go to 2nd move (no change)
+    record.goto(2);
+    expect(onChangePosition).toBeCalledTimes(17); // not called
+    // switch branch
+    expect(record.switchBranchByIndex(0)).toBeTruthy();
+    expect(onChangePosition).toBeCalledTimes(18);
     expect(record.usi).toBe("position startpos moves 7g7f 3c3d");
   });
 
