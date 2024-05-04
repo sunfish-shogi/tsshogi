@@ -329,11 +329,14 @@ export function importCSA(data: string): Record | Error {
   const lines = data.replace(/\r?\n\/(\r?\n[\s\S]*)?$/, "").split(/\r?\n/);
   for (const line of lines) {
     for (const parsed of parseLine(line)) {
-      if (
-        (parsed.sectionType === SectionType.HEADER && inMoveSection) ||
-        (parsed.sectionType === SectionType.MOVE && !inMoveSection)
-      ) {
+      if (parsed.sectionType === SectionType.MOVE && !inMoveSection) {
         return new InvalidLineError(parsed.line);
+      }
+      // NOTE:
+      //   WCSC の棋譜中継ではファイルの末尾に $END_TIME が書かれる。
+      //   V2.2 の仕様上は認められないはずだが、エラーにすると実用上困るので無視する。
+      if (parsed.sectionType === SectionType.HEADER && inMoveSection) {
+        continue;
       }
       switch (parsed.type) {
         case LineType.VERSION:
