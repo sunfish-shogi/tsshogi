@@ -449,7 +449,7 @@ export type CSAExportOptions = {
 
 function formatMetadata(metadata: ImmutableRecordMetadata, options?: CSAExportOptions): string {
   let ret = "";
-  const returnCode = options?.returnCode ? options.returnCode : "\n";
+  const returnCode = options?.returnCode || "\n";
   const blackName = getBlackPlayerName(metadata);
   if (blackName) {
     ret += "N+" + blackName + returnCode;
@@ -558,7 +558,7 @@ const sfenToPCommand: { [sfen: string]: [string, string] } = {
 };
 
 function formatPosition(position: ImmutablePosition, options?: CSAExportOptions): string {
-  const returnCode = options?.returnCode ? options.returnCode : "\n";
+  const returnCode = options?.returnCode || "\n";
 
   const p = sfenToPCommand[position.sfen];
   if (p) {
@@ -644,7 +644,7 @@ export function formatCSAMove(move: Move): string {
  * @param options
  */
 export function exportCSA(record: ImmutableRecord, options?: CSAExportOptions): string {
-  const returnCode = options?.returnCode ? options.returnCode : "\n";
+  const returnCode = options?.returnCode || "\n";
   let ret = "";
   if (options?.v3) {
     ret += "'CSA encoding=" + (options.v3.encoding || "UTF-8") + returnCode;
