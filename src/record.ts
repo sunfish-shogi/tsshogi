@@ -13,27 +13,30 @@ import { DoMoveOption, ImmutablePosition, InitialPositionSFEN, Position } from "
 import { formatMove, formatSpecialMove } from "./text";
 
 export enum RecordMetadataKey {
-  // 柿木形式で規定されている項目
   TITLE = "title", // 表題
   BLACK_NAME = "blackName", // 先手
   WHITE_NAME = "whiteName", // 後手
   SHITATE_NAME = "shitateName", // 下手
   UWATE_NAME = "uwateName", // 上手
+  BLACK_SHORT_NAME = "blackShortName", // 先手省略名
+  WHITE_SHORT_NAME = "whiteShortName", // 後手省略名
   START_DATETIME = "startDatetime", // 開始日時
   END_DATETIME = "endDatetime", // 終了日時
   DATE = "date", // 対局日
   TOURNAMENT = "tournament", // 棋戦
   STRATEGY = "strategy", // 戦型
   TIME_LIMIT = "timeLimit", // 持ち時間
+  BLACK_TIME_LIMIT = "blackTimeLimit", // 先手の持ち時間 (CSA V3)
+  WHITE_TIME_LIMIT = "whiteTimeLimit", // 後手の持ち時間 (CSA V3)
   BYOYOMI = "byoyomi", // 秒読み
   TIME_SPENT = "timeSpent", // 消費時間
+  MAX_MOVES = "maxMoves", // 最大手数 (CSA V3)
+  JISHOGI = "jishogi", // 持将棋規定 (CSA V3)
   PLACE = "place", // 場所
   POSTED_ON = "postedOn", // 掲載
   NOTE = "note", // 備考
-  BLACK_SHORT_NAME = "blackShortName", // 先手省略名
-  WHITE_SHORT_NAME = "whiteShortName", // 後手省略名
 
-  // 柿木形式で規定されている詰将棋に関する項目
+  // 詰将棋に関する項目
   OPUS_NO = "opusNo", // 作品番号
   OPUS_NAME = "opusName", // 作品名
   AUTHOR = "author", // 作者
@@ -44,12 +47,6 @@ export enum RecordMetadataKey {
   INTEGRITY = "integrity", // 完全性
   CATEGORY = "category", // 分類
   AWARD = "award", // 受賞
-
-  // CSA 形式で規定されている項目
-  BLACK_TIME_LIMIT = "blackTimeLimit", // 先手の持ち時間
-  WHITE_TIME_LIMIT = "whiteTimeLimit", // 後手の持ち時間
-  MAX_MOVES = "maxMoves", // 最大手数
-  JISHOGI = "jishogi", // 持将棋規定
 }
 
 /**
