@@ -969,17 +969,35 @@ $END_TIME:2024/05/04 11:05:12
   });
 
   it("import/v3", () => {
+    // http://www2.computer-shogi.org/protocol/record_v3.html より
     const data = `
 'CSA encoding=UTF-8
+'----------棋譜ファイルの例 "example.csa"---------------
+'バージョン
 V3.0
-N+NAKAHARA
-N-YONENAGA
-$EVENT:33th World Computer Shogi Championship
+'対局者名
+N+先手
+N-後手
+'棋譜情報
+'棋戦名
+$EVENT:34th World Computer Shogi Championship
+'対局場所
 $SITE:INTERNET
-$START_TIME:2023/05/05 15:05:40
-$END_TIME:2023/05/05 15:31:22
+'開始日時
+$START_TIME:2024/05/05 15:05:40
+'終了日時
+$END_TIME:2024/05/05 15:31:22
+'持ち時間：フイッシャー方式、初期持ち時間：900秒、加算：5秒
 $TIME:900+0+5
+'戦型：矢倉
 $OPENING:YAGURA
+'最大手数：320
+$MAX_MOVES:320
+'持将棋ルールは、27点法
+$JISHOGI:27
+'備考
+$NOTE:備考１行目\n２行目
+'平手の初期局面
 P1-KY-KE-GI-KI-OU-KI-GI-KE-KY
 P2 * -HI * * * * * -KA * 
 P3-FU-FU-FU-FU-FU-FU-FU-FU-FU
@@ -989,19 +1007,40 @@ P6 * * * * * * * * *
 P7+FU+FU+FU+FU+FU+FU+FU+FU+FU
 P8 * +KA * * * * * +HI * 
 P9+KY+KE+GI+KI+OU+KI+GI+KE+KY
+'先手番
 +
+'指し手と消費時間
 +2726FU,T0
+'評価値、読み筋、ノード数
 '** 30 -8384FU +2625FU -8485FU +6978KI -4132KI +3938GI -7172GI #1234
 -3334FU
+'ミリ秒単位の消費時間
 T6.123
 '*プログラムが読むコメント１行目
 '*プログラムが読むコメント２行目
-%CHUDAN
+  %CHUDAN
 `;
     const record = importCSA(data) as Record;
     expect(record).toBeInstanceOf(Record);
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.BLACK_NAME)).toBe("先手");
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.WHITE_NAME)).toBe("後手");
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.TITLE)).toBe(
+      "34th World Computer Shogi Championship",
+    );
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.PLACE)).toBe("INTERNET");
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.TIME_LIMIT)).toBe("900+0+5");
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.MAX_MOVES)).toBe("320");
+    expect(record.metadata.getStandardMetadata(RecordMetadataKey.JISHOGI)).toBe("27");
+    record.goto(1);
+    expect(record.current.elapsedMs).toBe(0);
+    expect(record.current.comment).toBe(
+      "* 30 -8384FU +2625FU -8485FU +6978KI -4132KI +3938GI -7172GI #1234\n",
+    );
     record.goto(2);
     expect(record.current.elapsedMs).toBe(6123);
+    expect(record.current.comment).toBe(
+      "プログラムが読むコメント１行目\nプログラムが読むコメント２行目\n",
+    );
   });
 
   it("import/time_handicap", () => {
