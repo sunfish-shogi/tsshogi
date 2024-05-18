@@ -78,7 +78,8 @@ export enum JKFSpecial {
   JISHOGI = "JISHOGI",
   KACHI = "KACHI",
   HIKIWAKE = "HIKIWAKE",
-  MATTA = "MATTA",
+  MAX_MOVES = "MAX_MOVES", // NOTE: CSA V3 で追加
+  MATTA = "MATTA", // NOTE: CSA V3 で廃止
   TSUMI = "TSUMI",
   FUZUMI = "FUZUMI",
   ERROR = "ERROR",

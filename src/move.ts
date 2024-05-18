@@ -98,6 +98,7 @@ export enum SpecialMoveType {
   START = "start",
   INTERRUPT = "interrupt",
   RESIGN = "resign",
+  MAX_MOVES = "maxMoves",
   IMPASS = "impass",
   DRAW = "draw",
   REPETITION_DRAW = "repetitionDraw",

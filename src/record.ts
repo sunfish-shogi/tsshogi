@@ -44,6 +44,12 @@ export enum RecordMetadataKey {
   INTEGRITY = "integrity", // 完全性
   CATEGORY = "category", // 分類
   AWARD = "award", // 受賞
+
+  // CSA 形式で規定されている項目
+  BLACK_TIME_LIMIT = "blackTimeLimit", // 先手の持ち時間
+  WHITE_TIME_LIMIT = "whiteTimeLimit", // 後手の持ち時間
+  MAX_MOVES = "maxMoves", // 最大手数
+  JISHOGI = "jishogi", // 持将棋規定
 }
 
 /**

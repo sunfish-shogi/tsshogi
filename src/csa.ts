@@ -11,7 +11,7 @@ import {
 } from "./errors";
 import { Color, reverseColor } from "./color";
 import { ImmutableHand } from "./hand";
-import { Move, SpecialMove, SpecialMoveType } from "./move";
+import { anySpecialMove, Move, specialMove, SpecialMove, SpecialMoveType } from "./move";
 import { Piece, PieceType, promotedPieceType } from "./piece";
 import {
   Position,
@@ -118,7 +118,7 @@ const linePatterns: {
     sectionType: SectionType.MOVE,
   },
   {
-    pattern: /^T([0-9]+)/,
+    pattern: /^T([0-9]+(?:\.[0-9]*)?)/,
     type: LineType.ELAPSED,
     sectionType: SectionType.MOVE,
   },
@@ -157,7 +157,13 @@ const csaNameToRecordMetadataKey: { [key: string]: RecordMetadataKey } = {
   START_TIME: RecordMetadataKey.START_DATETIME,
   END_TIME: RecordMetadataKey.END_DATETIME,
   TIME_LIMIT: RecordMetadataKey.TIME_LIMIT,
+  TIME: RecordMetadataKey.TIME_LIMIT,
+  "TIME+": RecordMetadataKey.BLACK_TIME_LIMIT,
+  "TIME-": RecordMetadataKey.WHITE_TIME_LIMIT,
   OPENING: RecordMetadataKey.STRATEGY,
+  MAX_MOVES: RecordMetadataKey.MAX_MOVES,
+  JISHOGI: RecordMetadataKey.JISHOGI,
+  NOTE: RecordMetadataKey.NOTE,
 };
 
 const csaNameToPieceType: { [name: string]: PieceType } = {
@@ -277,33 +283,40 @@ function parseMove(line: string, position: ImmutablePosition): Move | Error {
  * @param name 先頭の % 記号を含めない名前をしていします。
  * @param color 手番を指定します。 +ILLEGAL_ACTION や -ILLEGAL_ACTION の読み取りに使用します。
  */
-export function getSpecialMoveByName(name: string, color: Color): SpecialMoveType | undefined {
+export function getSpecialMoveByName(name: string, color: Color): SpecialMove {
   switch (name) {
     case "CHUDAN":
-      return SpecialMoveType.INTERRUPT;
+      return specialMove(SpecialMoveType.INTERRUPT);
     case "TORYO":
-      return SpecialMoveType.RESIGN;
+      return specialMove(SpecialMoveType.RESIGN);
+    case "MAX_MOVES":
+      return specialMove(SpecialMoveType.MAX_MOVES);
     case "JISHOGI":
-      return SpecialMoveType.IMPASS;
+      return specialMove(SpecialMoveType.IMPASS);
     case "HIKIWAKE":
-      return SpecialMoveType.DRAW;
+      return specialMove(SpecialMoveType.DRAW);
     case "SENNICHITE":
-      return SpecialMoveType.REPETITION_DRAW;
+      return specialMove(SpecialMoveType.REPETITION_DRAW);
     case "TSUMI":
-      return SpecialMoveType.MATE;
+      return specialMove(SpecialMoveType.MATE);
     case "FUZUMI":
-      return SpecialMoveType.NO_MATE;
+      return specialMove(SpecialMoveType.NO_MATE);
     case "TIME_UP":
-      return SpecialMoveType.TIMEOUT;
+      return specialMove(SpecialMoveType.TIMEOUT);
     case "ILLEGAL_MOVE":
-      return SpecialMoveType.FOUL_LOSE;
+      return specialMove(SpecialMoveType.FOUL_LOSE);
     case "+ILLEGAL_ACTION":
-      return color == Color.BLACK ? SpecialMoveType.FOUL_WIN : SpecialMoveType.FOUL_LOSE;
+      return specialMove(
+        color == Color.BLACK ? SpecialMoveType.FOUL_WIN : SpecialMoveType.FOUL_LOSE,
+      );
     case "-ILLEGAL_ACTION":
-      return color == Color.WHITE ? SpecialMoveType.FOUL_WIN : SpecialMoveType.FOUL_LOSE;
+      return specialMove(
+        color == Color.WHITE ? SpecialMoveType.FOUL_WIN : SpecialMoveType.FOUL_LOSE,
+      );
     case "KACHI":
-      return SpecialMoveType.ENTERING_OF_KING;
+      return specialMove(SpecialMoveType.ENTERING_OF_KING);
   }
+  return anySpecialMove(name);
 }
 
 /**
@@ -402,9 +415,7 @@ export function importCSA(data: string): Record | Error {
         }
         case LineType.SPECIAL_MOVE: {
           const specialMove = getSpecialMoveByName(parsed.line.slice(1), record.position.color);
-          if (specialMove) {
-            record.append(specialMove, { ignoreValidation: true });
-          }
+          record.append(specialMove, { ignoreValidation: true });
           break;
         }
         case LineType.ELAPSED:
@@ -423,13 +434,22 @@ export function importCSA(data: string): Record | Error {
   return record;
 }
 
-type CSAExportOptions = {
-  returnCode?: string;
+const timeRegExpV2 = /^[0-9]+:[0-9]{2}\+[0-9]+$/;
+const timeRegExpV3 = /^[0-9.]+\+[0-9.]+\+[0-9.]+$/;
+
+export type CSAV3Options = {
+  encoding?: "UTF-8" | "SHIFT_JIS";
+  milliseconds?: boolean;
 };
 
-function formatMetadata(metadata: ImmutableRecordMetadata, options: CSAExportOptions): string {
+export type CSAExportOptions = {
+  returnCode?: string;
+  v3?: CSAV3Options;
+};
+
+function formatMetadata(metadata: ImmutableRecordMetadata, options?: CSAExportOptions): string {
   let ret = "";
-  const returnCode = options.returnCode ? options.returnCode : "\n";
+  const returnCode = options?.returnCode || "\n";
   const blackName = getBlackPlayerName(metadata);
   if (blackName) {
     ret += "N+" + blackName + returnCode;
@@ -465,7 +485,32 @@ function formatMetadata(metadata: ImmutableRecordMetadata, options: CSAExportOpt
   if (opening) {
     ret += "$OPENING:" + opening + returnCode;
   }
-  // TODO: 持ち時間（CSA形式に合致する場合のみ）
+  const timeLimit = metadata.getStandardMetadata(RecordMetadataKey.TIME_LIMIT);
+  if (timeLimit?.match(timeRegExpV2)) {
+    ret += "$TIME_LIMIT:" + timeLimit + returnCode;
+  } else if (timeLimit?.match(timeRegExpV3)) {
+    ret += "$TIME:" + timeLimit + returnCode;
+  }
+  const blackTimeLimit = metadata.getStandardMetadata(RecordMetadataKey.BLACK_TIME_LIMIT);
+  if (blackTimeLimit?.match(timeRegExpV3)) {
+    ret += "$TIME+:" + blackTimeLimit + returnCode;
+  }
+  const whiteTimeLimit = metadata.getStandardMetadata(RecordMetadataKey.WHITE_TIME_LIMIT);
+  if (whiteTimeLimit?.match(timeRegExpV3)) {
+    ret += "$TIME-:" + whiteTimeLimit + returnCode;
+  }
+  const maxMoves = metadata.getStandardMetadata(RecordMetadataKey.MAX_MOVES);
+  if (maxMoves) {
+    ret += "$MAX_MOVES:" + maxMoves + returnCode;
+  }
+  const jishogi = metadata.getStandardMetadata(RecordMetadataKey.JISHOGI);
+  if (jishogi) {
+    ret += "$JISHOGI:" + jishogi + returnCode;
+  }
+  const note = metadata.getStandardMetadata(RecordMetadataKey.NOTE);
+  if (note) {
+    ret += "$NOTE:" + note + returnCode;
+  }
   return ret;
 }
 
@@ -512,8 +557,8 @@ const sfenToPCommand: { [sfen: string]: [string, string] } = {
   [InitialPositionSFEN.HANDICAP_10PIECES]: ["PI82HI22KA41KI61KI31GI71GI21KE81KE11KY91KY", "-"],
 };
 
-function formatPosition(position: ImmutablePosition, options: CSAExportOptions): string {
-  const returnCode = options.returnCode ? options.returnCode : "\n";
+function formatPosition(position: ImmutablePosition, options?: CSAExportOptions): string {
+  const returnCode = options?.returnCode || "\n";
 
   const p = sfenToPCommand[position.sfen];
   if (p) {
@@ -557,6 +602,8 @@ export function getCSASpecialMoveName(move: SpecialMove, color: Color): string |
       return "CHUDAN";
     case SpecialMoveType.RESIGN:
       return "TORYO";
+    case SpecialMoveType.MAX_MOVES:
+      return "MAX_MOVES";
     case SpecialMoveType.IMPASS:
       return "JISHOGI";
     case SpecialMoveType.DRAW:
@@ -596,11 +643,14 @@ export function formatCSAMove(move: Move): string {
  * @param record
  * @param options
  */
-export function exportCSA(record: ImmutableRecord, options: CSAExportOptions): string {
+export function exportCSA(record: ImmutableRecord, options?: CSAExportOptions): string {
+  const returnCode = options?.returnCode || "\n";
   let ret = "";
-  const returnCode = options.returnCode ? options.returnCode : "\n";
+  if (options?.v3) {
+    ret += "'CSA encoding=" + (options.v3.encoding || "UTF-8") + returnCode;
+  }
   ret += "' CSA形式棋譜ファイル Generated by Electron Shogi" + returnCode;
-  ret += "V2.2" + returnCode;
+  ret += (options?.v3 ? "V3.0" : "V2.2") + returnCode;
   ret += formatMetadata(record.metadata, options);
   ret += formatPosition(record.initialPosition, options);
   record.moves.forEach((node) => {
@@ -616,7 +666,11 @@ export function exportCSA(record: ImmutableRecord, options: CSAExportOptions): s
       }
       if (move) {
         ret += move + returnCode;
-        ret += "T" + Math.floor(node.elapsedMs / 1e3) + returnCode;
+        if (options?.v3?.milliseconds && node.elapsedMs % 1e3 !== 0) {
+          ret += "T" + node.elapsedMs / 1e3 + returnCode;
+        } else {
+          ret += "T" + Math.floor(node.elapsedMs / 1e3) + returnCode;
+        }
       }
     }
     if (node.comment) {
