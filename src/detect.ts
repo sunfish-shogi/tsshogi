@@ -43,9 +43,9 @@ export function detectRecordFormat(data: string): RecordFormatType {
   const matchedKIF = data.match(pattKIF);
   const matchedKI2 = data.match(pattKI2);
   const matchedCSA = data.match(pattCSA);
-  const evalKIF = matchedKIF ? matchedKIF.length : 0;
-  const evalKI2 = matchedKI2 ? matchedKI2.length : 0;
-  const evalCSA = matchedCSA ? matchedCSA.length : 0;
+  const evalKIF = matchedKIF?.length || 0;
+  const evalKI2 = matchedKI2?.length || 0;
+  const evalCSA = matchedCSA?.length || 0;
   return evalKIF >= evalCSA && evalKIF >= evalKI2
     ? RecordFormatType.KIF
     : evalKI2 >= evalCSA
