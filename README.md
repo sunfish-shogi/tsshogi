@@ -112,9 +112,13 @@ if (!record.append(move)) {
 
 平手と比べて不足している駒の枚数を数えます。
 
+### `function countJishogiPoint`
+
+時将棋の合意に適用される点数を計算します。
+
 ### `function countJishogiDeclarationPoint`
 
-持将棋の判定に適用される点数を計算します。
+入玉宣言法の判定に適用される点数を計算します。
 
 ### `function judgeJishogiDeclaration`
 
