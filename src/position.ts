@@ -771,6 +771,53 @@ function invadingPieces(board: ImmutableBoard, color: Color): Piece[] {
     .map((square) => board.at(square) as Piece);
 }
 
+/**
+ * 時将棋指し直し判定の点数を計算します。
+ * 入玉宣言法と異なり、敵陣に侵入していない駒も加点対象となります。
+ * 時将棋指し直しは原則として対局者の合意によって成立し、ここで求められる点数はあくまで参考値です。
+ * @param position
+ * @param color 計算対象のプレイヤー
+ * @returns
+ */
+export function countJishogiPoint(position: ImmutablePosition, color: Color): number {
+  let point = 0;
+  Square.all.forEach((square) => {
+    const piece = position.board.at(square);
+    if (piece?.color === color && piece.type !== PieceType.KING) {
+      const type = piece.unpromoted().type;
+      point += type === PieceType.BISHOP || type === PieceType.ROOK ? 5 : 1;
+    }
+  });
+  const hand = position.hand(color);
+  point +=
+    hand.count(PieceType.PAWN) +
+    hand.count(PieceType.LANCE) +
+    hand.count(PieceType.KNIGHT) +
+    hand.count(PieceType.SILVER) +
+    hand.count(PieceType.GOLD) +
+    hand.count(PieceType.BISHOP) * 5 +
+    hand.count(PieceType.ROOK) * 5;
+  if (color === Color.WHITE) {
+    // 駒落ちの場合は上手に落とした駒を加点する。
+    const notExisting = countNotExistingPieces(position);
+    point +=
+      notExisting.pawn +
+      notExisting.lance +
+      notExisting.knight +
+      notExisting.silver +
+      notExisting.gold +
+      notExisting.bishop * 5 +
+      notExisting.rook * 5;
+  }
+  return point;
+}
+
+/**
+ * 入玉宣言法に基づいて宣言する際の点数を計算します。
+ * 敵陣に侵入している駒と持ち駒だけが対象となり、それ以外の駒は加点対象になりません。
+ * @param position
+ * @param color 宣言するプレイヤー
+ */
 export function countJishogiDeclarationPoint(position: ImmutablePosition, color: Color): number {
   let point = 0;
   for (const piece of invadingPieces(position.board, color)) {
@@ -801,6 +848,12 @@ export function countJishogiDeclarationPoint(position: ImmutablePosition, color:
   return point;
 }
 
+/**
+ * 入玉宣言法に基づいて宣言した場合の結果を判定します。
+ * @param rule
+ * @param position
+ * @param color 宣言するプレイヤー
+ */
 export function judgeJishogiDeclaration(
   rule: JishogiDeclarationRule,
   position: ImmutablePosition,
