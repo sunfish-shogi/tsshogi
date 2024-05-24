@@ -1,6 +1,6 @@
 {
   "name": "electron-shogi-core",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Core module of ElectronShogi(https://github.com/sunfish-shogi/electron-shogi)",
   "author": "Kubo, Ryosuke",
   "license": "MIT",
