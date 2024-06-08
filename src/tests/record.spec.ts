@@ -132,11 +132,11 @@ describe("shogi/record", () => {
     expect(record.append(move(7, 7, 7, 6))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(1);
     expect(record.current.nextColor).toBe(Color.WHITE);
-    // 34歩
+    // 76歩 -> 34歩
     expect(record.append(move(3, 3, 3, 4))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(2);
     expect(record.current.nextColor).toBe(Color.BLACK);
-    // 26歩
+    // 76歩 -> 34歩 -> 26歩
     expect(record.append(move(2, 7, 2, 6))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(3);
     expect(record.current.nextColor).toBe(Color.WHITE);
@@ -146,20 +146,23 @@ describe("shogi/record", () => {
     // go back
     expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(5);
-    // 34歩 (again)
+    // 76歩 -> 34歩 (again)
     expect(record.append(move(3, 3, 3, 4))).toBeTruthy();
     expect(record.current.hasBranch).toBeFalsy(); // 登録済みの指し手なので分岐は作られない。
     expect(onChangePosition).toBeCalledTimes(6);
     // go back
     expect(record.goBack()).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(7);
-    // 84歩
+    // 76歩 -> 84歩
     expect(record.append(move(8, 3, 8, 4))).toBeTruthy();
     expect(record.current.hasBranch).toBeTruthy(); // 分岐が作られる。
     expect(onChangePosition).toBeCalledTimes(8);
-    // 78金
+    // 76歩 -> 84歩 -> 78金
     expect(record.append(move(7, 9, 7, 8))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(9);
+    // 76歩 -> 84歩 -> 78金 -> 84飛 (invalid move)
+    expect(record.append(move(8, 2, 8, 4))).toBeFalsy();
+    expect(onChangePosition).toBeCalledTimes(9); // not called
 
     // go back
     expect(record.goBack()).toBeTruthy();
@@ -253,7 +256,9 @@ describe("shogi/record", () => {
     const record1 = importKI2(data1) as Record;
     const record2 = importKI2(data2) as Record;
     const record3 = importKI2(data3) as Record;
+    const onChangePosition = vi.fn();
     record1.goto(2);
+    record1.on("changePosition", onChangePosition);
 
     expect(record1.merge(record2)).toBeTruthy();
     expect(exportKI2(record1, {})).toBe(expected);
@@ -262,6 +267,8 @@ describe("shogi/record", () => {
     expect(record1.merge(record3)).toBeFalsy();
     expect(exportKI2(record1, {})).toBe(expected);
     expect(record1.current.ply).toBe(2);
+
+    expect(onChangePosition).toBeCalledTimes(0);
   });
 
   it("merge:withElapsedTime", () => {
