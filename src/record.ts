@@ -524,6 +524,13 @@ export class Record {
    */
   goto(ply: number): void {
     const orgPly = this._current.ply;
+    this._goto(ply);
+    if (orgPly !== this._current.ply) {
+      this.onChangePosition();
+    }
+  }
+
+  private _goto(ply: number): void {
     while (ply < this._current.ply) {
       if (!this._goBack()) {
         break;
@@ -533,9 +540,6 @@ export class Record {
       if (!this._goForward()) {
         break;
       }
-    }
-    if (orgPly !== this._current.ply) {
-      this.onChangePosition();
     }
   }
 
@@ -591,6 +595,14 @@ export class Record {
    * 既に同じ指し手が存在する場合はそのノードへ移動します。
    */
   append(move: Move | SpecialMove | SpecialMoveType, opt?: DoMoveOption): boolean {
+    if (this._append(move, opt)) {
+      this.onChangePosition();
+      return true;
+    }
+    return false;
+  }
+
+  private _append(move: Move | SpecialMove | SpecialMoveType, opt?: DoMoveOption): boolean {
     // convert SpecialMoveType to SpecialMove
     if (typeof move === "string") {
       move = specialMove(move);
@@ -631,7 +643,6 @@ export class Record {
       );
       this._current = this._current.next;
       this._current.setElapsedMs(0);
-      this.onChangePosition();
       return true;
     }
 
@@ -647,7 +658,6 @@ export class Record {
       if (areSameMoves(move, p.move)) {
         this._current = p;
         this._current.activeBranch = true;
-        this.onChangePosition();
         return true;
       }
       lastBranch = p;
@@ -666,7 +676,6 @@ export class Record {
     );
     this._current.setElapsedMs(0);
     lastBranch.branch = this._current;
-    this.onChangePosition();
     return true;
   }
 
@@ -775,8 +784,8 @@ export class Record {
       if (node.ply === 0) {
         return;
       }
-      this.goto(node.ply - 1);
-      this.append(node.move, { ignoreValidation: true });
+      this._goto(node.ply - 1);
+      this._append(node.move, { ignoreValidation: true });
       if (node.elapsedMs && !this.current.elapsedMs) {
         this.current.setElapsedMs(node.elapsedMs);
       }
@@ -791,9 +800,9 @@ export class Record {
       }
     });
     // 元居た局面まで戻す。
-    this.goto(0);
+    this._goto(0);
     for (let i = 1; i < path.length; i++) {
-      this.append(path[i].move, { ignoreValidation: true });
+      this._append(path[i].move, { ignoreValidation: true });
     }
     return true;
   }
