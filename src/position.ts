@@ -14,7 +14,7 @@ import {
 } from "./direction";
 
 // Deprecated: Use InitialPositionSFEN instead.
-// NOTICE: Electron将棋のgame_setting.jsonで使用しているため互換性のために残す。
+// NOTICE: ShogiHomeのgame_setting.jsonで使用しているため互換性のために残す。
 export enum InitialPositionType {
   STANDARD = "standard",
   EMPTY = "empty",
