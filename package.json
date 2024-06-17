@@ -1,20 +1,20 @@
 {
-  "name": "electron-shogi-core",
+  "name": "tsshogi",
   "version": "0.7.1",
-  "description": "Core module of ShogiHome(https://github.com/sunfish-shogi/electron-shogi)",
+  "description": "TypeScript library for Shogi (Japanese chess)",
   "author": "Kubo, Ryosuke",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sunfish-shogi/electron-shogi-core.git"
+    "url": "git+https://github.com/sunfish-shogi/tsshogi.git"
   },
   "keywords": [
     "shogi"
   ],
   "bugs": {
-    "url": "https://github.com/sunfish-shogi/electron-shogi-core/issues"
+    "url": "https://github.com/sunfish-shogi/tsshogi/issues"
   },
-  "homepage": "https://github.com/sunfish-shogi/electron-shogi-core#readme",
+  "homepage": "https://github.com/sunfish-shogi/tsshogi#readme",
   "publishConfig": {
     "access": "public"
   },

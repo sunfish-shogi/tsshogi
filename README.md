@@ -1,24 +1,22 @@
-# electron-shogi-core
+# tsshogi
 
-[![Test](https://github.com/sunfish-shogi/electron-shogi-core/actions/workflows/test.yml/badge.svg)](https://github.com/sunfish-shogi/electron-shogi-core/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/sunfish-shogi/electron-shogi-core/graph/badge.svg?token=SS0SJW8196)](https://codecov.io/gh/sunfish-shogi/electron-shogi-core)
+[![Test](https://github.com/sunfish-shogi/tsshogi/actions/workflows/test.yml/badge.svg)](https://github.com/sunfish-shogi/tsshogi/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/sunfish-shogi/tsshogi/graph/badge.svg?token=SS0SJW8196)](https://codecov.io/gh/sunfish-shogi/tsshogi)
 
-electron-shogi-core は [ShogiHome](https://github.com/sunfish-shogi/electron-shogi) で使用している将棋の局面や棋譜を取り扱う実装です。
-TypeScript や JavaScript のアプリケーションに組み込むことができます。
-
+将棋のアプリを開発するために作られたライブラリです。
 KIF や KI2、CSA、JKF、SFEN/USI といった幅広いフォーマットでの入出力に対応しており、分岐や消費時間、コメントなど、それらのフォーマットで用いられるほとんどの表現に対応しています。
 
 ## インストール
 
 ```
-npm install electron-shogi-core
+npm install tsshogi
 ```
 
 ## 基本的な使用方法
 
 ```.ts
 import fs from "node:fs";
-import { importKIF } from "electron-shogi-core";
+import { importKIF } from "tsshogi";
 
 /*
  * .kifu ファイルを読み込む。
@@ -144,7 +142,7 @@ if (!record.append(move)) {
 
 文字コードの変換機能はありません。Shift_JIS でエンコードされた .kif ファイルや .ki2 ファイルがあることに注意してください。
 
-CSA 形式棋譜フォーマットでは 1 つのファイルに複数の棋譜を埋め込むことが可能ですが、 electron-shogi-core では最初の 1 件しか読み込みません。
+CSA 形式棋譜フォーマットでは 1 つのファイルに複数の棋譜を埋め込むことが可能ですが、 tsshogi では最初の 1 件しか読み込みません。
 全ての棋譜を読み込む場合は、セパレーターが書かれている行で分割してから個別に読み込ませてください。
 
 ## ライセンス
