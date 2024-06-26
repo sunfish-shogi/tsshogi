@@ -112,7 +112,7 @@ if (!record.append(move)) {
 
 ### `function countJishogiPoint`
 
-時将棋の合意に適用される点数を計算します。
+持将棋の合意に適用される点数を計算します。
 
 ### `function countJishogiDeclarationPoint`
 
