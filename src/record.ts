@@ -11,6 +11,42 @@ import {
 } from "./move";
 import { DoMoveOption, ImmutablePosition, InitialPositionSFEN, Position } from "./position";
 import { formatMove, formatSpecialMove } from "./text";
+import { PieceType } from "./piece";
+import { Square } from "./square";
+
+const usenHandTable = {
+  [PieceType.PAWN]: 81 + 10,
+  [PieceType.LANCE]: 81 + 11,
+  [PieceType.KNIGHT]: 81 + 12,
+  [PieceType.SILVER]: 81 + 13,
+  [PieceType.GOLD]: 81 + 9,
+  [PieceType.BISHOP]: 81 + 14,
+  [PieceType.ROOK]: 81 + 15,
+  [PieceType.KING]: 81 + 8,
+  [PieceType.PROM_PAWN]: 81 + 2,
+  [PieceType.PROM_LANCE]: 81 + 3,
+  [PieceType.PROM_KNIGHT]: 81 + 4,
+  [PieceType.PROM_SILVER]: 81 + 5,
+  [PieceType.HORSE]: 81 + 6,
+  [PieceType.DRAGON]: 81 + 7,
+};
+
+const usenHandReverseTable = {
+  [81 + 10]: PieceType.PAWN,
+  [81 + 11]: PieceType.LANCE,
+  [81 + 12]: PieceType.KNIGHT,
+  [81 + 13]: PieceType.SILVER,
+  [81 + 9]: PieceType.GOLD,
+  [81 + 14]: PieceType.BISHOP,
+  [81 + 15]: PieceType.ROOK,
+  [81 + 8]: PieceType.KING,
+  [81 + 2]: PieceType.PROM_PAWN,
+  [81 + 3]: PieceType.PROM_LANCE,
+  [81 + 4]: PieceType.PROM_KNIGHT,
+  [81 + 5]: PieceType.PROM_SILVER,
+  [81 + 6]: PieceType.HORSE,
+  [81 + 7]: PieceType.DRAGON,
+};
 
 export enum RecordMetadataKey {
   TITLE = "title", // 表題
@@ -339,6 +375,7 @@ export interface ImmutableRecord {
   readonly usi: string;
   getUSI(opts?: USIFormatOptions): string;
   readonly sfen: string;
+  readonly usen: string;
   readonly bookmarks: string[];
   forEach(handler: (node: ImmutableNode, base: ImmutablePosition) => void): void;
   on(event: "changePosition", handler: () => void): void;
@@ -935,6 +972,69 @@ export class Record {
   }
 
   /**
+   * USEN (Url Safe sfen-Extended Notation) 形式の文字列を返します。
+   * https://www.slideshare.net/slideshow/scalajs-web/92707205#15
+   * @returns [usen, branchIndex]
+   */
+  get usen(): [string, number] {
+    const sfen = this.initialPosition.sfen;
+    let usen =
+      sfen === InitialPositionSFEN.STANDARD
+        ? ""
+        : sfen.replace(/ 1$/, "").replace(/\//g, "_").replace(/ /g, ".").replace(/\+/g, "z");
+    let moves = "0.";
+    let special = "";
+    let lastPly = 0;
+    let bi = 0;
+    let branchIndex = 0;
+    this.forEach((node) => {
+      if (node.ply === 0) {
+        // root node
+        return;
+      }
+      const move = node.move;
+      if (lastPly + 1 !== node.ply) {
+        usen += `~${moves}.${special}`;
+        moves = `${node.ply - 1}.`;
+        bi++;
+      }
+      if (this.current === node) {
+        branchIndex = bi;
+      }
+      if (!(move instanceof Move)) {
+        switch (move.type) {
+          case SpecialMoveType.RESIGN:
+            special = "r";
+            break;
+          case SpecialMoveType.TIMEOUT:
+            special = "t";
+            break;
+          case SpecialMoveType.MAX_MOVES:
+          case SpecialMoveType.IMPASS:
+          case SpecialMoveType.DRAW:
+            special = "j";
+            break;
+          default:
+            // 未定義のものは全て中断として扱う。
+            special = "p";
+            break;
+        }
+        return;
+      }
+      const from =
+        move.from instanceof Square
+          ? (move.from.rank - 1) * 9 + (move.from.file - 1)
+          : usenHandTable[move.from];
+      const to = (move.to.rank - 1) * 9 + (move.to.file - 1);
+      const m = (from * 81 + to) * 2 + (move.promote ? 1 : 0);
+      moves += m.toString(36).padStart(3, "0");
+      lastPly = node.ply;
+    });
+    usen += `~${moves}.${special}`;
+    return [usen, branchIndex];
+  }
+
+  /**
    * しおりの一覧を返します。
    */
   get bookmarks(): string[] {
@@ -1060,6 +1160,75 @@ export class Record {
         move = move.withPromote();
       }
       record.append(move, { ignoreValidation: true });
+    }
+    return record;
+  }
+
+  /**
+   * USEN (Url Safe sfen-Extended Notation) 形式の文字列から棋譜を読み込みます。
+   * https://www.slideshare.net/slideshow/scalajs-web/92707205#15
+   */
+  static newByUSEN(usen: string, branchIndex?: number, ply?: number): Record | Error {
+    const sections = usen.split("~");
+    if (sections.length < 2) {
+      return new Error("USEN must have at least 2 sections.");
+    }
+    const sfen = sections[0].replace(/_/g, "/").replace(/\./g, " ").replace(/z/g, "+");
+    const position = sfen === "" ? new Position() : Position.newBySFEN(sfen + " 1");
+    if (!position) {
+      return new Error("Invalid SFEN in USEN.");
+    }
+    const record = new Record(position);
+    let activeNode = record.first;
+    for (let si = 1; si < sections.length; si++) {
+      const [n, moves, special] = sections[si].split(".");
+      if (!/[0-9]+/.test(n)) {
+        return new Error("Invalid USEN ply format.");
+      }
+      record.goto(parseInt(n));
+      for (let i = 0; i < moves.length; i += 3) {
+        const m = parseInt(moves.slice(i, i + 3), 36);
+        const f = Math.floor(m / 162);
+        const from =
+          f < 81 ? new Square((f % 9) + 1, Math.floor(f / 9) + 1) : usenHandReverseTable[f];
+        const t = Math.floor((m % 162) / 2);
+        const to = new Square((t % 9) + 1, Math.floor(t / 9) + 1);
+        const promote = m % 2 === 1;
+        const move = record.position.createMove(from, to);
+        if (!move) {
+          return new Error("Invalid move in USEN.");
+        }
+        record.append(promote ? move.withPromote() : move, { ignoreValidation: true });
+        if (si - 1 === branchIndex && record.current.ply === ply) {
+          activeNode = record.current;
+        }
+      }
+      if (special === "r") {
+        record.append(specialMove(SpecialMoveType.RESIGN));
+      } else if (special === "t") {
+        record.append(specialMove(SpecialMoveType.TIMEOUT));
+      } else if (special === "j") {
+        record.append(specialMove(SpecialMoveType.IMPASS));
+      } else if (special === "p") {
+        record.append(specialMove(SpecialMoveType.INTERRUPT));
+      }
+      if (si - 1 === branchIndex && record.current.ply === ply) {
+        activeNode = record.current;
+      }
+    }
+    if (activeNode === record.first) {
+      record.goto(0);
+    } else {
+      const route: Node[] = [];
+      for (let p: Node | null = activeNode; p; p = p.prev) {
+        route[p.ply] = p;
+      }
+      while (record._current !== route[record._current.ply]) {
+        record.goBack();
+      }
+      while (route.length > record._current.ply + 1) {
+        record.append(route[record._current.ply + 1].move);
+      }
     }
     return record;
   }

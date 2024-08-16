@@ -107,6 +107,136 @@ describe("shogi/record", () => {
     ).toBe("position startpos moves 2g2f 8c8d 7g7f 8d8e resign");
   });
 
+  it("usen/single", () => {
+    const data = `手合割：平手
+▲２六歩    △８四歩    ▲７六歩    △８五歩
+まで4手で持将棋
+`;
+    const record = importKI2(data) as Record;
+    expect(record.usen).toEqual(["~0.6y236e7ku4be.j", 0]);
+    const record2 = Record.newByUSEN(record.usen[0]);
+    expect(record2).toBeInstanceOf(Record);
+    expect(record2.current.ply).toBe(0);
+    expect(exportKI2(record2, {})).toBe(data);
+  });
+
+  it("usen/branches", () => {
+    const data = `手合割：平手
+▲７六歩    △３四歩    ▲２六歩    △８四歩    ▲２五歩    △８五歩
+▲４八銀    △６二銀    ▲５六歩    △３二金    ▲５七銀    △５四歩
+▲７八金    △５三銀    ▲４六銀    △４四歩    ▲６八銀    △４二銀上
+▲６九玉    △３三角    ▲７七銀    △４三銀    ▲５八金    △６四銀
+▲７九角    △６五銀    ▲５七銀    △４二角    ▲６六歩    △７四銀
+▲４六銀    △４一玉    ▲３六歩    △５二金    ▲３五歩    △同　歩
+▲同　銀    △３一玉    ▲２四歩    △同　歩    ▲２二歩    △同　玉
+▲６七金右  △６四角    ▲４六角    △同　角    ▲同　歩    △４七角
+▲５九玉    △３七歩    ▲同　桂    △３六角成  ▲２六角    △２五歩
+▲２三歩    △同　金    ▲２五桂    △２七歩    ▲２九飛    △３二玉
+▲３九飛    △２五馬    ▲２四歩    △３三金    ▲６八玉    △２八歩成
+▲３七飛    △３四歩    ▲７九玉    △３五歩    ▲同　角    △１九と
+▲２三歩成  △同　玉    ▲２七飛    △２六歩    ▲同　角    △３六馬
+▲４四角    △２七馬    ▲７一角成  △４九飛    ▲８八玉    △８四飛
+▲３四歩    △同　金    ▲３五歩    △２四金    ▲６八金引  △２二歩
+▲９八玉    △５九飛成  ▲８八銀    △９四桂    ▲７七金右  △８六歩
+▲同　歩    △同　桂    ▲同　金    △同　飛    ▲８七歩    △７六飛
+▲７九歩    △１七馬    ▲３六桂    △３五馬    ▲同　馬    △同　金
+▲４一角    △３三玉    ▲５二角成  △同　銀    ▲２四金    △４三玉
+▲７七金    △同　飛成  ▲同　銀    △６七角    ▲４五歩    △７九龍
+▲４四歩    △５三玉    ▲８八飛    △７八銀    ▲４三歩成  △同　銀
+▲９六歩    △８九銀不成▲同　飛    △同　龍    ▲９七玉    △７五角
+▲８六歩    △８七金
+まで134手で後手の勝ち
+
+変化：26手
+△７四歩    ▲３六歩    △６五銀    ▲５七銀    △７五歩    ▲同　歩
+△５五歩    ▲同　歩    △４五歩    ▲６六銀右  △同　銀    ▲同　銀
+△６四銀    ▲５六銀    △８六歩    ▲同　歩    △同　飛    ▲８七歩
+△８四飛    ▲３七桂    △５二歩    ▲３五歩    △同　歩    ▲４五桂
+△４四角    ▲２四歩    △同　歩    ▲７四歩    △同　飛    ▲２四飛
+△２三歩    ▲２六飛    △７三桂    ▲７六歩    △８六歩    ▲同　歩
+△７六飛    ▲４六歩    △８七歩    ▲同　金    △７四飛    ▲７六歩
+△９四歩    ▲７八玉    △９五歩    ▲８八角    △８四飛    ▲６八金
+△３三桂    ▲５七銀    △３四銀    ▲６六角    △８一飛    ▲２四歩
+△６五桂    ▲２三歩成  △同　銀    ▲４八銀    △７七歩    ▲同　桂
+△同　桂成  ▲同　角    △６五桂    ▲６六角    △７七歩    ▲６九玉
+△６二玉    ▲３四歩    △同　銀    ▲２一飛成  △４三金    ▲７四桂
+△７二玉    ▲１一龍    △４五桂    ▲６一龍    △同　玉    ▲４五歩
+△８九飛    ▲７九桂    △６二角    ▲同　桂成  △同　玉    ▲６五銀
+△同　銀    ▲７七角    △５六桂    ▲６六香    △６八桂成  ▲同　玉
+△８七飛成  ▲同　桂    △５六桂    ▲７九玉    △７八歩    ▲同　玉
+△７六銀    ▲７四桂    △５一玉    ▲３一飛    △４一金    ▲２四角
+△３三銀    ▲同　飛成  △７七銀成  ▲同　玉    △６八角    ▲８八玉
+△７七金    ▲９八玉    △８七金    ▲同　玉    △８六角成  ▲８八玉
+△９七馬    ▲同　玉    △９六歩    ▲９八玉    △９七歩成
+まで144手で中断
+
+変化：7手
+▲７八金    △３二金    ▲４八銀    △６二銀    ▲５六歩    △５四歩
+▲５七銀    △５三銀    ▲６六銀    △４二銀上  ▲６九玉    △４一玉
+▲６八銀    △７四歩    ▲７七銀上  △５二金    ▲７九角    △３三銀
+▲６五銀    △４四歩    ▲５八金    △７五歩    ▲同　歩    △７三桂
+▲７六銀引  △８四飛    ▲６六歩    △６四銀    ▲３六歩    △３一角
+▲４六角    △４二角    ▲７九玉    △３一玉    ▲８八玉    △４五歩
+▲３七角    △４三金右  ▲６七金右  △４四銀    ▲９六歩    △９四歩
+▲１六歩    △１四歩    ▲４六歩    △同　歩    ▲同　角    △４五歩
+▲３七角    △５五歩    ▲同　歩    △同　銀右  ▲５三歩    △同　角
+▲５六歩    △４六銀    ▲２六角    △５五歩    ▲同　歩    △同　銀引
+▲２四歩    △同　歩    ▲２三歩    △同　金    ▲５六歩    △６四銀
+▲３七角    △３二玉    ▲１五歩    △同　歩    ▲同　香    △同　香
+▲同　角    △８六歩    ▲同　歩    △４二角    ▲２五歩    △同　歩
+▲４二角成  △同　玉    ▲６一角    △６九角    ▲８七香    △３六角成
+▲７二角成  △４六馬    ▲１八飛    △３三玉    ▲６三馬    △１四歩
+▲１六飛    △２四玉    ▲４六飛    △同　歩    ▲８五歩    △５三金
+▲４二角    △３三飛    ▲５三角成  △同　飛    ▲同　馬    △同　銀左
+▲８四歩    △８六歩    ▲３一飛    △８七歩成  ▲同　銀    △８五香
+▲２一飛成  △８七香成  ▲同　金    △８五香    ▲１六桂    △１五玉
+▲２三龍    △８七香成  ▲同　玉    △６九角    ▲７八香    △５四角
+▲７六金打  △１八角成  ▲８三歩成  △８六歩    ▲同　銀    △７九銀
+▲８八歩    △８五歩    ▲１七歩    △８六歩    ▲同　金    △５四馬
+▲６五歩    △同　馬    ▲７六金上  △７八角成  ▲同　玉    △５六馬
+▲６七歩    △６八金    ▲８七玉    △７八銀    ▲９七玉    △８八銀不成
+▲同　玉    △４七歩成  ▲２七歩    △８九銀成  ▲同　玉    △６七馬
+▲９八玉    △９七香    ▲同　玉    △８五桂打  ▲同　金直  △同　桂
+▲同　金    △８七金    ▲同　玉    △８六歩    ▲同　金    △７八馬
+▲９七玉    △７九馬    ▲８八香    △同　馬    ▲同　玉    △７八金
+▲同　玉    △７七香    ▲同　玉    △７六歩    ▲同　金    △４六歩
+▲３三角
+まで181手で先手の勝ち
+`;
+    const record = importKI2(data) as Record;
+    record.goto(26);
+    record.switchBranchByIndex(1);
+    expect(record.usen).toEqual([
+      "~0.7ku2jm6y236e5t24be9co0rs7bq0e48c82sq9qc1s87bo2o69us09o9ma1a48lc1j69h82ss8vc42a6382io7ga56c7bo0i672m0n85xm3om6240dm4o22f2be209k8gs1js9to42o776byo9qqbgm97m775by23k2bek1ek722bgk84219m98m5xkbf22em9ls6z39c4bf48mc3om5t48403j31ek732bg24tk4p45so5yk3rdc469uw21wbf42jmbfm3o27habe28uy9hr7lwbog8lc5ge7pe4ge7kw4bwbgw6kubhu6yibp46t40t43k4bvo2em0e92n8bak2j68pu6gv8ucbys6269mc4x62nqc3wbuu3s71no7ty8qw8ve9ve8yybxu7pebce.r~25.31u72m42a63846u6fu3xq66q3t67bs57a7ksbssbtq5ge7pe22wbgw6jw97mbe85xm3om7262jo4o22f25au4au81kbek3kk0wubgcbge7pe47c776bgw8pw6fcbgc3ay9qc4fy9uw46e8ha05m6c82o48ts49ebf232a3j33nk7cobgu9yu57v6ccbos7ksbgu8qs0isbf42f45r31eoboc1ru04i2k600a1vs626c4ebqu3rs45b0na66s42a6ccbp8bks68b9qa9yx9uebp88mcbhc9uu57cboc1r8c04b96bx2bs40a56gv8pubza7lwbcc8uy7le8yw8kx7qe6lg8ug5ky7uy6pz.p~6.9qc0e49co0rs7bq2sq8c81s87bs09o9ma0i69us31u8lc0n88vc1j46ba2o69h846u6fu0wu57c21w7ga2ss72m1949to09o9qu0dm9uw3t66341no8gs2jo7ty3ay6ti2ai7764y672obfo6343xq66q428beq1j8bg852o72kbfq66q6284o22f2bek1ekbg851s5u409m5oi3fi9200207205ge7pe2robfk3k24ip1e6bvsbzsble9p50nd5y683i1j41wsbf07y02jk5p64y66ke2nqbw6c141j92j82wq3s85febgec046lf6gwbke0935gx8pwbkebp03k005k5gx8uebzsblubx8bbu3z14afbge7kwbvcbhebfwbgi5ge6ge7x86ba3xs7gc9qd7qc578bgsbcs8pwbuu7py9uw7uw637bgk8qx8ve67s9zgblg8yybow6ke32e6fwbce7uebge5ge7hc7py8qublw9uw7uw8lu8uublc8pubgc6kubg6bwm.r",
+      1,
+    ]);
+    const record2 = Record.newByUSEN(record.usen[0], 1, 30);
+    expect(record2).toBeInstanceOf(Record);
+    expect(record2.current.ply).toBe(30);
+    expect(exportKI2(record2 as Record, {})).toBe(data);
+    expect(record2.usi).toBe(
+      "position startpos moves 7g7f 3c3d 2g2f 8c8d 2f2e 8d8e 3i4h 7a6b 5g5f 4a3b 4h5g 5c5d 6i7h 6b5c 5g4f 4c4d 7i6h 3a4b 5i6i 2b3c 6h7g 4b4c 4i5h 5c6d 8h7i 7c7d 3g3f 6d6e 4f5g 7d7e",
+    );
+  });
+
+  it("usen/handicap", () => {
+    const data = `手合割：二枚落ち
+△６二銀    ▲７六歩    △５四歩    ▲４六歩    △５三銀    ▲４五歩
+△３二金    ▲３六歩    △６二玉    ▲４八銀    △７二金    ▲４七銀
+△７四歩    ▲３五歩    △２二銀    ▲３八飛    △７三金    ▲３四歩
+△同　歩    ▲同　飛    △３三歩    ▲３六飛    △６四金    ▲７八金
+`;
+    const record = importKI2(data) as Record;
+    expect(record.usen).toEqual([
+      "lnsgkgsnl_9_ppppppppp_9_9_9_PPPPPPPPP_1B5R1_LNSGKGSNL.w.-~0.0rs7ku2sq7761s86260e472m0is9co0nc8c631u5xm09k83m1wu4sm2jm864bem3p431s9qc.",
+      0,
+    ]);
+    const record2 = Record.newByUSEN(record.usen[0]);
+    expect(record2).toBeInstanceOf(Record);
+    expect(record2.current.ply).toBe(0);
+    expect(exportKI2(record2 as Record, {})).toBe(data);
+  });
+
   it("getNextColorFromUSI", () => {
     expect(getNextColorFromUSI("position startpos")).toBe(Color.BLACK);
     expect(getNextColorFromUSI("position startpos ")).toBe(Color.BLACK);
