@@ -313,11 +313,11 @@ class NodeImpl implements Node {
 }
 
 export type USIFormatOptions = {
-  // 平手の場合に "startpos" を使用するかを指定します。デフォルトは true です。
+  /** 平手の場合に "startpos" を使用するかを指定します。デフォルトは true です。 */
   startpos?: boolean;
-  // 投了 "resign" を出力に含めるかどうかを表します。デフォルトは false です。
+  /** 投了 "resign" を出力に含めるかどうかを表します。デフォルトは false です。 */
   resign?: boolean;
-  // 全ての指し手を含めるかどうかを指定します。デフォルトは false です。
+  /** 全ての指し手を含めるかどうかを指定します。デフォルトは false です。 */
   allMoves?: boolean;
 };
 
