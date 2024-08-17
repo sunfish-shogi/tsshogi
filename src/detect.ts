@@ -7,6 +7,7 @@ export enum RecordFormatType {
   KI2,
   CSA,
   JKF,
+  USEN,
 }
 
 /**
@@ -34,6 +35,11 @@ export function detectRecordFormat(data: string): RecordFormatType {
   // JKF
   if (data.match(/^[\s\r\n]*{/) && data.match(/}[\s\r\n]*$/)) {
     return RecordFormatType.JKF;
+  }
+
+  // USEN
+  if (data.match(/^[_.A-Za-z0-9]*~[0-9]*\.[0-9A-Za-z]*\.[a-z]/)) {
+    return RecordFormatType.USEN;
   }
 
   // KIF vs KI2 vs CSA: 行頭の文字の出現頻度を比較する。
