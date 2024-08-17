@@ -375,7 +375,7 @@ export interface ImmutableRecord {
   readonly usi: string;
   getUSI(opts?: USIFormatOptions): string;
   readonly sfen: string;
-  readonly usen: string;
+  readonly usen: [string, number];
   readonly bookmarks: string[];
   forEach(handler: (node: ImmutableNode, base: ImmutablePosition) => void): void;
   on(event: "changePosition", handler: () => void): void;
