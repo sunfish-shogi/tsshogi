@@ -38,7 +38,7 @@ export function detectRecordFormat(data: string): RecordFormatType {
   }
 
   // USEN
-  if (data.match(/^[_.A-Za-z0-9]*~[0-9]*\.[0-9A-Za-z]*\.[a-z]/)) {
+  if (data.match(/^[-_.A-Za-z0-9]*~[0-9]*\.[0-9A-Za-z]*\.[a-z]?(~|$)/)) {
     return RecordFormatType.USEN;
   }
 
