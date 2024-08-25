@@ -35,6 +35,7 @@
     "build": "npm run build:cjs && npm run build:esm",
     "prepare": "npm run build",
     "test": "vitest run",
+    "bench": "vitest bench",
     "coverage": "vitest run --coverage",
     "test:ui": "vitest --ui --coverage",
     "lint": "eslint --fix --max-warnings 0 . && prettier --write .",
