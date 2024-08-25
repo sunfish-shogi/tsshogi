@@ -16,7 +16,7 @@ import {
   parseMoves,
 } from "../";
 
-describe("shogi/text", () => {
+describe("text", () => {
   it("formatSpecialMove", () => {
     expect(formatSpecialMove(SpecialMoveType.RESIGN)).toBe("投了");
     expect(formatSpecialMove(specialMove(SpecialMoveType.TIMEOUT))).toBe("切れ負け");

@@ -19,7 +19,7 @@ import {
   exportKI2,
 } from "../";
 
-describe("shogi/record", () => {
+describe("record", () => {
   it("getBlackPlayerName", () => {
     const record = new Record();
     record.metadata.setStandardMetadata(RecordMetadataKey.SHITATE_NAME, "羽生結弦");

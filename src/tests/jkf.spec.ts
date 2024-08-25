@@ -1,7 +1,7 @@
 import { Record, exportKIF, importKIF, exportJKF, importJKFString } from "../";
 import * as fs from "node:fs";
 
-describe("shogi/jkf", () => {
+describe("jkf", () => {
   it("importJKF", () => {
     const testCases = [
       {

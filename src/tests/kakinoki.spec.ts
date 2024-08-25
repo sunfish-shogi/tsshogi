@@ -18,7 +18,7 @@ import {
   Square,
 } from "../";
 
-describe("shogi/kakinoki", () => {
+describe("kakinoki", () => {
   it("import/standard", () => {
     const data = `
 # ----  Kifu for Windows V7 V7.50 棋譜ファイル  ----

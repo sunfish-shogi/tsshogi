@@ -1,6 +1,6 @@
 import { RecordFormatType, detectRecordFormat } from "../";
 
-describe("shogi/detect", () => {
+describe("detect", () => {
   it("usi", () => {
     expect(detectRecordFormat(`position startpos moves`)).toBe(RecordFormatType.USI);
     expect(

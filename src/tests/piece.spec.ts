@@ -1,6 +1,6 @@
 import { Color, Piece, PieceType, pieceTypeToSFEN, standardPieceName } from "../";
 
-describe("shogi/piece", () => {
+describe("piece", () => {
   it("PieceType", () => {
     expect(standardPieceName(PieceType.PAWN)).toBe("歩");
     expect(standardPieceName(PieceType.LANCE)).toBe("香");

@@ -16,7 +16,7 @@ import {
   countJishogiPoint,
 } from "../";
 
-describe("shogi/position", () => {
+describe("position", () => {
   it("getters", () => {
     const position = new Position();
     expect(position.color).toBe(Color.BLACK);

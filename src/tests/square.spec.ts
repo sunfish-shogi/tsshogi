@@ -1,6 +1,6 @@
 import { Square } from "../";
 
-describe("shogi/square", () => {
+describe("square", () => {
   it("getters", () => {
     const square = new Square(3, 8);
     expect(square.file).toBe(3);
