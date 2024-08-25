@@ -13,12 +13,16 @@ describe("text", () => {
     return {
       position: record.initialPosition,
       moves: record.moves.map((node) => node.move).filter((move) => move instanceof Move),
-    }
+    };
   });
 
-  bench("formatPV", () => {
-    for (const { position, moves } of formatPVBenchCases) {
-      formatPV(position, moves);
-    }
-  }, { time: 1000, throws: true });
+  bench(
+    "formatPV",
+    () => {
+      for (const { position, moves } of formatPVBenchCases) {
+        formatPV(position, moves);
+      }
+    },
+    { time: 1000, throws: true },
+  );
 });
