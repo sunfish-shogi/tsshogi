@@ -71,6 +71,7 @@ export enum RecordMetadataKey {
   PLACE = "place", // 場所
   POSTED_ON = "postedOn", // 掲載
   NOTE = "note", // 備考
+  SCOREKEEPER = "scorekeeper", // 記録係
 
   // 詰将棋に関する項目
   OPUS_NO = "opusNo", // 作品番号
