@@ -383,7 +383,7 @@ function readBoard(board: Board, data: string): Error | undefined {
 function readHand(hand: Hand, data: string): Error | undefined {
   // NOTE:
   //   スペースで区切られていないものでも Kifu for Windows や ShogiGUI は読み込める。
-  //   See: https://github.com/sunfish-shogi/electron-shogi/issues/572
+  //   See: https://github.com/sunfish-shogi/shogihome/issues/572
   const sections = data.split(/[ 　]/);
   for (const section of sections) {
     if (!section || section === "なし") {
@@ -630,7 +630,7 @@ function importKakinoki(data: string, formatType: KakinokiFormatType): Record | 
       case LineType.BRANCH:
         // NOTE:
         //   KIF では指し手の先頭に手数が付与されるので必要ない。
-        //   https://github.com/sunfish-shogi/electron-shogi/issues/570
+        //   https://github.com/sunfish-shogi/shogihome/issues/570
         //   の不具合により、ヘッダー部に "変化：" で始まる行が存在する場合がある。
         //   指し手が始まるより前に "変化：" が出現しても無視しなければならない。
         if (isMoveSection && formatType === KakinokiFormatType.KI2) {
