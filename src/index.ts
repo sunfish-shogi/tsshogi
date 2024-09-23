@@ -2,6 +2,7 @@ export * from "./helpers/time";
 export * from "./errors";
 export * from "./piece";
 export * from "./color";
+export * from "./direction";
 export * from "./square";
 export * from "./move";
 export * from "./board";
