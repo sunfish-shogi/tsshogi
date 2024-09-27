@@ -172,6 +172,12 @@ export interface ImmutablePosition {
    */
   isPawnDropMate(move: Move): boolean;
   /**
+   * 指定したマスに利いている駒のマス目を列挙します。
+   * @param to
+   * @param piece
+   */
+  listAttackers(to: Square): Square[];
+  /**
    * 指定したマスに利いている指定した駒のマス目を列挙します。
    * @param to
    * @param piece
@@ -347,6 +353,17 @@ export class Position {
           ignore: from,
         })
       );
+    });
+  }
+
+  /**
+   * 指定したマスに利いている駒のマス目を列挙します。
+   * @param to
+   * @param piece
+   */
+  listAttackers(to: Square): Square[] {
+    return this.board.listNonEmptySquares().filter((from) => {
+      return this.isMovable(from, to);
     });
   }
 
