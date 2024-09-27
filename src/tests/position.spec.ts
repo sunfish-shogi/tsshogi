@@ -525,6 +525,49 @@ describe("position", () => {
     expect(position.hand(Color.WHITE).count(PieceType.KNIGHT)).toBe(1);
   });
 
+  it("listAttackers", () => {
+      const data = `
+後手の持駒：なし 
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+| 馬 ・ ・ ・v王v金 ・ ・ ・|一
+| ・ ・ ・ ・v桂 ・ ・v角 ・|二
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|三
+| ・ ・ ・ ・v歩 ・ と ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|五
+| ・ ・ ・ ・ 歩 ・ ・ ・ ・|六
+| ・ ・ ・ 銀 ・ ・ ・ ・ ・|七
+| ・ ・ ・ ・ ・ 飛 ・ ・ ・|八
+| ・ ・ ・ ・ 王 ・ ・ ・ ・|九
++---------------------------+
+先手の持駒：なし
+後手番
+`;
+      const position = (importKIF(data) as Record).position;
+      expect(position.listAttackers(new Square(4, 4))).toStrictEqual([
+        new Square(5, 2),
+        new Square(2, 2),
+        new Square(3, 4),
+        new Square(4, 8),
+      ]);
+      expect(position.listAttackers(new Square(4, 2))).toStrictEqual([
+        new Square(5, 1),
+        new Square(4, 1),
+        new Square(4, 8),
+      ]);
+      expect(position.listAttackers(new Square(5, 5))).toStrictEqual([
+        new Square(9, 1),
+        new Square(2, 2),
+        new Square(5, 4),
+        new Square(5, 6),
+      ]);
+      expect(position.listAttackers(new Square(5, 8))).toStrictEqual([
+        new Square(6, 7),
+        new Square(4, 8),
+        new Square(5, 9),
+      ]);
+  });
+
   it("sfen", () => {
     const sfen = "l2R2s1+P/4gg1k1/p1+P2lPp1/4p1p+b1/1p3G3/3pP1nS1/PP3KSP1/R8/L4G2+b b NL4Ps2np 1";
     const position = Position.newBySFEN(sfen);
