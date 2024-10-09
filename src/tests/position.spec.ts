@@ -526,7 +526,7 @@ describe("position", () => {
   });
 
   it("listAttackers", () => {
-      const data = `
+    const data = `
 後手の持駒：なし 
   ９ ８ ７ ６ ５ ４ ３ ２ １
 +---------------------------+
@@ -543,29 +543,29 @@ describe("position", () => {
 先手の持駒：なし
 後手番
 `;
-      const position = (importKIF(data) as Record).position;
-      expect(position.listAttackers(new Square(4, 4))).toStrictEqual([
-        new Square(5, 2),
-        new Square(2, 2),
-        new Square(3, 4),
-        new Square(4, 8),
-      ]);
-      expect(position.listAttackers(new Square(4, 2))).toStrictEqual([
-        new Square(5, 1),
-        new Square(4, 1),
-        new Square(4, 8),
-      ]);
-      expect(position.listAttackers(new Square(5, 5))).toStrictEqual([
-        new Square(9, 1),
-        new Square(2, 2),
-        new Square(5, 4),
-        new Square(5, 6),
-      ]);
-      expect(position.listAttackers(new Square(5, 8))).toStrictEqual([
-        new Square(6, 7),
-        new Square(4, 8),
-        new Square(5, 9),
-      ]);
+    const position = (importKIF(data) as Record).position;
+    expect(position.listAttackers(new Square(4, 4))).toStrictEqual([
+      new Square(5, 2),
+      new Square(2, 2),
+      new Square(3, 4),
+      new Square(4, 8),
+    ]);
+    expect(position.listAttackers(new Square(4, 2))).toStrictEqual([
+      new Square(5, 1),
+      new Square(4, 1),
+      new Square(4, 8),
+    ]);
+    expect(position.listAttackers(new Square(5, 5))).toStrictEqual([
+      new Square(9, 1),
+      new Square(2, 2),
+      new Square(5, 4),
+      new Square(5, 6),
+    ]);
+    expect(position.listAttackers(new Square(5, 8))).toStrictEqual([
+      new Square(6, 7),
+      new Square(4, 8),
+      new Square(5, 9),
+    ]);
   });
 
   it("sfen", () => {
