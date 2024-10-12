@@ -53,7 +53,7 @@ export const directions: Direction[] = [
   Direction.RIGHT_UP_KNIGHT,
   Direction.LEFT_DOWN_KNIGHT,
   Direction.RIGHT_DOWN_KNIGHT,
-];
+] as const;
 
 export enum MoveType {
   SHORT = "short",

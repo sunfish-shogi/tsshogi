@@ -58,7 +58,7 @@ export const pieceTypes: PieceType[] = [
   PieceType.PROM_SILVER,
   PieceType.HORSE,
   PieceType.DRAGON,
-];
+] as const;
 
 export const handPieceTypes: PieceType[] = [
   PieceType.PAWN,
@@ -68,7 +68,7 @@ export const handPieceTypes: PieceType[] = [
   PieceType.GOLD,
   PieceType.BISHOP,
   PieceType.ROOK,
-];
+] as const;
 
 const promotable: { [pieceType in PieceType]: boolean } = {
   pawn: true,
