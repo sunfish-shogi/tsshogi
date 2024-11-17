@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "ms-vscode.vscode-typescript-next",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode"
   ]
