@@ -57,6 +57,17 @@ if (!record.append(move)) {
 }
 ```
 
+## 棋譜の構造
+
+棋譜は 1 手が 1 ノードとなるような木構造で表されています。
+前後の指し手は `next` プロパティと `prev` プロパティで相互に参照を持っています。
+分岐は兄弟ノードからの `branch` プロパティで参照されています。
+
+![Record Architecture](./docs/record_architecture.png)
+
+指し手を進めたり戻したりするのは `Record.goForward` や `Record.goBack`, `Record.goto` を使います。
+分岐は `Record.switchBranchByIndex` で切り替えることができます。
+
 ## 主なデータ型
 
 ### `class Record`
