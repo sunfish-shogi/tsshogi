@@ -770,6 +770,25 @@ describe("record", () => {
     ]);
   });
 
+  it("resetAllBranchSelection", () => {
+    const data = `手合割：平手
+▲７六歩 △３四歩 ▲２六歩 △８四歩 ▲２五歩 △８五歩
+変化：3手
+▲６六歩 △８四歩 ▲６八飛
+変化：4手
+△５四歩 ▲６八飛
+変化：3手
+▲７五歩 △８四歩
+`;
+    const record = importKI2(data) as Record;
+    record.goto(3);
+    record.switchBranchByIndex(2);
+    expect(record.current.branchIndex).toBe(2);
+    record.resetAllBranchSelection();
+    expect(record.current.branchIndex).toBe(0);
+    expect((record.current.move as Move).usi).toBe("2g2f");
+  });
+
   it("newByUSI/position-startpos", () => {
     // 平手100手
     const data =

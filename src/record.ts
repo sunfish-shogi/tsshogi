@@ -588,6 +588,7 @@ export class Record {
     this._forEach((node) => {
       node.activeBranch = node.isFirstBranch;
     });
+    this._current = (this._current.prev && this._current.prev.next) || this._current;
   }
 
   /**
