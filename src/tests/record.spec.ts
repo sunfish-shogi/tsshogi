@@ -497,16 +497,24 @@ describe("record", () => {
     expect(record.perpetualCheck).toBeFalsy();
 
     // 途中で出現した局面
-    const position1 = Position.newBySFEN("ln1g3nl/1r1s1kg2/p1ppppspp/6p2/1p5P1/2P2PP2/PPSPP1N1P/5S1R1/LN1GKG2L w Bb 1") as Position;
+    const position1 = Position.newBySFEN(
+      "ln1g3nl/1r1s1kg2/p1ppppspp/6p2/1p5P1/2P2PP2/PPSPP1N1P/5S1R1/LN1GKG2L w Bb 1",
+    ) as Position;
     expect(record.getRepetitionCount(position1)).toBe(1);
     // 存在しない局面
-    const position2 = Position.newBySFEN("ln5nl/1r1sgkg2/p1ppppspp/6p2/1p5P1/2P2PP2/PPSPP1N1P/5S1R1/LN1GKG2L b Bb 1") as Position;
+    const position2 = Position.newBySFEN(
+      "ln5nl/1r1sgkg2/p1ppppspp/6p2/1p5P1/2P2PP2/PPSPP1N1P/5S1R1/LN1GKG2L b Bb 1",
+    ) as Position;
     expect(record.getRepetitionCount(position2)).toBe(0);
     // 48手目着手後の局面
-    const position3 = Position.newBySFEN("lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PP1PP1P/1PS1PSN2/2GK1G3/LN5RL b Bb 1") as Position;
+    const position3 = Position.newBySFEN(
+      "lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PP1PP1P/1PS1PSN2/2GK1G3/LN5RL b Bb 1",
+    ) as Position;
     expect(record.getRepetitionCount(position3)).toBe(1);
     // 49手目着手後の局面
-    const position4 = Position.newBySFEN("lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2GK1G3/LN5RL w Bb 1") as Position;
+    const position4 = Position.newBySFEN(
+      "lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2GK1G3/LN5RL w Bb 1",
+    ) as Position;
     expect(record.getRepetitionCount(position4)).toBe(0);
   });
 

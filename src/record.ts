@@ -907,7 +907,6 @@ export class Record {
   /**
    * 現在の局面まで(Record.current着手後を含む)に指定された局面が何回現れたかを返します。
    * @param position
-   * @returns 
    */
   getRepetitionCount(position: ImmutablePosition): number {
     return this.repetitionCounts[position.sfen] || 0;
