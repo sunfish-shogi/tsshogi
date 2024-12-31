@@ -905,6 +905,15 @@ export class Record {
   }
 
   /**
+   * 現在の局面まで(Record.current着手後を含む)に指定された局面が何回現れたかを返します。
+   * @param position
+   * @returns 
+   */
+  getRepetitionCount(position: ImmutablePosition): number {
+    return this.repetitionCounts[position.sfen] || 0;
+  }
+
+  /**
    * 連続王手の千日手かどうかを判定します。
    * 現在の局面が4回目以上の同一局面であり、かつ同一局面が最初に出現したときから一方の王手が連続している場合に true を返します。
    */
