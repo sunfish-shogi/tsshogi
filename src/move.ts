@@ -51,11 +51,11 @@ export class Move {
   get usi(): string {
     let ret = "";
     if (this.from instanceof Square) {
-      ret += this.from.sfen;
+      ret += this.from.usi;
     } else {
       ret += pieceTypeToSFEN(this.from) + "*";
     }
-    ret += this.to.sfen;
+    ret += this.to.usi;
     if (this.promote) {
       ret += "+";
     }
@@ -80,13 +80,13 @@ export function parseUSIMove(usiMove: string): {
     }
     from = piece.type;
   } else {
-    const square = Square.parseSFENSquare(usiMove);
+    const square = Square.newByUSI(usiMove);
     if (!square) {
       return null;
     }
     from = square;
   }
-  const to = Square.parseSFENSquare(usiMove.substring(2));
+  const to = Square.newByUSI(usiMove.substring(2));
   if (!to) {
     return null;
   }
