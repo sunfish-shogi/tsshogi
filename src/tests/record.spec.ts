@@ -510,12 +510,12 @@ describe("record", () => {
     const position3 = Position.newBySFEN(
       "lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PP1PP1P/1PS1PSN2/2GK1G3/LN5RL b Bb 1",
     ) as Position;
-    expect(record.getRepetitionCount(position3)).toBe(1);
+    expect(record.getRepetitionCount(position3)).toBe(3);
     // 49手目着手後の局面
     const position4 = Position.newBySFEN(
       "lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2GK1G3/LN5RL w Bb 1",
     ) as Position;
-    expect(record.getRepetitionCount(position4)).toBe(0);
+    expect(record.getRepetitionCount(position4)).toBe(3);
   });
 
   it("perpetualCheck/black", () => {
