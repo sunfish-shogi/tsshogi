@@ -17,6 +17,7 @@ import {
   getWhitePlayerName,
   getWhitePlayerNamePreferShort,
   exportKI2,
+  Position,
 } from "../";
 
 describe("record", () => {
@@ -114,7 +115,7 @@ describe("record", () => {
 `;
     const record = importKI2(data) as Record;
     expect(record.usen).toEqual(["~0.6y236e7ku4be.j", 0]);
-    const record2 = Record.newByUSEN(record.usen[0]);
+    const record2 = Record.newByUSEN(record.usen[0]) as Record;
     expect(record2).toBeInstanceOf(Record);
     expect(record2.current.ply).toBe(0);
     expect(exportKI2(record2, {})).toBe(data);
@@ -210,7 +211,7 @@ describe("record", () => {
       "~0.7ku2jm6y236e5t24be9co0rs7bq0e48c82sq9qc1s87bo2o69us09o9ma1a48lc1j69h82ss8vc42a6382io7ga56c7bo0i672m0n85xm3om6240dm4o22f2be209k8gs1js9to42o776byo9qqbgm97m775by23k2bek1ek722bgk84219m98m5xkbf22em9ls6z39c4bf48mc3om5t48403j31ek732bg24tk4p45so5yk3rdc469uw21wbf42jmbfm3o27habe28uy9hr7lwbog8lc5ge7pe4ge7kw4bwbgw6kubhu6yibp46t40t43k4bvo2em0e92n8bak2j68pu6gv8ucbys6269mc4x62nqc3wbuu3s71no7ty8qw8ve9ve8yybxu7pebce.r~25.31u72m42a63846u6fu3xq66q3t67bs57a7ksbssbtq5ge7pe22wbgw6jw97mbe85xm3om7262jo4o22f25au4au81kbek3kk0wubgcbge7pe47c776bgw8pw6fcbgc3ay9qc4fy9uw46e8ha05m6c82o48ts49ebf232a3j33nk7cobgu9yu57v6ccbos7ksbgu8qs0isbf42f45r31eoboc1ru04i2k600a1vs626c4ebqu3rs45b0na66s42a6ccbp8bks68b9qa9yx9uebp88mcbhc9uu57cboc1r8c04b96bx2bs40a56gv8pubza7lwbcc8uy7le8yw8kx7qe6lg8ug5ky7uy6pz.p~6.9qc0e49co0rs7bq2sq8c81s87bs09o9ma0i69us31u8lc0n88vc1j46ba2o69h846u6fu0wu57c21w7ga2ss72m1949to09o9qu0dm9uw3t66341no8gs2jo7ty3ay6ti2ai7764y672obfo6343xq66q428beq1j8bg852o72kbfq66q6284o22f2bek1ekbg851s5u409m5oi3fi9200207205ge7pe2robfk3k24ip1e6bvsbzsble9p50nd5y683i1j41wsbf07y02jk5p64y66ke2nqbw6c141j92j82wq3s85febgec046lf6gwbke0935gx8pwbkebp03k005k5gx8uebzsblubx8bbu3z14afbge7kwbvcbhebfwbgi5ge6ge7x86ba3xs7gc9qd7qc578bgsbcs8pwbuu7py9uw7uw637bgk8qx8ve67s9zgblg8yybow6ke32e6fwbce7uebge5ge7hc7py8qublw9uw7uw8lu8uublc8pubgc6kubg6bwm.r",
       1,
     ]);
-    const record2 = Record.newByUSEN(record.usen[0], 1, 30);
+    const record2 = Record.newByUSEN(record.usen[0], 1, 30) as Record;
     expect(record2).toBeInstanceOf(Record);
     expect(record2.current.ply).toBe(30);
     expect(exportKI2(record2 as Record, {})).toBe(data);
@@ -231,7 +232,7 @@ describe("record", () => {
       "lnsgkgsnl_9_ppppppppp_9_9_9_PPPPPPPPP_1B5R1_LNSGKGSNL.w.-~0.0rs7ku2sq7761s86260e472m0is9co0nc8c631u5xm09k83m1wu4sm2jm864bem3p431s9qc.",
       0,
     ]);
-    const record2 = Record.newByUSEN(record.usen[0]);
+    const record2 = Record.newByUSEN(record.usen[0]) as Record;
     expect(record2).toBeInstanceOf(Record);
     expect(record2.current.ply).toBe(0);
     expect(exportKI2(record2 as Record, {})).toBe(data);
@@ -494,6 +495,19 @@ describe("record", () => {
     record.goBack();
     expect(record.repetition).toBeFalsy();
     expect(record.perpetualCheck).toBeFalsy();
+
+    // 途中で出現した局面
+    const position1 = Position.newBySFEN("ln1g3nl/1r1s1kg2/p1ppppspp/6p2/1p5P1/2P2PP2/PPSPP1N1P/5S1R1/LN1GKG2L w Bb 1") as Position;
+    expect(record.getRepetitionCount(position1)).toBe(1);
+    // 存在しない局面
+    const position2 = Position.newBySFEN("ln5nl/1r1sgkg2/p1ppppspp/6p2/1p5P1/2P2PP2/PPSPP1N1P/5S1R1/LN1GKG2L b Bb 1") as Position;
+    expect(record.getRepetitionCount(position2)).toBe(0);
+    // 48手目着手後の局面
+    const position3 = Position.newBySFEN("lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PP1PP1P/1PS1PSN2/2GK1G3/LN5RL b Bb 1") as Position;
+    expect(record.getRepetitionCount(position3)).toBe(1);
+    // 49手目着手後の局面
+    const position4 = Position.newBySFEN("lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2GK1G3/LN5RL w Bb 1") as Position;
+    expect(record.getRepetitionCount(position4)).toBe(0);
   });
 
   it("perpetualCheck/black", () => {
