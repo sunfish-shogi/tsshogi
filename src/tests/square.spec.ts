@@ -40,6 +40,27 @@ describe("square", () => {
   });
 
   it("sfen", () => {
+    expect(new Square(1, 6).usi).toBe("1f");
+    expect(new Square(2, 7).usi).toBe("2g");
+    expect(new Square(3, 8).usi).toBe("3h");
+    expect(new Square(4, 9).usi).toBe("4i");
+    expect(new Square(5, 1).usi).toBe("5a");
+    expect(new Square(6, 2).usi).toBe("6b");
+    expect(new Square(7, 3).usi).toBe("7c");
+    expect(new Square(8, 4).usi).toBe("8d");
+    expect(new Square(9, 5).usi).toBe("9e");
+
+    expect(Square.newByUSI("1e")).toStrictEqual(new Square(1, 5));
+    expect(Square.newByUSI("2f")).toStrictEqual(new Square(2, 6));
+    expect(Square.newByUSI("3g")).toStrictEqual(new Square(3, 7));
+    expect(Square.newByUSI("4h")).toStrictEqual(new Square(4, 8));
+    expect(Square.newByUSI("5i")).toStrictEqual(new Square(5, 9));
+    expect(Square.newByUSI("6a")).toStrictEqual(new Square(6, 1));
+    expect(Square.newByUSI("7b")).toStrictEqual(new Square(7, 2));
+    expect(Square.newByUSI("8c")).toStrictEqual(new Square(8, 3));
+    expect(Square.newByUSI("9d")).toStrictEqual(new Square(9, 4));
+
+    // sfen is deprecated
     expect(new Square(1, 6).sfen).toBe("1f");
     expect(new Square(2, 7).sfen).toBe("2g");
     expect(new Square(3, 8).sfen).toBe("3h");
@@ -50,6 +71,7 @@ describe("square", () => {
     expect(new Square(8, 4).sfen).toBe("8d");
     expect(new Square(9, 5).sfen).toBe("9e");
 
+    // parseSFENSquare is deprecated
     expect(Square.parseSFENSquare("1e")).toStrictEqual(new Square(1, 5));
     expect(Square.parseSFENSquare("2f")).toStrictEqual(new Square(2, 6));
     expect(Square.parseSFENSquare("3g")).toStrictEqual(new Square(3, 7));
