@@ -372,6 +372,7 @@ export interface ImmutableRecord {
   readonly length: number;
   readonly branchBegin: ImmutableNode;
   readonly repetition: boolean;
+  getRepetitionCount(position: ImmutablePosition): number;
   readonly perpetualCheck: Color | null;
   readonly usi: string;
   getUSI(opts?: USIFormatOptions): string;
