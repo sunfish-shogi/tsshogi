@@ -1,11 +1,11 @@
 import { Direction, vectorToDirectionAndDistance } from "./direction";
 
-function sfenFileToNumber(sfen: string): number | null {
-  return sfen >= "1" && sfen <= "9" ? Number(sfen) : null;
+function usiFileToNumber(usi: string): number | null {
+  return usi >= "1" && usi <= "9" ? Number(usi) : null;
 }
 
-function sfenRankToNumber(sfen: string): number | null {
-  switch (sfen) {
+function usiRankToNumber(usi: string): number | null {
+  switch (usi) {
     case "a":
       return 1;
     case "b":
@@ -151,18 +151,35 @@ export class Square {
 
   /**
    * SFEN形式の文字列を取得します。
+   * @deprecated Use usi instead.
    */
   get sfen(): string {
+    return this.usi;
+  }
+
+  /**
+   * USI形式の文字列を取得します。
+   */
+  get usi(): string {
     return this.file + sfenRanks[this.rank - 1];
   }
 
   /**
    * SFEN形式のマス目をパースします。
    * @param sfen
+   * @deprecated Use newByUSI instead.
    */
   static parseSFENSquare(sfen: string): Square | null {
-    const file = sfenFileToNumber(sfen[0]);
-    const rank = sfenRankToNumber(sfen[1]);
+    return Square.newByUSI(sfen);
+  }
+
+  /**
+   * USI形式のマス目をパースします。
+   * @param usi
+   */
+  static newByUSI(usi: string): Square | null {
+    const file = usiFileToNumber(usi[0]);
+    const rank = usiRankToNumber(usi[1]);
     if (!file || !rank) {
       return null;
     }
