@@ -1118,18 +1118,18 @@ export class Record {
    */
   static newByUSI(data: string): Record | Error {
     const prefixPositionStartpos = "position startpos ";
-    const prefixPositionSfen = "position sfen ";
+    const prefixPositionSFEN = "position sfen ";
     const prefixStartpos = "startpos ";
-    const prefixSfen = "sfen ";
+    const prefixSFEN = "sfen ";
     const prefixMoves = "moves ";
     if (data.startsWith(prefixPositionStartpos)) {
       return Record.newByUSIFromMoves(new Position(), data.slice(prefixPositionStartpos.length));
-    } else if (data.startsWith(prefixPositionSfen)) {
-      return Record.newByUSIFromSFEN(data.slice(prefixPositionSfen.length));
+    } else if (data.startsWith(prefixPositionSFEN)) {
+      return Record.newByUSIFromSFEN(data.slice(prefixPositionSFEN.length));
     } else if (data.startsWith(prefixStartpos)) {
       return Record.newByUSIFromMoves(new Position(), data.slice(prefixStartpos.length));
-    } else if (data.startsWith(prefixSfen)) {
-      return Record.newByUSIFromSFEN(data.slice(prefixSfen.length));
+    } else if (data.startsWith(prefixSFEN)) {
+      return Record.newByUSIFromSFEN(data.slice(prefixSFEN.length));
     } else if (data.startsWith(prefixMoves)) {
       return Record.newByUSIFromMoves(new Position(), data);
     } else {
