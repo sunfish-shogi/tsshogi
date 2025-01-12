@@ -23,24 +23,66 @@ describe("kakinoki", () => {
   it("formatKIFMove", () => {
     const testCases = [
       {
-        move: new Move(new Square(7, 7), new Square(7, 6), false, Color.BLACK, PieceType.PAWN, null),
+        move: new Move(
+          new Square(7, 7),
+          new Square(7, 6),
+          false,
+          Color.BLACK,
+          PieceType.PAWN,
+          null,
+        ),
         expected: "７六歩(77)",
       },
       {
-        move: new Move(new Square(1, 3), new Square(5, 7), true, Color.WHITE, PieceType.BISHOP, PieceType.SILVER),
+        move: new Move(
+          new Square(1, 3),
+          new Square(5, 7),
+          true,
+          Color.WHITE,
+          PieceType.BISHOP,
+          PieceType.SILVER,
+        ),
         expected: "５七角成(13)",
       },
       {
-        move: new Move(new Square(1, 3), new Square(5, 7), true, Color.WHITE, PieceType.BISHOP, PieceType.SILVER),
+        move: new Move(
+          new Square(1, 3),
+          new Square(5, 7),
+          true,
+          Color.WHITE,
+          PieceType.BISHOP,
+          PieceType.SILVER,
+        ),
         options: {
-          prev: new Move(new Square(6, 8), new Square(5, 7), false, Color.BLACK, PieceType.SILVER, PieceType.PROM_KNIGHT),
+          prev: new Move(
+            new Square(6, 8),
+            new Square(5, 7),
+            false,
+            Color.BLACK,
+            PieceType.SILVER,
+            PieceType.PROM_KNIGHT,
+          ),
         },
         expected: "同　角成(13)",
       },
       {
-        move: new Move(new Square(1, 3), new Square(5, 7), true, Color.WHITE, PieceType.BISHOP, PieceType.SILVER),
+        move: new Move(
+          new Square(1, 3),
+          new Square(5, 7),
+          true,
+          Color.WHITE,
+          PieceType.BISHOP,
+          PieceType.SILVER,
+        ),
         options: {
-          prev: new Move(new Square(6, 8), new Square(6, 7), false, Color.BLACK, PieceType.SILVER, PieceType.PROM_KNIGHT),
+          prev: new Move(
+            new Square(6, 8),
+            new Square(6, 7),
+            false,
+            Color.BLACK,
+            PieceType.SILVER,
+            PieceType.PROM_KNIGHT,
+          ),
         },
         expected: "５七角成(13)",
       },
