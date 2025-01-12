@@ -3,6 +3,7 @@ import {
   Color,
   exportKI2,
   exportKIF,
+  formatKIFMove,
   importKI2,
   importKIF,
   InitialPositionSFEN,
@@ -19,6 +20,36 @@ import {
 } from "../";
 
 describe("kakinoki", () => {
+  it("formatKIFMove", () => {
+    const testCases = [
+      {
+        move: new Move(new Square(7, 7), new Square(7, 6), false, Color.BLACK, PieceType.PAWN, null),
+        expected: "７六歩(77)",
+      },
+      {
+        move: new Move(new Square(1, 3), new Square(5, 7), true, Color.WHITE, PieceType.BISHOP, PieceType.SILVER),
+        expected: "５七角成(13)",
+      },
+      {
+        move: new Move(new Square(1, 3), new Square(5, 7), true, Color.WHITE, PieceType.BISHOP, PieceType.SILVER),
+        options: {
+          prev: new Move(new Square(6, 8), new Square(5, 7), false, Color.BLACK, PieceType.SILVER, PieceType.PROM_KNIGHT),
+        },
+        expected: "同　角成(13)",
+      },
+      {
+        move: new Move(new Square(1, 3), new Square(5, 7), true, Color.WHITE, PieceType.BISHOP, PieceType.SILVER),
+        options: {
+          prev: new Move(new Square(6, 8), new Square(6, 7), false, Color.BLACK, PieceType.SILVER, PieceType.PROM_KNIGHT),
+        },
+        expected: "５七角成(13)",
+      },
+    ];
+    for (const testCase of testCases) {
+      expect(formatKIFMove(testCase.move, testCase.options)).toBe(testCase.expected);
+    }
+  });
+
   it("import/standard", () => {
     const data = `
 # ----  Kifu for Windows V7 V7.50 棋譜ファイル  ----
