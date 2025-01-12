@@ -771,9 +771,14 @@ function formatPosition(position: ImmutablePosition, options?: KIFExportOptions)
   return ret;
 }
 
-function formatMove(move: Move, prev?: Move): string {
+/**
+ * KIF 形式の指し手を出力します。
+ * @param move 対象の指し手
+ * @param prev 直前の指し手 ("同"の判定に使用)
+ */
+export function formatKIFMove(move: Move, options?: { prev?: Move; padding?: boolean }): string {
   let ret = "";
-  if (prev && move.to.equals(prev.to)) {
+  if (options?.prev && move.to.equals(options.prev.to)) {
     ret += "同\u3000";
   } else {
     ret += fileToMultiByteChar(move.to.file);
@@ -784,9 +789,11 @@ function formatMove(move: Move, prev?: Move): string {
     ret += "成";
   }
   if (move.from instanceof Square) {
-    ret += "(" + move.from.file + move.from.rank + ")" + (ret.length === 3 ? "  " : "");
+    ret += "(" + move.from.file + move.from.rank + ")";
+    ret += ret.length === 7 && options?.padding ? "  " : "";
   } else {
-    ret += "打    ";
+    ret += "打";
+    ret += options?.padding ? "    " : "";
   }
   return ret;
 }
@@ -833,7 +840,7 @@ export function exportKIF(record: ImmutableRecord, options?: KIFExportOptions): 
       ret += String(node.ply).padStart(4, " ") + " ";
       if (node.move instanceof Move) {
         const prev = node.prev?.move instanceof Move ? node.prev.move : undefined;
-        ret += formatMove(node.move, prev);
+        ret += formatKIFMove(node.move, { prev, padding: true });
       } else if (isKnownSpecialMove(node.move)) {
         const s = specialMoveToString[node.move.type];
         ret += s + " ".repeat(Math.max(12 - s.length * 2, 0));
