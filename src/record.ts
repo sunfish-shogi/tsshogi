@@ -1139,14 +1139,15 @@ export class Record {
 
   private static newByUSIFromSFEN(data: string): Record | Error {
     const sections = data.split(" ");
-    if (sections.length < 4) {
+    if (sections.length < 3) {
       return new InvalidUSIError(data);
     }
-    const position = Position.newBySFEN(sections.slice(0, 4).join(" "));
+    const movesIndex = sections.length === 3 || sections[3] === "moves" ? 3 : 4;
+    const position = Position.newBySFEN(sections.slice(0, movesIndex).join(" "));
     if (!position) {
       return new InvalidUSIError(data);
     }
-    return Record.newByUSIFromMoves(position, sections.slice(4).join(" "));
+    return Record.newByUSIFromMoves(position, sections.slice(movesIndex).join(" "));
   }
 
   private static newByUSIFromMoves(position: ImmutablePosition, data: string): Record | Error {
@@ -1159,6 +1160,10 @@ export class Record {
       return new InvalidUSIError(data);
     }
     for (let i = 1; i < sections.length; i++) {
+      if (sections[i] === "resign") {
+        record.append(SpecialMoveType.RESIGN);
+        break;
+      }
       const parsed = parseUSIMove(sections[i]);
       if (!parsed) {
         break;
