@@ -623,10 +623,10 @@ export class Position {
    */
   static isValidSFEN(sfen: string): boolean {
     const sections = sfen.split(" ");
-    if (sections.length === 5 && sections[0] === "sfen") {
+    if ((sections.length === 5 || sections.length === 4) && sections[0] === "sfen") {
       sections.shift();
     }
-    if (sections.length !== 4) {
+    if (sections.length !== 4 && sections.length !== 3) {
       return false;
     }
     if (!Board.isValidSFEN(sections[0])) {
@@ -638,7 +638,7 @@ export class Position {
     if (!Hand.isValidSFEN(sections[2])) {
       return false;
     }
-    if (!sections[3].match(/[0-9]+/)) {
+    if (sections.length === 4 && !/[0-9]+/.test(sections[3])) {
       return false;
     }
     return true;
