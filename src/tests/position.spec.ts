@@ -65,6 +65,7 @@ describe("position", () => {
   });
 
   it("resetBySFEN", () => {
+    // normalized
     const testCases = [
       InitialPositionSFEN.STANDARD,
       InitialPositionSFEN.EMPTY,
@@ -86,6 +87,44 @@ describe("position", () => {
       const position = Position.newBySFEN(tc);
       expect(position).toBeInstanceOf(Position);
       expect(position?.sfen).toBe(tc);
+    }
+
+    // not normalized
+    const testCases2 = [
+      {
+        input: "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p 100",
+        output: "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p 1",
+      },
+      {
+        input: "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p",
+        output: "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p 1",
+      },
+      {
+        input: "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b PNSR2pnsr",
+        output: "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p 1",
+      },
+    ];
+    for (const tc of testCases2) {
+      const position = Position.newBySFEN(tc.input);
+      expect(position).toBeInstanceOf(Position);
+      expect(position?.sfen).toBe(tc.output);
+    }
+
+    // invalid
+    const invalids = [
+      " b - 1",
+      "x b - 1",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L  RSNPrsn2p 1",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L x RSNPrsn2p 1",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b  1",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b x 1",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p ",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b RSNPrsn2p x",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L",
+      "l+B5nl/4g1gk1/2b1p2p1/p1p2pp2/3s1P2p/P1P3PP1/1P2PSN1P/2G2GK2/L7L b",
+    ];
+    for (const invalid of invalids) {
+      expect(Position.newBySFEN(invalid)).toBeNull();
     }
   });
 
