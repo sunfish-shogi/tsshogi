@@ -189,7 +189,7 @@ export class Hand {
     if (sfen === "-") {
       return true;
     }
-    return /^(?:[0-9]*[PLNSGBRplnsgbr])+$/.test(sfen);
+    return /^(?:[0-9]{0,2}[PLNSGBRplnsgbr])+$/.test(sfen);
   }
 
   /**
@@ -200,7 +200,7 @@ export class Hand {
     if (sfen === "-") {
       return { black: new Hand(), white: new Hand() };
     }
-    const sections = sfen.match(/([0-9]*[PLNSGBRplnsgbr])/g) as RegExpMatchArray;
+    const sections = sfen.match(/([0-9]{0,2}[PLNSGBRplnsgbr])/g) as RegExpMatchArray;
     if (!sections) {
       return null;
     }
