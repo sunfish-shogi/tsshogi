@@ -133,7 +133,7 @@ type Line = {
 
 function parseLine(line: string): Line[] {
   const results = [];
-  const lines = line.match(/^['N$]/) ? [line] : line.split(",");
+  const lines = /^['N$]/.test(line) ? [line] : line.split(",");
   for (const line of lines) {
     for (let i = 0; i < linePatterns.length; i++) {
       const matched = linePatterns[i].pattern.exec(line);
@@ -487,17 +487,17 @@ function formatMetadata(metadata: ImmutableRecordMetadata, options?: CSAExportOp
     ret += "$OPENING:" + opening + returnCode;
   }
   const timeLimit = metadata.getStandardMetadata(RecordMetadataKey.TIME_LIMIT);
-  if (timeLimit?.match(timeRegExpV2)) {
+  if (timeLimit && timeRegExpV2.test(timeLimit)) {
     ret += "$TIME_LIMIT:" + timeLimit + returnCode;
-  } else if (timeLimit?.match(timeRegExpV3)) {
+  } else if (timeLimit && timeRegExpV3.test(timeLimit)) {
     ret += "$TIME:" + timeLimit + returnCode;
   }
   const blackTimeLimit = metadata.getStandardMetadata(RecordMetadataKey.BLACK_TIME_LIMIT);
-  if (blackTimeLimit?.match(timeRegExpV3)) {
+  if (blackTimeLimit && timeRegExpV3.test(blackTimeLimit)) {
     ret += "$TIME+:" + blackTimeLimit + returnCode;
   }
   const whiteTimeLimit = metadata.getStandardMetadata(RecordMetadataKey.WHITE_TIME_LIMIT);
-  if (whiteTimeLimit?.match(timeRegExpV3)) {
+  if (whiteTimeLimit && timeRegExpV3.test(whiteTimeLimit)) {
     ret += "$TIME-:" + whiteTimeLimit + returnCode;
   }
   const maxMoves = metadata.getStandardMetadata(RecordMetadataKey.MAX_MOVES);

@@ -33,12 +33,12 @@ export function detectRecordFormat(data: string): RecordFormatType {
   }
 
   // JKF
-  if (data.match(/^[\s\r\n]*{/) && data.match(/}[\s\r\n]*$/)) {
+  if (/^[\s\r\n]*{/.test(data) && /}[\s\r\n]*$/.test(data)) {
     return RecordFormatType.JKF;
   }
 
   // USEN
-  if (data.match(/^[-_.A-Za-z0-9]*~[0-9]*\.[0-9A-Za-z]*\.[a-z]?(~|$)/)) {
+  if (/^[-_.A-Za-z0-9]*~[0-9]*\.[0-9A-Za-z]*\.[a-z]?(~|$)/.test(data)) {
     return RecordFormatType.USEN;
   }
 
