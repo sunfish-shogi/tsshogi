@@ -189,7 +189,7 @@ export class Hand {
     if (sfen === "-") {
       return true;
     }
-    return !!sfen.match(/^(?:[0-9]*[PLNSGBRplnsgbr])*$/);
+    return /^(?:[0-9]*[PLNSGBRplnsgbr])+$/.test(sfen);
   }
 
   /**
@@ -200,10 +200,10 @@ export class Hand {
     if (sfen === "-") {
       return { black: new Hand(), white: new Hand() };
     }
-    if (!sfen.match(/^(?:[0-9]*[PLNSGBRplnsgbr])*$/)) {
+    const sections = sfen.match(/([0-9]*[PLNSGBRplnsgbr])/g) as RegExpMatchArray;
+    if (!sections) {
       return null;
     }
-    const sections = sfen.match(/([0-9]*[PLNSGBRplnsgbr])/g) as RegExpMatchArray;
     const black = new Hand();
     const white = new Hand();
     for (let i = 0; i < sections.length; i += 1) {
