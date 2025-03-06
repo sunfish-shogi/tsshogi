@@ -18,6 +18,7 @@ import {
   getWhitePlayerNamePreferShort,
   exportKI2,
   Position,
+  InitialPositionSFEN,
 } from "../";
 
 describe("record", () => {
@@ -811,57 +812,92 @@ describe("record", () => {
     expect((record.current.move as Move).usi).toBe("2g2f");
   });
 
-  it("newByUSI/position-startpos", () => {
-    // 平手100手
-    const data =
-      "position startpos moves 2g2f 3c3d 7g7f 4c4d 3i4h 3a3b 5g5f 9c9d 9g9f 3b4c 4i5h 2b3c 3g3f 4a3b 7i7h 5c5d 6g6f 8b5b 5i6h 5a6b 6f6e 4d4e 8h3c+ 2a3c 7h6g 5d5e 5f5e 5b5e 6g6f 5e5a 6h7h 6b7b 5h6g 7b8b 6i6h 7a7b 4h5g 4e4f 4g4f B*4g B*1h 3d3e 3f3e P*3h 5g4h 4g5h+ 6f5g 5h4i 1h2g 3h3i+ 2g4i 3i4i 4h4g B*3i 2h1h 5a5g+ 6h5g 4i4h 4g3f S*2h 3e3d 2h2i 3d3c+ 2i1h+ 3c4c R*3h B*1f 4h4g 1f3h 4g5g 6g7g 3i4h+ 4c5b 4h3h 5b6a 3h5f 7h8h 7b6a R*5a N*8e G*7i G*6f R*5b 6a5b 5a5b+ R*7b 5b7b 8b7b R*5b 7b6a 5b5f+ 5g5f 7g7h R*4h B*4d 5f6g S*6b 6a7b 4d6f 6g6f resign";
-    const record = Record.newByUSI(data) as Record;
-    expect(record).toBeInstanceOf(Record);
-    expect(record.length).toBe(100);
-  });
-
-  it("newByUSI/position-sfen", () => {
-    // 飛車香落ち51手
-    const data =
-      "position sfen lnsgkgsn1/7b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 7g7f 3c3d 2g2f 4c4d 2f2e 2b3c 1g1f 3a4b 1f1e 4b4c 2h1h 4a3b 1e1d 1c1d 1h1d P*1c 1d1h 5a4b 4g4f 6a7b 1h4h 7a6b 3i3h 5c5d 3h4g 6b5c 4g5f 7c7d P*1b 8a7c 4f4e 6c6d 4e4d 5c4d P*4e 4d5e 5f5e 5d5e S*4d 4c4d 4e4d S*5d 1b1a+ 3c1a S*1b 1a3c 1b2a P*4e 2a3b+ 4b3b N*6f";
-    const record = Record.newByUSI(data) as Record;
-    expect(record).toBeInstanceOf(Record);
-    expect(record.length).toBe(51);
-  });
-
   it("newByUSI/startpos", () => {
-    // 平手100手
-    const data =
-      "startpos moves 2g2f 3c3d 7g7f 4c4d 3i4h 3a3b 5g5f 9c9d 9g9f 3b4c 4i5h 2b3c 3g3f 4a3b 7i7h 5c5d 6g6f 8b5b 5i6h 5a6b 6f6e 4d4e 8h3c+ 2a3c 7h6g 5d5e 5f5e 5b5e 6g6f 5e5a 6h7h 6b7b 5h6g 7b8b 6i6h 7a7b 4h5g 4e4f 4g4f B*4g B*1h 3d3e 3f3e P*3h 5g4h 4g5h+ 6f5g 5h4i 1h2g 3h3i+ 2g4i 3i4i 4h4g B*3i 2h1h 5a5g+ 6h5g 4i4h 4g3f S*2h 3e3d 2h2i 3d3c+ 2i1h+ 3c4c R*3h B*1f 4h4g 1f3h 4g5g 6g7g 3i4h+ 4c5b 4h3h 5b6a 3h5f 7h8h 7b6a R*5a N*8e G*7i G*6f R*5b 6a5b 5a5b+ R*7b 5b7b 8b7b R*5b 7b6a 5b5f+ 5g5f 7g7h R*4h B*4d 5f6g S*6b 6a7b 4d6f 6g6f resign";
-    const record = Record.newByUSI(data) as Record;
-    expect(record).toBeInstanceOf(Record);
-    expect(record.length).toBe(100);
+    // 平手100手・投了
+    const inputs = [
+      "position startpos moves 2g2f 3c3d 7g7f 4c4d 3i4h 3a3b 5g5f 9c9d 9g9f 3b4c 4i5h 2b3c 3g3f 4a3b 7i7h 5c5d 6g6f 8b5b 5i6h 5a6b 6f6e 4d4e 8h3c+ 2a3c 7h6g 5d5e 5f5e 5b5e 6g6f 5e5a 6h7h 6b7b 5h6g 7b8b 6i6h 7a7b 4h5g 4e4f 4g4f B*4g B*1h 3d3e 3f3e P*3h 5g4h 4g5h+ 6f5g 5h4i 1h2g 3h3i+ 2g4i 3i4i 4h4g B*3i 2h1h 5a5g+ 6h5g 4i4h 4g3f S*2h 3e3d 2h2i 3d3c+ 2i1h+ 3c4c R*3h B*1f 4h4g 1f3h 4g5g 6g7g 3i4h+ 4c5b 4h3h 5b6a 3h5f 7h8h 7b6a R*5a N*8e G*7i G*6f R*5b 6a5b 5a5b+ R*7b 5b7b 8b7b R*5b 7b6a 5b5f+ 5g5f 7g7h R*4h B*4d 5f6g S*6b 6a7b 4d6f 6g6f resign",
+      "startpos moves 2g2f 3c3d 7g7f 4c4d 3i4h 3a3b 5g5f 9c9d 9g9f 3b4c 4i5h 2b3c 3g3f 4a3b 7i7h 5c5d 6g6f 8b5b 5i6h 5a6b 6f6e 4d4e 8h3c+ 2a3c 7h6g 5d5e 5f5e 5b5e 6g6f 5e5a 6h7h 6b7b 5h6g 7b8b 6i6h 7a7b 4h5g 4e4f 4g4f B*4g B*1h 3d3e 3f3e P*3h 5g4h 4g5h+ 6f5g 5h4i 1h2g 3h3i+ 2g4i 3i4i 4h4g B*3i 2h1h 5a5g+ 6h5g 4i4h 4g3f S*2h 3e3d 2h2i 3d3c+ 2i1h+ 3c4c R*3h B*1f 4h4g 1f3h 4g5g 6g7g 3i4h+ 4c5b 4h3h 5b6a 3h5f 7h8h 7b6a R*5a N*8e G*7i G*6f R*5b 6a5b 5a5b+ R*7b 5b7b 8b7b R*5b 7b6a 5b5f+ 5g5f 7g7h R*4h B*4d 5f6g S*6b 6a7b 4d6f 6g6f resign",
+      "moves 2g2f 3c3d 7g7f 4c4d 3i4h 3a3b 5g5f 9c9d 9g9f 3b4c 4i5h 2b3c 3g3f 4a3b 7i7h 5c5d 6g6f 8b5b 5i6h 5a6b 6f6e 4d4e 8h3c+ 2a3c 7h6g 5d5e 5f5e 5b5e 6g6f 5e5a 6h7h 6b7b 5h6g 7b8b 6i6h 7a7b 4h5g 4e4f 4g4f B*4g B*1h 3d3e 3f3e P*3h 5g4h 4g5h+ 6f5g 5h4i 1h2g 3h3i+ 2g4i 3i4i 4h4g B*3i 2h1h 5a5g+ 6h5g 4i4h 4g3f S*2h 3e3d 2h2i 3d3c+ 2i1h+ 3c4c R*3h B*1f 4h4g 1f3h 4g5g 6g7g 3i4h+ 4c5b 4h3h 5b6a 3h5f 7h8h 7b6a R*5a N*8e G*7i G*6f R*5b 6a5b 5a5b+ R*7b 5b7b 8b7b R*5b 7b6a 5b5f+ 5g5f 7g7h R*4h B*4d 5f6g S*6b 6a7b 4d6f 6g6f resign",
+    ];
+    for (const input of inputs) {
+      const record = Record.newByUSI(input) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.initialPosition.sfen).toBe(InitialPositionSFEN.STANDARD);
+      expect(record.length).toBe(101);
+      record.goto(101);
+      expect(record.current.move).toEqual(specialMove(SpecialMoveType.RESIGN));
+      expect(record.position.sfen).toBe(
+        "ln6l/2kS2g2/1ppp3pp/p8/1n1P5/P1P+p1PSP1/1P6P/1KG2r2+s/LNG5L b GSN3Pr2bp 1",
+      );
+    }
+  });
+
+  it("newByUSI/handicap", () => {
+    // 飛車香落ち106手
+    const inputs = [
+      "position sfen lnsgkgsn1/7b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1 moves 3c3d 7g7f 2b3c 8h3c+ 2a3c 7i7h 3a2b 3i4h 7c7d 5i6h 8a7c 4i5h 9c9d 9g9f 6a5b 2g2f B*4d 7h7g 9d9e 9f9e 7a7b 6i7h 5c5d 9e9d 7d7e 7f7e 7c6e 7g6f 7b7c 9d9c+ 7c6d 7e7d 5a4b P*9b 4b3b 9b9a+ 6d7e B*8h 7e6f 6g6f 3c4e 6f6e 4d8h+ 7h8h B*4i 4h3i S*6f S*4f 4i5h+ 6h5h 4e5g+ 4f5g G*6g 5h4h 6f5g+ 4h3h 6g5h 3h2g 5g4g 7d7c+ 5h4i 3i3h 4g3h 2h3h S*4g 3h7h 4i3i N*5i S*3h 2g1f 3i2i 5i4g 2i2h P*4h 3h2g 1f2e 5b5c 7c6c N*3c 2e1e 1c1d 1e1d 3b3a 6c5c P*1c 1d1e 3c2e 1e2e 2b3c 7h7b+ 2g1f 2e1f P*6b 7b6b 2h1i S*2b 3c2b S*3b 4a3b G*4b 3b4b 5c4b 3a2a 4b3b 2a1a 3b2b",
+      "sfen lnsgkgsn1/7b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1 moves 3c3d 7g7f 2b3c 8h3c+ 2a3c 7i7h 3a2b 3i4h 7c7d 5i6h 8a7c 4i5h 9c9d 9g9f 6a5b 2g2f B*4d 7h7g 9d9e 9f9e 7a7b 6i7h 5c5d 9e9d 7d7e 7f7e 7c6e 7g6f 7b7c 9d9c+ 7c6d 7e7d 5a4b P*9b 4b3b 9b9a+ 6d7e B*8h 7e6f 6g6f 3c4e 6f6e 4d8h+ 7h8h B*4i 4h3i S*6f S*4f 4i5h+ 6h5h 4e5g+ 4f5g G*6g 5h4h 6f5g+ 4h3h 6g5h 3h2g 5g4g 7d7c+ 5h4i 3i3h 4g3h 2h3h S*4g 3h7h 4i3i N*5i S*3h 2g1f 3i2i 5i4g 2i2h P*4h 3h2g 1f2e 5b5c 7c6c N*3c 2e1e 1c1d 1e1d 3b3a 6c5c P*1c 1d1e 3c2e 1e2e 2b3c 7h7b+ 2g1f 2e1f P*6b 7b6b 2h1i S*2b 3c2b S*3b 4a3b G*4b 3b4b 5c4b 3a2a 4b3b 2a1a 3b2b chudan",
+    ];
+    for (const input of inputs) {
+      const record = Record.newByUSI(input) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.initialPosition.sfen).toBe(InitialPositionSFEN.HANDICAP_ROOK_LANCE);
+      expect(record.length).toBe(106);
+      record.goto(106);
+      expect(record.position.sfen).toBe(
+        "+P7k/3+R3+P1/+Pp3p1pp/4p1p2/3P5/7PK/1P3NP1P/1G3P3/LN6g w 2BG2S2NL3Pg2sl 1",
+      );
+    }
   });
 
   it("newByUSI/sfen", () => {
-    // 飛車香落ち51手
-    const data =
-      "sfen lnsgkgsn1/7b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 7g7f 3c3d 2g2f 4c4d 2f2e 2b3c 1g1f 3a4b 1f1e 4b4c 2h1h 4a3b 1e1d 1c1d 1h1d P*1c 1d1h 5a4b 4g4f 6a7b 1h4h 7a6b 3i3h 5c5d 3h4g 6b5c 4g5f 7c7d P*1b 8a7c 4f4e 6c6d 4e4d 5c4d P*4e 4d5e 5f5e 5d5e S*4d 4c4d 4e4d S*5d 1b1a+ 3c1a S*1b 1a3c 1b2a P*4e 2a3b+ 4b3b N*6f";
-    const record = Record.newByUSI(data) as Record;
-    expect(record).toBeInstanceOf(Record);
-    expect(record.length).toBe(51);
-  });
-
-  it("newByUSI/moves", () => {
-    // 平手100手
-    const data =
-      "moves 2g2f 3c3d 7g7f 4c4d 3i4h 3a3b 5g5f 9c9d 9g9f 3b4c 4i5h 2b3c 3g3f 4a3b 7i7h 5c5d 6g6f 8b5b 5i6h 5a6b 6f6e 4d4e 8h3c+ 2a3c 7h6g 5d5e 5f5e 5b5e 6g6f 5e5a 6h7h 6b7b 5h6g 7b8b 6i6h 7a7b 4h5g 4e4f 4g4f B*4g B*1h 3d3e 3f3e P*3h 5g4h 4g5h+ 6f5g 5h4i 1h2g 3h3i+ 2g4i 3i4i 4h4g B*3i 2h1h 5a5g+ 6h5g 4i4h 4g3f S*2h 3e3d 2h2i 3d3c+ 2i1h+ 3c4c R*3h B*1f 4h4g 1f3h 4g5g 6g7g 3i4h+ 4c5b 4h3h 5b6a 3h5f 7h8h 7b6a R*5a N*8e G*7i G*6f R*5b 6a5b 5a5b+ R*7b 5b7b 8b7b R*5b 7b6a 5b5f+ 5g5f 7g7h R*4h B*4d 5f6g S*6b 6a7b 4d6f 6g6f resign";
-    const record = Record.newByUSI(data) as Record;
-    expect(record).toBeInstanceOf(Record);
-    expect(record.length).toBe(100);
+    // 平手途中局面
+    const inputs = [
+      "position sfen ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs 57 moves S*3c 4b4c 3c4d 4c4d 2h2d",
+      "position sfen ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs moves S*3c 4b4c 3c4d 4c4d 2h2d",
+    ];
+    for (const input of inputs) {
+      const record = Record.newByUSI(input) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.initialPosition.sfen).toBe(
+        "ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs 1",
+      );
+      expect(record.length).toBe(5);
+    }
   });
 
   it("newByUSI/sfen-no-moves", () => {
-    // 平手途中局面・指し手無し
-    const data =
-      "sfen ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs 57";
-    const record = Record.newByUSI(data) as Record;
-    expect(record).toBeInstanceOf(Record);
-    expect(record.length).toBe(0);
+    // 平手途中局面
+    const inputs = [
+      "sfen ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs 57",
+      "sfen ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs",
+    ];
+    for (const input of inputs) {
+      const record = Record.newByUSI(input) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.initialPosition.sfen).toBe(
+        "ln1g2g1l/2s2k3/2ppp3p/5p2b/P2r1N3/2P2P3/1P1PP1P1P/1SGKG2+R1/LN5NL b S5Pbs 1",
+      );
+      expect(record.length).toBe(0);
+    }
+  });
+
+  it("newByUSI/invalid", () => {
+    const inputs = [
+      "",
+      "xxx",
+      "sfen xxx",
+      "position xxx",
+      "position",
+      "position sfen",
+      "position sfen xxx",
+      "position sfen xxx b - 1 moves",
+      "position startpos xxx",
+      "position startpos moves 2e2d",
+    ];
+    for (const input of inputs) {
+      const record = Record.newByUSI(input);
+      expect(record).toBeInstanceOf(Error);
+    }
   });
 });
