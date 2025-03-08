@@ -1,6 +1,6 @@
 {
   "name": "tsshogi",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "TypeScript library for Shogi (Japanese chess)",
   "author": "Kubo, Ryosuke",
   "license": "MIT",
