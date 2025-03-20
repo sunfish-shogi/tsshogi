@@ -29,6 +29,9 @@
       "import": "./dist/esm/index.mjs"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "audit:scripts": "node scripts/audit-scripts.mjs",
     "install:esbuild": "npm run audit:scripts && node node_modules/esbuild/install.js",
