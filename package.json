@@ -30,14 +30,16 @@
     }
   },
   "scripts": {
+    "audit:scripts": "node scripts/audit-scripts.mjs",
+    "install:esbuild": "npm run audit:scripts && node node_modules/esbuild/install.js",
     "build:cjs": "tsc --project tsconfig.cjs.json && node ./scripts/fix-dist-extension.mjs dist/cjs .cjs",
     "build:esm": "tsc --project tsconfig.esm.json && node ./scripts/fix-dist-extension.mjs dist/esm .mjs",
     "build": "npm run build:cjs && npm run build:esm",
     "prepare": "npm run build",
-    "test": "vitest run",
-    "bench": "vitest bench",
-    "coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui --coverage",
+    "test": "npm run install:esbuild && vitest run",
+    "bench": "npm run install:esbuild && vitest bench",
+    "coverage": "npm run install:esbuild && vitest run --coverage",
+    "test:ui": "npm run install:esbuild && vitest --ui --coverage",
     "lint": "eslint --fix --max-warnings 0 . && prettier --write .",
     "release:patch": "npm version patch",
     "release:minor": "npm version minor"
