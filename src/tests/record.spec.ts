@@ -812,6 +812,17 @@ describe("record", () => {
     expect((record.current.move as Move).usi).toBe("2g2f");
   });
 
+  it("newByUSI/startpos-no-moves", () => {
+    const inputs = ["position startpos", "position startpos moves", "startpos", "startpos moves"];
+    for (const input of inputs) {
+      const record = Record.newByUSI(input) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.initialPosition.sfen).toBe(InitialPositionSFEN.STANDARD);
+      expect(record.length).toBe(0);
+      expect(record.position.sfen).toBe(InitialPositionSFEN.STANDARD);
+    }
+  });
+
   it("newByUSI/startpos", () => {
     // 平手100手・投了
     const inputs = [

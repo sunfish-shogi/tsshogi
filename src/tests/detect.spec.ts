@@ -2,6 +2,7 @@ import { RecordFormatType, detectRecordFormat } from "../";
 
 describe("detect", () => {
   it("usi", () => {
+    expect(detectRecordFormat(`position startpos`)).toBe(RecordFormatType.USI);
     expect(detectRecordFormat(`position startpos moves`)).toBe(RecordFormatType.USI);
     expect(
       detectRecordFormat(
@@ -13,6 +14,7 @@ describe("detect", () => {
         `sfen l2g2snl/2s1k1gb1/p1nppp1pp/2p3p2/2r6/P2P2P2/2S1PPS1P/1BG4R1/LN2KG1NL b 2P2p 1`,
       ),
     ).toBe(RecordFormatType.USI);
+    expect(detectRecordFormat(`startpos`)).toBe(RecordFormatType.USI);
     expect(detectRecordFormat(`startpos `)).toBe(RecordFormatType.USI);
     expect(detectRecordFormat(`moves `)).toBe(RecordFormatType.USI);
   });

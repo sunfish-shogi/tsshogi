@@ -18,6 +18,8 @@ export enum RecordFormatType {
 export function detectRecordFormat(data: string): RecordFormatType {
   // USI
   if (
+    data === "position startpos" ||
+    data === "startpos" ||
     data.startsWith("position sfen ") ||
     data.startsWith("position startpos ") ||
     data.startsWith("sfen ") ||

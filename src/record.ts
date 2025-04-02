@@ -1117,21 +1117,25 @@ export class Record {
    * @param data
    */
   static newByUSI(data: string): Record | Error {
+    const positionStartpos = "position startpos";
+    const startpos = "startpos";
     const prefixPositionStartpos = "position startpos ";
     const prefixPositionSFEN = "position sfen ";
     const prefixStartpos = "startpos ";
     const prefixSFEN = "sfen ";
     const prefixMoves = "moves ";
-    if (data.startsWith(prefixPositionStartpos)) {
-      return Record.newByUSIFromMoves(new Position(), data.slice(prefixPositionStartpos.length));
+    if (data === positionStartpos || data === startpos) {
+      return new Record();
+    } else if (data.startsWith(prefixPositionStartpos)) {
+      return Record.newByUSIFromMoves(data.slice(prefixPositionStartpos.length));
     } else if (data.startsWith(prefixPositionSFEN)) {
       return Record.newByUSIFromSFEN(data.slice(prefixPositionSFEN.length));
     } else if (data.startsWith(prefixStartpos)) {
-      return Record.newByUSIFromMoves(new Position(), data.slice(prefixStartpos.length));
+      return Record.newByUSIFromMoves(data.slice(prefixStartpos.length));
     } else if (data.startsWith(prefixSFEN)) {
       return Record.newByUSIFromSFEN(data.slice(prefixSFEN.length));
     } else if (data.startsWith(prefixMoves)) {
-      return Record.newByUSIFromMoves(new Position(), data);
+      return Record.newByUSIFromMoves(data);
     } else {
       return new InvalidUSIError(data);
     }
@@ -1147,10 +1151,10 @@ export class Record {
     if (!position) {
       return new InvalidUSIError(data);
     }
-    return Record.newByUSIFromMoves(position, sections.slice(movesIndex).join(" "));
+    return Record.newByUSIFromMoves(sections.slice(movesIndex).join(" "), position);
   }
 
-  private static newByUSIFromMoves(position: ImmutablePosition, data: string): Record | Error {
+  private static newByUSIFromMoves(data: string, position?: ImmutablePosition): Record | Error {
     const record = new Record(position);
     if (data.length === 0) {
       return record;
