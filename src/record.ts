@@ -586,10 +586,14 @@ export class Record {
    * 全ての分岐選択を初期化して最初のノードをアクティブにします。
    */
   resetAllBranchSelection(): void {
+    for (let node = this._current; node.prev; node = node.prev) {
+      if (!node.isFirstBranch) {
+        this._current = node.prev.next as NodeImpl;
+      }
+    }
     this._forEach((node) => {
       node.activeBranch = node.isFirstBranch;
     });
-    this._current = (this._current.prev && this._current.prev.next) || this._current;
   }
 
   /**
