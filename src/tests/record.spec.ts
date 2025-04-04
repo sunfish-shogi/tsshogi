@@ -809,7 +809,7 @@ describe("record", () => {
     expect(record.current.branchIndex).toBe(2);
     record.resetAllBranchSelection();
     expect(record.current.branchIndex).toBe(0);
-    expect((record.current.move as Move).usi).toBe("2g2f");
+    expect((record.current.move as Move).usi).toBe("3c3d");
   });
 
   it("newByUSI/startpos-no-moves", () => {
