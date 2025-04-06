@@ -39,6 +39,7 @@
     "build:esm": "tsc --project tsconfig.esm.json && node ./scripts/fix-dist-extension.mjs dist/esm .mjs",
     "build": "npm run build:cjs && npm run build:esm",
     "prepare": "npm run build",
+    "publish": "npm run build && npm publish",
     "test": "npm run install:esbuild && vitest run",
     "bench": "npm run install:esbuild && vitest bench",
     "coverage": "npm run install:esbuild && vitest run --coverage",
