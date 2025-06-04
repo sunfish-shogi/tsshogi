@@ -1,6 +1,7 @@
 import {
   anySpecialMove,
   Color,
+  exportBOD,
   exportKI2,
   exportKIF,
   formatKIFMove,
@@ -1462,5 +1463,31 @@ describe("kakinoki", () => {
       expect(record.metadata.getStandardMetadata(key)).match(/^.+テスト$/);
     }
     expect(exportKIF(record, {})).toBe(data);
+  });
+
+  it("exportBOD", () => {
+    const record = new Record();
+    record.append(record.position.createMoveByUSI("7g7f") as Move);
+    record.append(record.position.createMoveByUSI("3c3d") as Move);
+    record.append(record.position.createMoveByUSI("2g2f") as Move);
+    record.append(record.position.createMoveByUSI("2b8h+") as Move);
+    const bod = exportBOD(record);
+    expect(bod).toBe(`後手の持駒：角　
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+|v香v桂v銀v金v玉v金v銀v桂v香|一
+| ・v飛 ・ ・ ・ ・ ・ ・ ・|二
+|v歩v歩v歩v歩v歩v歩 ・v歩v歩|三
+| ・ ・ ・ ・ ・ ・v歩 ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|五
+| ・ ・ 歩 ・ ・ ・ ・ 歩 ・|六
+| 歩 歩 ・ 歩 歩 歩 歩 ・ 歩|七
+| ・v馬 ・ ・ ・ ・ ・ 飛 ・|八
+| 香 桂 銀 金 玉 金 銀 桂 香|九
++---------------------------+
+先手の持駒：なし
+先手番
+手数＝4  ８八角成(22)  まで
+`);
   });
 });

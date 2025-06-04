@@ -34,7 +34,7 @@ import {
 import { Square } from "./square";
 import {
   fileToMultiByteChar,
-  formatMove as formatMove2,
+  formatMove,
   numberToKanji,
   parseMoves,
   pieceTypeToStringForBoard,
@@ -741,7 +741,11 @@ function formatPosition(position: ImmutablePosition, options?: KIFExportOptions)
     case InitialPositionSFEN.HANDICAP_10PIECES:
       return "手合割：十枚落ち" + returnCode;
   }
+  return formatBOD(position, options);
+}
 
+function formatBOD(position: ImmutablePosition, options?: KIFExportOptions): string {
+  const returnCode = options?.returnCode || "\n";
   let ret = "";
   ret += "後手の持駒：" + formatHand(position.whiteHand) + returnCode;
   ret += "  ９ ８ ７ ６ ５ ４ ３ ２ １" + returnCode;
@@ -876,11 +880,11 @@ type KI2ExportOptions = {
  * @param record
  * @param options
  */
-export function exportKI2(record: ImmutableRecord, options: KI2ExportOptions): string {
+export function exportKI2(record: ImmutableRecord, options?: KI2ExportOptions): string {
   let ret = "";
   let moveCountInLine = 0;
   let lastMoveLength = 0;
-  const returnCode = options.returnCode ? options.returnCode : "\n";
+  const returnCode = options?.returnCode ? options.returnCode : "\n";
   ret += formatMetadata(record.metadata, options);
   ret += formatPosition(record.initialPosition, options);
   record.forEach((node, pos) => {
@@ -893,7 +897,7 @@ export function exportKI2(record: ImmutableRecord, options: KI2ExportOptions): s
         ret += "変化：" + node.ply + "手" + returnCode;
       }
       if (node.move instanceof Move) {
-        const str = formatMove2(pos, node.move, {
+        const str = formatMove(pos, node.move, {
           lastMove: node.prev?.move instanceof Move ? node.prev.move : undefined,
           compatible: true,
         });
@@ -955,5 +959,16 @@ export function exportKI2(record: ImmutableRecord, options: KI2ExportOptions): s
       ret += "&" + node.bookmark + returnCode;
     }
   });
+  return ret;
+}
+
+export function exportBOD(record: ImmutableRecord, options?: KIFExportOptions): string {
+  let ret = "";
+  const returnCode = options?.returnCode || "\n";
+  ret += formatBOD(record.position, options);
+  const ply = record.current.ply;
+  const lastMove = record.current.move instanceof Move ? record.current.move : undefined;
+  const lastMoveStr = lastMove ? formatKIFMove(lastMove) : "";
+  ret += `手数＝${ply}  ${lastMoveStr}  まで` + returnCode;
   return ret;
 }
