@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import fs from "node:fs";
 
-function checkPackageJson(packageJsonPath) {
+function checkPackageJson(packageJsonPath: string) {
   const stat = fs.statSync(packageJsonPath);
   if (!stat.isFile()) {
     return;
@@ -21,6 +21,16 @@ function checkPackageJson(packageJsonPath) {
         throw new Error(`Package ${name}@${version} is missing postinstall scripts`);
       }
       if (scripts.postinstall !== "node install.js") {
+        throw new Error(`Package ${name}@${version} has unexpected postinstall scripts`);
+      }
+      break;
+
+    // The postinstall is introduced since https://github.com/unrs/unrs-resolver/pull/66 (v1.6.0)
+    case "unrs-resolver":
+      if (!scripts?.postinstall) {
+        throw new Error(`Package ${name}@${version} is missing postinstall scripts`);
+      }
+      if (!scripts.postinstall.match(/^napi-postinstall unrs-resolver [\d.]+ check$/)) {
         throw new Error(`Package ${name}@${version} has unexpected postinstall scripts`);
       }
       break;

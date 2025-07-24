@@ -33,7 +33,7 @@
     "dist"
   ],
   "scripts": {
-    "audit:scripts": "node scripts/audit-scripts.mjs",
+    "audit:scripts": "tsx scripts/audit-scripts.ts",
     "install:esbuild": "npm run audit:scripts && node node_modules/esbuild/install.js",
     "build:cjs": "tsc --project tsconfig.cjs.json && node ./scripts/fix-dist-extension.mjs dist/cjs .cjs",
     "build:esm": "tsc --project tsconfig.esm.json && node ./scripts/fix-dist-extension.mjs dist/esm .mjs",
@@ -56,6 +56,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "prettier": "^3.1.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.3.2",
     "vitest": "^3.0.7"
   }
