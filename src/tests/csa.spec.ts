@@ -970,8 +970,7 @@ $END_TIME:2024/05/04 11:05:12
 
   it("import/v3", () => {
     // http://www2.computer-shogi.org/protocol/record_v3.html より
-    const data = `
-'CSA encoding=UTF-8
+    const data = `'CSA encoding=UTF-8
 '----------棋譜ファイルの例 "example.csa"---------------
 'バージョン
 V3.0
@@ -999,13 +998,13 @@ $JISHOGI:27
 $NOTE:備考１行目\n２行目
 '平手の初期局面
 P1-KY-KE-GI-KI-OU-KI-GI-KE-KY
-P2 * -HI * * * * * -KA * 
+P2 * -HI * * * * * -KA *
 P3-FU-FU-FU-FU-FU-FU-FU-FU-FU
-P4 * * * * * * * * * 
-P5 * * * * * * * * * 
-P6 * * * * * * * * * 
+P4 * * * * * * * * *
+P5 * * * * * * * * *
+P6 * * * * * * * * *
 P7+FU+FU+FU+FU+FU+FU+FU+FU+FU
-P8 * +KA * * * * * +HI * 
+P8 * +KA * * * * * +HI *
 P9+KY+KE+GI+KI+OU+KI+GI+KE+KY
 '先手番
 +
@@ -1018,10 +1017,11 @@ P9+KY+KE+GI+KI+OU+KI+GI+KE+KY
 T6.123
 '*プログラムが読むコメント１行目
 '*プログラムが読むコメント２行目
-  %CHUDAN
-`;
+%CHUDAN
+'-------------------------------------------------`;
     const record = importCSA(data) as Record;
     expect(record).toBeInstanceOf(Record);
+    expect(record.initialPosition.sfen).toBe(InitialPositionSFEN.STANDARD);
     expect(record.metadata.getStandardMetadata(RecordMetadataKey.BLACK_NAME)).toBe("先手");
     expect(record.metadata.getStandardMetadata(RecordMetadataKey.WHITE_NAME)).toBe("後手");
     expect(record.metadata.getStandardMetadata(RecordMetadataKey.TITLE)).toBe(

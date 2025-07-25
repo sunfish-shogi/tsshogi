@@ -93,7 +93,7 @@ const linePatterns: {
     sectionType: SectionType.HEADER,
   },
   {
-    pattern: /^P[1-9]( \* |[-+][A-Z][A-Z]){9}$/,
+    pattern: /^P[1-9]( \* ?|[-+][A-Z][A-Z]){9}$/,
     type: LineType.RANK,
     sectionType: SectionType.HEADER,
   },
@@ -194,13 +194,24 @@ function parsePosition(line: string, position: Position): void {
 
 function parseRank(line: string, position: Position): Error | undefined {
   const rank = Number(line[1]);
+  let begin = 2;
   for (let x = 0; x < 9; x += 1) {
     const file = 9 - x;
-    const begin = x * 3 + 2;
     const section = line.slice(begin, begin + 3);
+
+    // 次のマス目は通常3文字先になる。
+    // ただし " *  * " のように空きマスが続いた時にメールやHTML上で連続する空白がまとめられて " * * " となることがある。
+    // これはCSAの仕様といては正しいデータではないが、現実に存在するので配慮する。
+    // 3文字先へ進めるが、次の文字が "*" であれば1文字戻る。
+    begin += 3;
+    if (line[begin] === "*") {
+      begin -= 1;
+    }
+
     if (section[0] === " ") {
       continue;
     }
+
     const color = section[0] === "+" ? Color.BLACK : Color.WHITE;
     const pieceType = csaNameToPieceType[section.slice(1)];
     if (!pieceType) {
