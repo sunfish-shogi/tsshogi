@@ -435,6 +435,119 @@ describe("record", () => {
     expect(exportKIF(record1, {})).toBe(expected);
   });
 
+  it("mergeFromCurrentPosition", () => {
+    const data1 = `手合割：平手
+▲２六歩    △３四歩    ▲７六歩    △５四歩    ▲２五歩    △５二飛
+*ゴキゲン中飛車
+▲７八金
+*2000年前後は７八金や５八金が主流
+△５五歩    ▲２四歩    △同　歩    ▲同　飛    △５六歩    ▲同　歩
+△同　飛    ▲６九玉    △３二金    ▲４八銀
+
+変化：7手
+▲４八銀
+*現代は４八銀が主流
+△５五歩    ▲６八玉    △３三角    ▲７八玉    △４二銀    ▲６八銀`;
+    const data2 = `後手の持駒：なし
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+|v香v桂v銀v金v玉v金v銀v桂v香|一
+| ・ ・ ・ ・v飛 ・ ・v角 ・|二
+|v歩v歩v歩v歩 ・v歩 ・v歩v歩|三
+| ・ ・ ・ ・v歩 ・v歩 ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ 歩 ・|五
+| ・ ・ 歩 ・ ・ ・ ・ ・ ・|六
+| 歩 歩 ・ 歩 歩 歩 歩 ・ 歩|七
+| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八
+| 香 桂 銀 金 玉 金 銀 桂 香|九
++---------------------------+
+先手の持駒：なし
+先手番
+▲４八銀    △５五歩    ▲６八玉    △３三角    ▲３六歩
+*超速を目指す手
+△４二銀    ▲３七銀    △５三銀    ▲４六銀    △４四銀
+
+変化：5手
+▲７八玉    △４二銀    ▲６八銀    △５三銀    ▲３六歩    △５四銀
+▲３七桂`;
+    const expected = `手合割：平手
+▲２六歩    △３四歩    ▲７六歩    △５四歩    ▲２五歩    △５二飛
+*ゴキゲン中飛車
+▲７八金
+*2000年前後は７八金や５八金が主流
+△５五歩    ▲２四歩    △同　歩    ▲同　飛    △５六歩    ▲同　歩
+△同　飛    ▲６九玉    △３二金    ▲４八銀
+
+変化：7手
+▲４八銀
+*現代は４八銀が主流
+△５五歩    ▲６八玉    △３三角    ▲７八玉    △４二銀    ▲６八銀
+△５三銀    ▲３六歩    △５四銀    ▲３七桂
+
+変化：11手
+▲３六歩
+*超速を目指す手
+△４二銀    ▲３七銀    △５三銀    ▲４六銀    △４四銀`;
+    const record1 = importKI2(data1) as Record;
+    const record2 = importKI2(data2) as Record;
+    record1.goto(6);
+
+    const result = record1.mergeFromCurrentPosition(record2);
+
+    expect(result.successCount).toBe(17);
+    expect(result.skipCount).toBe(0);
+    expect(exportKI2(record1, {})).toBe(expected);
+    expect(record1.current.ply).toBe(6);
+  });
+
+  it("mergeFromCurrentPosition:partial", () => {
+    const data1 = `手合割：平手
+▲２六歩    △３四歩    ▲７六歩    △４四歩    ▲４八銀    △４二飛
+▲２五歩    △３三角    ▲９六歩    △９四歩`;
+    const data2 = `後手の持駒：なし
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+|v香v桂v銀v金v玉v金v銀v桂v香|一
+| ・ ・ ・ ・ ・v飛 ・ ・ ・|二
+|v歩v歩v歩v歩v歩 ・v角v歩v歩|三
+| ・ ・ ・ ・ ・v歩v歩 ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ 歩 ・|五
+| ・ ・ 歩 ・ ・ ・ ・ ・ ・|六
+| 歩 歩 ・ 歩 歩 歩 歩 ・ 歩|七
+| ・ 角 ・ ・ ・ 銀 ・ 飛 ・|八
+| 香 桂 銀 金 玉 金 ・ 桂 香|九
++---------------------------+
+先手の持駒：なし
+先手番
+▲６八玉    △３二銀    ▲７八玉    △６二玉    ▲５八金右  △７二銀
+▲５六歩    △５二金左  ▲５七銀    △９四歩    ▲９六歩    △７一玉
+▲３六歩    △８二玉
+
+変化：11手
+▲７七角    △９五歩    ▲８八玉
+
+変化：9手
+▲６六角    △４三銀    ▲５七角    △２二飛`;
+    const expected = `手合割：平手
+▲２六歩    △３四歩    ▲７六歩    △４四歩    ▲４八銀    △４二飛
+▲２五歩    △３三角    ▲９六歩    △９四歩    ▲６八玉    △３二銀
+▲７八玉    △６二玉    ▲５八金右  △７二銀    ▲５六歩    △５二金左
+▲５七銀
+
+変化：19手
+▲６六角    △４三銀    ▲５七角    △２二飛`;
+    const record1 = importKI2(data1) as Record;
+    const record2 = importKI2(data2) as Record;
+    record1.goto(10);
+
+    const result = record1.mergeFromCurrentPosition(record2);
+
+    expect(result.successCount).toBe(13);
+    expect(result.skipCount).toBe(8);
+    expect(exportKI2(record1, {})).toBe(expected);
+    expect(record1.current.ply).toBe(10);
+  });
+
   it("repetition", () => {
     const data = `
 手合割：平手

@@ -829,6 +829,7 @@ export class Record implements ImmutableRecord {
   /**
    * 棋譜をマージします。
    * 経過時間やコメント、しおりが両方にある場合は自分の側を優先します。
+   * 初期局面が異なる場合はマージできません。
    * @param record
    */
   merge(record: ImmutableRecord): boolean {
@@ -838,13 +839,48 @@ export class Record implements ImmutableRecord {
     }
     // 元居た局面までのパスを記憶する。
     const path = this.movesBefore;
+    // 開始局面に戻してマージを実行する。
+    this._goto(0);
+    this.mergeFromCurrentPosition(record);
+    // 元居た局面まで戻す。
+    for (let i = 1; i < path.length; i++) {
+      this._append(path[i].move, { ignoreValidation: true });
+    }
+    return true;
+  }
+
+  /**
+   * 棋譜を現在の局面からのサブツリーとしてマージします。
+   * 経過時間やコメント、しおりが両方にある場合は自分の側を優先します。
+   * 開始局面が一致していなくてもマージできますが、指し手が挿入不能な場合その子ノードは無視されます。
+   * @param record
+   */
+  mergeFromCurrentPosition(
+    record: ImmutableRecord,
+    option?: DoMoveOption,
+  ): { successCount: number; skipCount: number } {
+    const begin = this._current.ply;
+    let errorPly: number | null = null;
+    let successCount = 0;
+    let skipCount = 0;
     // 指し手をマージする。
     record.forEach((node) => {
       if (node.ply === 0) {
         return;
       }
-      this._goto(node.ply - 1);
-      this._append(node.move, { ignoreValidation: true });
+      const ply = begin + node.ply - 1;
+      if (errorPly !== null && ply > errorPly) {
+        skipCount++;
+        return;
+      }
+      this._goto(ply);
+      if (!this._append(node.move, option)) {
+        errorPly = ply;
+        skipCount++;
+        return;
+      }
+      errorPly = null;
+      successCount++;
       if (node.elapsedMs && !this.current.elapsedMs) {
         this.current.setElapsedMs(node.elapsedMs);
       }
@@ -859,11 +895,8 @@ export class Record implements ImmutableRecord {
       }
     });
     // 元居た局面まで戻す。
-    this._goto(0);
-    for (let i = 1; i < path.length; i++) {
-      this._append(path[i].move, { ignoreValidation: true });
-    }
-    return true;
+    this._goto(begin);
+    return { successCount, skipCount };
   }
 
   /**
