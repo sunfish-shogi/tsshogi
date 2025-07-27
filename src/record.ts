@@ -259,9 +259,16 @@ export interface Node extends ImmutableNode {
   readonly next: Node | null;
   readonly branch: Node | null;
   comment: string;
+  bookmark: string;
   customData: unknown;
   setElapsedMs(elapsedMs: number): void;
-  bookmark: string;
+}
+
+function copyNodeMetadata(source: ImmutableNode, target: Node): void {
+  target.comment = source.comment;
+  target.bookmark = source.bookmark;
+  target.customData = source.customData;
+  target.setElapsedMs(source.elapsedMs);
 }
 
 class NodeImpl implements Node {
@@ -380,6 +387,7 @@ export interface ImmutableRecord {
   readonly usen: [string, number];
   readonly bookmarks: string[];
   forEach(handler: (node: ImmutableNode, base: ImmutablePosition) => void): void;
+  getSubtree(): ImmutableRecord;
   on(event: "changePosition", handler: () => void): void;
 }
 
@@ -1108,6 +1116,53 @@ export class Record implements ImmutableRecord {
         }
         p = prev;
       }
+      p = p.branch;
+    }
+  }
+
+  getSubtree(): Record {
+    // Create a new Record instance with the initial position.
+    const subtree = new Record(this.position);
+
+    // Copy the metadata from the current record to the subtree.
+    for (const key of Object.values(RecordMetadataKey)) {
+      const value = this.metadata.getStandardMetadata(key);
+      if (value) {
+        subtree.metadata.setStandardMetadata(key, value);
+      }
+    }
+    for (const key of this.metadata.customMetadataKeys) {
+      const value = this.metadata.getCustomMetadata(key);
+      if (value) {
+        subtree.metadata.setCustomMetadata(key, value);
+      }
+    }
+
+    // Copy the nodes from the current record to the subtree.
+    let p: ImmutableNode = this.current;
+    copyNodeMetadata(p, subtree.current);
+    if (!p.next) {
+      return subtree;
+    }
+    p = p.next;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      subtree.append(p.move, { ignoreValidation: true });
+      copyNodeMetadata(p, subtree.current);
+      if (p.next) {
+        p = p.next;
+        continue;
+      }
+      while (!p.branch) {
+        const prev = p.prev;
+        if (!prev || prev === this.current) {
+          subtree.goto(0);
+          return subtree;
+        }
+        subtree.goBack();
+        p = prev;
+      }
+      subtree.goBack();
       p = p.branch;
     }
   }
