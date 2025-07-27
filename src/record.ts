@@ -386,7 +386,7 @@ export interface ImmutableRecord {
 /**
  * 棋譜
  */
-export class Record {
+export class Record implements ImmutableRecord {
   public metadata: RecordMetadata;
   private _initialPosition: ImmutablePosition;
   private _position: Position;
@@ -1086,14 +1086,12 @@ export class Record {
   private find(handler: (node: NodeImpl, base: ImmutablePosition) => boolean): NodeImpl | null {
     let p: NodeImpl = this._first;
     const pos = this.initialPosition.clone();
-    const stack: NodeImpl[] = [];
     // eslint-disable-next-line no-constant-condition
     while (true) {
       if (handler(p, pos)) {
         return p;
       }
       if (p.next) {
-        stack.push(p);
         if (p.move instanceof Move) {
           pos.doMove(p.move);
         }
@@ -1101,14 +1099,14 @@ export class Record {
         continue;
       }
       while (!p.branch) {
-        const last = stack.pop();
-        if (!last) {
+        const prev = p.prev;
+        if (!prev) {
           return null;
         }
-        if (last.move instanceof Move) {
-          pos.undoMove(last.move);
+        if (prev.move instanceof Move) {
+          pos.undoMove(prev.move);
         }
-        p = last;
+        p = prev;
       }
       p = p.branch;
     }
