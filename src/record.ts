@@ -841,7 +841,7 @@ export class Record implements ImmutableRecord {
     const path = this.movesBefore;
     // 開始局面に戻してマージを実行する。
     this._goto(0);
-    this.mergeFromCurrentPosition(record);
+    this.mergeIntoCurrentPosition(record);
     // 元居た局面まで戻す。
     for (let i = 1; i < path.length; i++) {
       this._append(path[i].move, { ignoreValidation: true });
@@ -855,7 +855,7 @@ export class Record implements ImmutableRecord {
    * 開始局面が一致していなくてもマージできますが、指し手が挿入不能な場合その子ノードは無視されます。
    * @param record
    */
-  mergeFromCurrentPosition(
+  mergeIntoCurrentPosition(
     record: ImmutableRecord,
     option?: DoMoveOption,
   ): { successCount: number; skipCount: number } {

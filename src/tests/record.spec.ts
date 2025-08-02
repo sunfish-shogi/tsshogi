@@ -435,7 +435,7 @@ describe("record", () => {
     expect(exportKIF(record1, {})).toBe(expected);
   });
 
-  it("mergeFromCurrentPosition", () => {
+  it("mergeIntoCurrentPosition", () => {
     const data1 = `手合割：平手
 ▲２六歩    △３四歩    ▲７六歩    △５四歩    ▲２五歩    △５二飛
 *ゴキゲン中飛車
@@ -492,7 +492,7 @@ describe("record", () => {
     const record2 = importKI2(data2) as Record;
     record1.goto(6);
 
-    const result = record1.mergeFromCurrentPosition(record2);
+    const result = record1.mergeIntoCurrentPosition(record2);
 
     expect(result.successCount).toBe(17);
     expect(result.skipCount).toBe(0);
@@ -500,7 +500,7 @@ describe("record", () => {
     expect(record1.current.ply).toBe(6);
   });
 
-  it("mergeFromCurrentPosition:partial", () => {
+  it("mergeIntoCurrentPosition:partial", () => {
     const data1 = `手合割：平手
 ▲２六歩    △３四歩    ▲７六歩    △４四歩    ▲４八銀    △４二飛
 ▲２五歩    △３三角    ▲９六歩    △９四歩`;
@@ -540,7 +540,7 @@ describe("record", () => {
     const record2 = importKI2(data2) as Record;
     record1.goto(10);
 
-    const result = record1.mergeFromCurrentPosition(record2);
+    const result = record1.mergeIntoCurrentPosition(record2);
 
     expect(result.successCount).toBe(13);
     expect(result.skipCount).toBe(8);
