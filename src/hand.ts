@@ -78,7 +78,7 @@ export class Hand {
    * @param pieceType
    */
   count(pieceType: PieceType): number {
-    return this.pieces.get(pieceType) as number;
+    return Math.max(this.pieces.get(pieceType) as number, 0);
   }
 
   /**
