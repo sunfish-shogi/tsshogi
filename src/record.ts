@@ -241,6 +241,7 @@ export interface ImmutableNode {
   readonly isCheck: boolean;
   readonly comment: string;
   readonly customData: unknown;
+  readonly sfen: string;
   readonly displayText: string;
   readonly timeText: string;
   readonly hasBranch: boolean;
@@ -289,6 +290,7 @@ class NodeImpl implements Node {
     public move: Move | SpecialMove,
     public isCheck: boolean,
     public displayText: string,
+    public sfen: string,
   ) {}
 
   get timeText(): string {
@@ -342,16 +344,17 @@ class NodeImpl implements Node {
     }
   }
 
-  static newRootEntry(color: Color): NodeImpl {
+  static newRootEntry(position: ImmutablePosition): NodeImpl {
     return new NodeImpl(
       0, // ply
       null, // prev
       0, // branchIndex
       true, // activeBranch
-      color, // color
+      position.color, // color
       specialMove(SpecialMoveType.START), // move
       false, // isCheck
       "開始局面", // displayText
+      position.sfen, // sfen
     );
   }
 }
@@ -386,7 +389,7 @@ export interface ImmutableRecord {
   readonly sfen: string;
   readonly usen: [string, number];
   readonly bookmarks: string[];
-  forEach(handler: (node: ImmutableNode, base: ImmutablePosition) => void): void;
+  forEach(handler: (node: ImmutableNode) => void): void;
   getSubtree(): ImmutableRecord;
   on(event: "changePosition", handler: () => void): void;
 }
@@ -410,7 +413,7 @@ export class Record implements ImmutableRecord {
     this.metadata = new RecordMetadata();
     this._initialPosition = position ? position.clone() : new Position();
     this._position = this.initialPosition.clone();
-    this._first = NodeImpl.newRootEntry(this._initialPosition.color);
+    this._first = NodeImpl.newRootEntry(this._initialPosition);
     this._current = this._first;
     this.incrementRepetition();
   }
@@ -506,7 +509,7 @@ export class Record implements ImmutableRecord {
       this._initialPosition = position.clone();
     }
     this._position = this.initialPosition.clone();
-    this._first = NodeImpl.newRootEntry(this._initialPosition.color);
+    this._first = NodeImpl.newRootEntry(this._initialPosition);
     this._current = this._first;
     this.repetitionCounts = {};
     this.repetitionStart = {};
@@ -699,6 +702,7 @@ export class Record implements ImmutableRecord {
         move,
         isCheck,
         displayText,
+        this.position.sfen,
       );
       this._current = this._current.next;
       this._current.setElapsedMs(0);
@@ -732,6 +736,7 @@ export class Record implements ImmutableRecord {
       move,
       isCheck,
       displayText,
+      this.position.sfen,
     );
     this._current.setElapsedMs(0);
     lastBranch.branch = this._current;
@@ -787,11 +792,7 @@ export class Record implements ImmutableRecord {
   removeCurrentMove(): boolean {
     const target = this._current;
     if (!this.goBack()) {
-      if (!this._current.next) {
-        return false;
-      }
-      this._current.next = null;
-      return true;
+      return this.removeNextMove();
     }
     if (this._current.next === target) {
       this._current.next = target.branch;
@@ -1113,29 +1114,25 @@ export class Record implements ImmutableRecord {
   }
 
   // 深さ優先で全てのノードを訪問します。
-  forEach(handler: (node: Node, base: ImmutablePosition) => void): void {
+  forEach(handler: (node: Node) => void): void {
     this._forEach(handler);
   }
 
-  private _forEach(handler: (node: NodeImpl, base: ImmutablePosition) => void): void {
-    this.find((node, base) => {
-      handler(node, base);
+  private _forEach(handler: (node: NodeImpl) => void): void {
+    this.find((node) => {
+      handler(node);
       return false;
     });
   }
 
-  private find(handler: (node: NodeImpl, base: ImmutablePosition) => boolean): NodeImpl | null {
+  private find(handler: (node: NodeImpl) => boolean): NodeImpl | null {
     let p: NodeImpl = this._first;
-    const pos = this.initialPosition.clone();
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      if (handler(p, pos)) {
+      if (handler(p)) {
         return p;
       }
       if (p.next) {
-        if (p.move instanceof Move) {
-          pos.doMove(p.move);
-        }
         p = p.next;
         continue;
       }
@@ -1143,9 +1140,6 @@ export class Record implements ImmutableRecord {
         const prev = p.prev;
         if (!prev) {
           return null;
-        }
-        if (prev.move instanceof Move) {
-          pos.undoMove(prev.move);
         }
         p = prev;
       }

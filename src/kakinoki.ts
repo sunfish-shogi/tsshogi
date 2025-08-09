@@ -887,8 +887,8 @@ export function exportKI2(record: ImmutableRecord, options?: KI2ExportOptions): 
   const returnCode = options?.returnCode ? options.returnCode : "\n";
   ret += formatMetadata(record.metadata, options);
   ret += formatPosition(record.initialPosition, options);
-  record.forEach((node, pos) => {
-    if (node.ply !== 0) {
+  record.forEach((node) => {
+    if (node.prev) {
       if (!node.isFirstBranch) {
         if (!ret.endsWith(returnCode)) {
           ret += returnCode;
@@ -897,6 +897,10 @@ export function exportKI2(record: ImmutableRecord, options?: KI2ExportOptions): 
         ret += "変化：" + node.ply + "手" + returnCode;
       }
       if (node.move instanceof Move) {
+        const pos = Position.newBySFEN(node.prev.sfen);
+        if (!pos) {
+          throw new Error("Invalid SFEN");
+        }
         const str = formatMove(pos, node.move, {
           lastMove: node.prev?.move instanceof Move ? node.prev.move : undefined,
           compatible: true,
