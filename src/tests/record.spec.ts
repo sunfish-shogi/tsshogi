@@ -64,12 +64,20 @@ describe("record", () => {
     expect(record.first.next).toBe(record.current);
     expect(record.first.comment).toBe("abc");
     expect(record.first.customData).toBe("foo bar baz");
+    const onClear = vi.fn();
+    const onChangePosition = vi.fn();
+    record.on("clear", onClear);
+    record.on("changePosition", onChangePosition);
+
     record.clear();
+
     expect(record.first.move).toStrictEqual(specialMove(SpecialMoveType.START));
     expect(record.first.next).toBeNull();
     expect(record.first.comment).toBe("");
     expect(record.first.customData).toBeUndefined();
     expect(record.current).toBe(record.first);
+    expect(onClear).toBeCalledTimes(1);
+    expect(onChangePosition).toBeCalledTimes(1);
   });
 
   it("getUSI", () => {
@@ -254,7 +262,9 @@ describe("record", () => {
   it("append/goBack/goForward/goto", () => {
     const record = new Record();
     const onChangePosition = vi.fn();
+    const onAddNode = vi.fn();
     record.on("changePosition", onChangePosition);
+    record.on("addNode", onAddNode);
     const move = (ff: number, fr: number, tf: number, tr: number): Move => {
       return record.position.createMove(new Square(ff, fr), new Square(tf, tr)) as Move;
     };
@@ -287,10 +297,10 @@ describe("record", () => {
     expect(record.append(move(8, 3, 8, 4))).toBeTruthy();
     expect(record.current.hasBranch).toBeTruthy(); // 分岐が作られる。
     expect(onChangePosition).toBeCalledTimes(8);
-    // 76歩 -> 84歩 -> 78金
+    // 76歩 -> 84歩 -> 78銀
     expect(record.append(move(7, 9, 7, 8))).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(9);
-    // 76歩 -> 84歩 -> 78金 -> 84飛 (invalid move)
+    // 76歩 -> 84歩 -> 78銀 -> 84飛 (invalid move)
     expect(record.append(move(8, 2, 8, 4))).toBeFalsy();
     expect(onChangePosition).toBeCalledTimes(9); // not called
 
@@ -338,6 +348,14 @@ describe("record", () => {
     expect(record.switchBranchByIndex(0)).toBeTruthy();
     expect(onChangePosition).toBeCalledTimes(18);
     expect(record.usi).toBe("position startpos moves 7g7f 3c3d");
+
+    expect(onAddNode).toBeCalledTimes(6);
+    expect(onAddNode.mock.calls[0][0].displayText).toBe("☗７六歩");
+    expect(onAddNode.mock.calls[1][0].displayText).toBe("☖３四歩");
+    expect(onAddNode.mock.calls[2][0].displayText).toBe("☗２六歩");
+    expect(onAddNode.mock.calls[3][0].displayText).toBe("☖８四歩");
+    expect(onAddNode.mock.calls[4][0].displayText).toBe("☗７八銀");
+    expect(onAddNode.mock.calls[5][0].displayText).toBe("中断");
   });
 
   it("merge", () => {
@@ -773,24 +791,57 @@ describe("record", () => {
 3 ７五歩(76)
 4 ８四歩(83)
 5 ７八飛(28)
+6 ８五歩(84)
+4 ３五歩(34)
+5 ７八飛(28)
+3 ２六歩(27)
+4 ４四歩(43)
+3 ７八金(69)
 `;
     const record = importKIF(data) as Record;
+    const handler = vi.fn();
+    record.on("removeNode", handler);
+
+    record.goto(6);
+    expect(record.removeCurrentMove()).toBeTruthy();
+    expect(record.moves.length).toBe(6);
+    expect(record.current.ply).toBe(5);
+    expect(handler).toBeCalledTimes(1);
+    expect(handler.mock.calls[0][0].displayText).toBe("☖８五歩");
 
     record.goto(4);
-    expect(record.current.ply).toBe(4);
+    record.switchBranchByIndex(1);
+    expect(record.removeCurrentMove()).toBeTruthy();
+    expect(record.moves.length).toBe(6);
+    expect(record.current.ply).toBe(3);
+    expect(handler).toBeCalledTimes(3);
+    expect(handler.mock.calls[1][0].displayText).toBe("☗７八飛");
+    expect(handler.mock.calls[2][0].displayText).toBe("☖３五歩");
+
+    record.goto(4);
     expect(record.removeCurrentMove()).toBeTruthy();
     expect(record.moves.length).toBe(4);
     expect(record.current.ply).toBe(3);
+    expect(handler).toBeCalledTimes(5);
+    expect(handler.mock.calls[3][0].displayText).toBe("☗７八飛");
+    expect(handler.mock.calls[4][0].displayText).toBe("☖８四歩");
 
     record.goto(0);
-    expect(record.current.ply).toBe(0);
     expect(record.removeCurrentMove()).toBeTruthy();
     expect(record.moves.length).toBe(1);
     expect(record.current.ply).toBe(0);
+    expect(handler).toBeCalledTimes(11);
+    expect(handler.mock.calls[5][0].displayText).toBe("☗７五歩");
+    expect(handler.mock.calls[6][0].displayText).toBe("☖４四歩");
+    expect(handler.mock.calls[7][0].displayText).toBe("☗２六歩");
+    expect(handler.mock.calls[8][0].displayText).toBe("☗７八金");
+    expect(handler.mock.calls[9][0].displayText).toBe("☖３四歩");
+    expect(handler.mock.calls[10][0].displayText).toBe("☗７六歩");
 
     expect(record.removeCurrentMove()).toBeFalsy();
     expect(record.moves.length).toBe(1);
     expect(record.current.ply).toBe(0);
+    expect(handler).toBeCalledTimes(11);
   });
 
   it("removeNextMove", () => {
@@ -800,30 +851,48 @@ describe("record", () => {
 3 ７五歩(76)
 4 ８四歩(83)
 5 ７八飛(28)
+5 ６八飛(28)
+6 ８五歩(84)
+3 ２六歩(27)
+4 ４四歩(43)
+3 ７八金(69)
 `;
     const record = importKIF(data) as Record;
+    const handler = vi.fn();
+    record.on("removeNode", handler);
 
     record.goto(5);
-    expect(record.current.ply).toBe(5);
     expect(record.removeNextMove()).toBeFalsy();
     expect(record.moves.length).toBe(6);
     expect(record.current.ply).toBe(5);
+    expect(handler).toBeCalledTimes(0);
 
     record.goto(4);
-    expect(record.current.ply).toBe(4);
     expect(record.removeNextMove()).toBeTruthy();
     expect(record.moves.length).toBe(5);
     expect(record.current.ply).toBe(4);
+    expect(handler).toBeCalledTimes(3);
+    expect(handler.mock.calls[0][0].displayText).toBe("☗７八飛");
+    expect(handler.mock.calls[1][0].displayText).toBe("☖８五歩");
+    expect(handler.mock.calls[2][0].displayText).toBe("☗６八飛");
 
     record.goto(0);
-    expect(record.current.ply).toBe(0);
-    expect(record.removeCurrentMove()).toBeTruthy();
+    expect(record.removeNextMove()).toBeTruthy();
     expect(record.moves.length).toBe(1);
     expect(record.current.ply).toBe(0);
+    expect(handler).toBeCalledTimes(10);
+    expect(handler.mock.calls[3][0].displayText).toBe("☖８四歩");
+    expect(handler.mock.calls[4][0].displayText).toBe("☗７五歩");
+    expect(handler.mock.calls[5][0].displayText).toBe("☖４四歩");
+    expect(handler.mock.calls[6][0].displayText).toBe("☗２六歩");
+    expect(handler.mock.calls[7][0].displayText).toBe("☗７八金");
+    expect(handler.mock.calls[8][0].displayText).toBe("☖３四歩");
+    expect(handler.mock.calls[9][0].displayText).toBe("☗７六歩");
 
-    expect(record.removeCurrentMove()).toBeFalsy();
+    expect(record.removeNextMove()).toBeFalsy();
     expect(record.moves.length).toBe(1);
     expect(record.current.ply).toBe(0);
+    expect(handler).toBeCalledTimes(10);
   });
 
   it("bookmark", () => {
