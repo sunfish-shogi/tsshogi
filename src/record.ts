@@ -394,6 +394,10 @@ export interface ImmutableRecord {
   on(event: "changePosition", handler: () => void): void;
 }
 
+type OnChangePositionHandler = () => void;
+type OnAddNodeHandler = (node: ImmutableNode) => void;
+type OnRemoveNodeHandler = (node: ImmutableNode) => void;
+
 /**
  * 棋譜
  */
@@ -405,7 +409,13 @@ export class Record implements ImmutableRecord {
   private _current: NodeImpl;
   private repetitionCounts: { [sfen: string]: number } = {};
   private repetitionStart: { [sfen: string]: number } = {};
-  private onChangePosition = (): void => {
+  private onChangePosition: OnChangePositionHandler = () => {
+    /* noop */
+  };
+  private onAddNode: OnAddNodeHandler = () => {
+    /* noop */
+  };
+  private onRemoveNode: OnRemoveNodeHandler = () => {
     /* noop */
   };
 
@@ -706,6 +716,7 @@ export class Record implements ImmutableRecord {
       );
       this._current = this._current.next;
       this._current.setElapsedMs(0);
+      this.onAddNode(this._current);
       return true;
     }
 
@@ -740,6 +751,7 @@ export class Record implements ImmutableRecord {
     );
     this._current.setElapsedMs(0);
     lastBranch.branch = this._current;
+    this.onAddNode(this._current);
     return true;
   }
 
@@ -794,6 +806,7 @@ export class Record implements ImmutableRecord {
     if (!this.goBack()) {
       return this.removeNextMove();
     }
+    this.onRemoveSubTree(target);
     if (this._current.next === target) {
       this._current.next = target.branch;
     } else {
@@ -821,10 +834,35 @@ export class Record implements ImmutableRecord {
    */
   removeNextMove(): boolean {
     if (this._current.next) {
+      for (let p: Node | null = this.current.next; p; p = p.branch) {
+        this.onRemoveSubTree(p);
+      }
       this._current.next = null;
       return true;
     }
     return false;
+  }
+
+  private onRemoveSubTree(root: Node) {
+    let p = root;
+    while (p) {
+      if (p.next) {
+        p = p.next;
+        continue;
+      }
+      this.onRemoveNode(p);
+      while (!p.branch) {
+        if (!p.prev || p.prev === this.current) {
+          return;
+        }
+        p = p.prev;
+        this.onRemoveNode(p);
+        if (p === root) {
+          return;
+        }
+      }
+      p = p.branch;
+    }
   }
 
   /**
@@ -1137,11 +1175,10 @@ export class Record implements ImmutableRecord {
         continue;
       }
       while (!p.branch) {
-        const prev = p.prev;
-        if (!prev) {
+        if (!p.prev) {
           return null;
         }
-        p = prev;
+        p = p.prev;
       }
       p = p.branch;
     }
@@ -1181,24 +1218,31 @@ export class Record implements ImmutableRecord {
         continue;
       }
       while (!p.branch) {
-        const prev = p.prev;
-        if (!prev || prev === this.current) {
+        if (!p.prev || p.prev === this.current) {
           subtree.goto(0);
           return subtree;
         }
         subtree.goBack();
-        p = prev;
+        p = p.prev;
       }
       subtree.goBack();
       p = p.branch;
     }
   }
 
-  on(event: "changePosition", handler: () => void): void;
+  on(event: "changePosition", handler: OnChangePositionHandler): void;
+  on(event: "addNode", handler: OnAddNodeHandler): void;
+  on(event: "removeNode", handler: OnRemoveNodeHandler): void;
   on(event: string, handler: unknown): void {
     switch (event) {
       case "changePosition":
-        this.onChangePosition = handler as () => void;
+        this.onChangePosition = handler as OnChangePositionHandler;
+        break;
+      case "addNode":
+        this.onAddNode = handler as OnAddNodeHandler;
+        break;
+      case "removeNode":
+        this.onRemoveNode = handler as OnRemoveNodeHandler;
         break;
     }
   }
