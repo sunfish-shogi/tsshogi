@@ -17,6 +17,7 @@ import {
   exportKI2,
   Position,
   InitialPositionSFEN,
+  ImmutableNode,
 } from "../";
 
 describe("record", () => {
@@ -259,7 +260,7 @@ describe("record", () => {
     expect(getNextColorFromUSI(`position sfen ${sfenWhite} moves 8d8e`)).toBe(Color.BLACK);
   });
 
-  it("append/goBack/goForward/goto", () => {
+  it("append/goBack/goForward/goto/switchBranchByIndex", () => {
     const record = new Record();
     const onChangePosition = vi.fn();
     const onAddNode = vi.fn();
@@ -346,8 +347,22 @@ describe("record", () => {
     expect(onChangePosition).toBeCalledTimes(17); // not called
     // switch branch
     expect(record.switchBranchByIndex(0)).toBeTruthy();
+    expect(record.current.activeBranch).toBeTruthy();
+    expect(record.current.branch?.activeBranch).toBeFalsy();
     expect(onChangePosition).toBeCalledTimes(18);
     expect(record.usi).toBe("position startpos moves 7g7f 3c3d");
+    // switch branch
+    expect(record.switchBranchByIndex(1)).toBeTruthy();
+    expect(record.current.activeBranch).toBeTruthy();
+    expect(record.current.prev?.next?.activeBranch).toBeFalsy();
+    expect(onChangePosition).toBeCalledTimes(19);
+    expect(record.usi).toBe("position startpos moves 7g7f 8c8d");
+    // switch branch (invalid value)
+    expect(record.switchBranchByIndex(2)).toBeFalsy();
+    expect(record.current.activeBranch).toBeTruthy();
+    expect(record.current.prev?.next?.activeBranch).toBeFalsy();
+    expect(record.current.activeBranch).toBeTruthy();
+    expect(onChangePosition).toBeCalledTimes(19); // not called
 
     expect(onAddNode).toBeCalledTimes(6);
     expect(onAddNode.mock.calls[0][0].displayText).toBe("☗７六歩");
@@ -356,6 +371,47 @@ describe("record", () => {
     expect(onAddNode.mock.calls[3][0].displayText).toBe("☖８四歩");
     expect(onAddNode.mock.calls[4][0].displayText).toBe("☗７八銀");
     expect(onAddNode.mock.calls[5][0].displayText).toBe("中断");
+  });
+
+  it("gotoNode", () => {
+    const data = `手合割：平手
+▲２六歩    △３四歩    ▲７六歩    △５四歩    ▲４八銀    △５二飛
+変化：3手
+▲２五歩    △３三角    ▲４八銀    △２二飛`;
+    const record = importKI2(data) as Record;
+    const b1ply2 = record.first.next?.next as ImmutableNode;
+    const b1ply5 = record.first.next?.next?.next?.next?.next as ImmutableNode;
+    const b2ply3 = record.first.next?.next?.next?.branch as ImmutableNode;
+    const b2ply6 = record.first.next?.next?.next?.branch?.next?.next?.next as ImmutableNode;
+    const handler = vi.fn();
+    record.on("changePosition", handler);
+
+    expect(record.gotoNode(b1ply5)).toBeTruthy();
+    expect(record.current.displayText).toBe("☗４八銀");
+    expect(handler).toBeCalledTimes(1);
+
+    expect(record.gotoNode(b2ply6)).toBeTruthy();
+    expect(record.current.displayText).toBe("☖２二飛");
+    expect(handler).toBeCalledTimes(2);
+
+    expect(record.gotoNode(b2ply3)).toBeTruthy();
+    expect(record.current.displayText).toBe("☗２五歩");
+    expect(handler).toBeCalledTimes(3);
+
+    expect(record.gotoNode(b1ply2)).toBeTruthy();
+    expect(record.current.displayText).toBe("☖３四歩");
+    expect(handler).toBeCalledTimes(4);
+
+    // not changed
+    expect(record.gotoNode(b1ply2)).toBeTruthy();
+    expect(record.current.displayText).toBe("☖３四歩");
+    expect(handler).toBeCalledTimes(4);
+
+    // invalid node
+    const record2 = importKI2(data) as Record;
+    const invalidNode = record2.first.next as ImmutableNode;
+    expect(record.gotoNode(invalidNode)).toBeFalsy();
+    expect(handler).toBeCalledTimes(4);
   });
 
   it("merge", () => {
