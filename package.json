@@ -46,7 +46,8 @@
     "test:ui": "npm run install:esbuild && vitest --ui --coverage",
     "lint": "eslint --fix --max-warnings 0 . && prettier --write .",
     "release:patch": "npm version patch",
-    "release:minor": "npm version minor"
+    "release:minor": "npm version minor",
+    "release:major": "npm version major"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.5.0",
