@@ -595,6 +595,28 @@ export class Record implements ImmutableRecord {
     }
   }
 
+  gotoNode(node: ImmutableNode): boolean {
+    const variation: ImmutableNode[] = [];
+    let first = node;
+    for (let p: ImmutableNode = node; p.prev; p = p.prev) {
+      variation.unshift(p);
+      first = p.prev;
+    }
+    if (this.first !== first) {
+      return false;
+    }
+    const orgNode = this._current;
+    this._goto(0);
+    for (const p of variation) {
+      this._goForward();
+      this._switchBranchByIndex(p.branchIndex);
+    }
+    if (orgNode !== this._current) {
+      this.onChangePosition();
+    }
+    return true;
+  }
+
   private _goto(ply: number): void {
     while (ply < this._current.ply) {
       if (!this._goBack()) {
@@ -637,6 +659,17 @@ export class Record implements ImmutableRecord {
     if (this.current.branchIndex === index) {
       return true;
     }
+    if (!this._switchBranchByIndex(index)) {
+      return false;
+    }
+    this.onChangePosition();
+    return true;
+  }
+
+  _switchBranchByIndex(index: number): boolean {
+    if (this.current.branchIndex === index) {
+      return true;
+    }
     if (!this._current.prev) {
       return false;
     }
@@ -660,8 +693,8 @@ export class Record implements ImmutableRecord {
         p.activeBranch = false;
       }
     }
-    if (ok) {
-      this.onChangePosition();
+    if (!ok) {
+      this._current.activeBranch = true;
     }
     return ok;
   }
