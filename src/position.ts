@@ -385,7 +385,7 @@ export class Position {
   isValidMove(move: Move): boolean {
     if (move.from instanceof Square) {
       const target = this._board.at(move.from);
-      if (!target || target.color !== this.color) {
+      if (!target || target.color !== this.color || target.type !== move.pieceType) {
         return false;
       }
       if (!this.isMovable(move.from, move.to)) {
@@ -393,6 +393,12 @@ export class Position {
       }
       const captured = this._board.at(move.to);
       if (captured && captured.color === this.color) {
+        return false;
+      }
+      if (!captured !== !move.capturedPieceType) {
+        return false;
+      }
+      if (captured && move.capturedPieceType && captured.type !== move.capturedPieceType) {
         return false;
       }
       if (move.promote) {

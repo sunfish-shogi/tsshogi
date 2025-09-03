@@ -219,6 +219,28 @@ describe("position", () => {
       expect(position.isValidMove(drop(PieceType.BISHOP, 3, 6))).toBeFalsy();
       // 相手の駒
       expect(position.isValidMove(move(2, 6, 2, 5))).toBeFalsy();
+      // 異なる駒
+      const invalidPieceMove = move(4, 7, 4, 6);
+      invalidPieceMove.pieceType = PieceType.SILVER;
+      expect(position.isValidMove(invalidPieceMove)).toBeFalsy();
+      // 異なる取った駒
+      const invalidCapturedPieceMove = move(2, 7, 2, 6);
+      invalidCapturedPieceMove.capturedPieceType = PieceType.SILVER;
+      expect(position.isValidMove(invalidCapturedPieceMove)).toBeFalsy();
+      const invalidCapturedPieceMove2 = move(2, 7, 2, 6);
+      invalidCapturedPieceMove2.capturedPieceType = null;
+      expect(position.isValidMove(invalidCapturedPieceMove2)).toBeFalsy();
+      const invalidCapturedPieceMove3 = move(4, 7, 4, 6);
+      invalidCapturedPieceMove3.capturedPieceType = PieceType.SILVER;
+      expect(position.isValidMove(invalidCapturedPieceMove3)).toBeFalsy();
+      // 成り駒を打つ手
+      const invalidPieceDrop = drop(PieceType.BISHOP, 3, 6);
+      invalidPieceDrop.promote = true;
+      expect(position.isValidMove(invalidPieceDrop)).toBeFalsy();
+      // 相手の駒を打つ手
+      const invalidColorDrop = drop(PieceType.BISHOP, 3, 6);
+      invalidColorDrop.color = Color.WHITE;
+      expect(position.isValidMove(invalidColorDrop)).toBeFalsy();
     });
 
     it("white", () => {

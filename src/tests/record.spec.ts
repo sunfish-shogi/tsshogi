@@ -620,6 +620,30 @@ describe("record", () => {
     expect(record1.current.ply).toBe(10);
   });
 
+  it("mergeIntoCurrentPosition:noValidMove", () => {
+    // https://github.com/sunfish-shogi/shogihome/issues/1325
+    const data = `手合割：平手
+▲５六歩    △３四歩    ▲５八飛    △６二銀    ▲７六歩    △４二金
+▲４八玉    △４一玉    ▲５五歩    △８四歩    ▲３八玉    △８五歩
+▲７七角    △３三金    ▲６八銀    △４四金    ▲５七銀    △５五金
+▲５六銀`;
+    const data2 = `手合割：平手
+▲５六歩    △３四歩    ▲５八飛    △６二銀    ▲７六歩    △４二金
+▲４八玉    △４一玉    ▲５五歩    △８四歩    ▲６八銀    △５四歩
+▲５七銀    △５五歩    ▲６六銀    △５三銀    ▲５五銀    △５四歩
+▲６六銀`;
+    const record1 = importKI2(data) as Record;
+    const record2 = importKI2(data2) as Record;
+    record1.goto(18);
+
+    const result = record1.mergeIntoCurrentPosition(record2);
+
+    expect(result.successCount).toBe(0);
+    expect(result.skipCount).toBe(19);
+    expect(exportKI2(record1, {})).toBe(data);
+    expect(record1.current.ply).toBe(18);
+  });
+
   it("repetition", () => {
     const data = `
 手合割：平手
