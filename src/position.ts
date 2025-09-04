@@ -395,7 +395,7 @@ export class Position {
       if (captured && captured.color === this.color) {
         return false;
       }
-      if (!captured !== !move.capturedPieceType) {
+      if ((captured === null) !== (move.capturedPieceType === null)) {
         return false;
       }
       if (captured && move.capturedPieceType && captured.type !== move.capturedPieceType) {
