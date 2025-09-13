@@ -16,13 +16,9 @@ describe("text", () => {
     };
   });
 
-  bench(
-    "formatPV",
-    () => {
-      for (const { position, moves } of formatPVBenchCases) {
-        formatPV(position, moves);
-      }
-    },
-    { time: 1000, throws: true },
-  );
+  bench("formatPV", () => {
+    for (const { position, moves } of formatPVBenchCases) {
+      formatPV(position, moves);
+    }
+  });
 });
