@@ -1,6 +1,0 @@
-node_modules
-docs/webapp*
-dist
-dist_electron
-coverage
-.gitignore
