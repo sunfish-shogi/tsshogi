@@ -1206,7 +1206,6 @@ export class Record implements ImmutableRecord {
 
   private find(handler: (node: NodeImpl) => boolean): NodeImpl | null {
     let p: NodeImpl = this._first;
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (handler(p)) {
         return p;
@@ -1250,7 +1249,6 @@ export class Record implements ImmutableRecord {
       return subtree;
     }
     p = p.next;
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       subtree.append(p.move, { ignoreValidation: true });
       copyNodeMetadata(p, subtree.current);

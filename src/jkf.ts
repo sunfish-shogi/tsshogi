@@ -25,8 +25,7 @@ export type JKFInitial = {
 
 export type JKFInitialData = {
   color: JKFColor;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  board: JKFSquare[][] | {}; // JKF の仕様によると駒がない場合は空オブジェクトになるらしい。
+  board: JKFSquare[][] | object; // JKF の仕様によると駒がない場合は空オブジェクトになるらしい。
   hands: JKFHands;
 };
 

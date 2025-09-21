@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import fs from "node:fs";
 import { importKIF } from "../dist/cjs/index.cjs";
 
