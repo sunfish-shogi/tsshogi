@@ -29,10 +29,15 @@ export type JKFInitialData = {
   hands: JKFHands;
 };
 
-export type JKFSquare = {
-  color?: JKFColor | null;
-  kind?: JKFKind | null;
-};
+export type JKFSquare =
+  | {
+      color: JKFColor;
+      kind: JKFKind;
+    }
+  | {
+      color?: null;
+      kind?: null;
+    };
 
 export type JKFHands = [JKFHand, JKFHand];
 
