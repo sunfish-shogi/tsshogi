@@ -605,6 +605,163 @@ describe("record", () => {
     expect(record.perpetualCheck).toBeNull();
   });
 
+  it("perpetualCheck/initial-position", () => {
+    const data = `
+手合割：平手
+▲５八玉 △５二玉 ▲５九玉 △５一玉
+▲５八玉 △５二玉 ▲５九玉 △５一玉
+▲５八玉 △５二玉 ▲５九玉 △５一玉
+`;
+    const record = importKI2(data) as Record;
+    record.goto(11);
+    expect(record.repetition).toBeFalsy();
+    expect(record.perpetualCheck).toBeNull();
+    record.goto(12);
+    expect(record.repetition).toBeTruthy();
+    expect(record.perpetualCheck).toBeNull();
+  });
+
+  it("perpetualCheck/append/goForward/goBack", () => {
+    const testCases = [
+      {
+        initialPosition: `
+後手の持駒：なし
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|一
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|二
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|三
+| ・ ・ ・ ・ ・ ・ ・ ・v香|四
+| ・ ・ ・ ・ ・ ・ ・ ・v玉|五
+| ・ ・ ・ ・ ・ ・ ・ 飛 ・|六
+| ・ ・ ・ ・ ・ ・ ・ ・v歩|七
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+| ・ ・ ・ ・ 玉 ・ ・ 香 ・|九
++---------------------------+
+先手の持駒：なし
+先手番
+`,
+        pre: [],
+        oneCycle: ["2f2e", "1e1f", "2e2f", "1f1e"],
+      },
+      {
+        initialPosition: `
+後手の持駒：なし
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|一
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|二
+| ・ ・ ・ ・ ・ ・ ・ ・v香|三
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ ・v玉|五
+| ・ ・ ・ ・ ・ ・ ・ 飛 ・|六
+| ・ ・ ・ ・ ・ ・ ・ ・v歩|七
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+| ・ ・ ・ ・ 玉 ・ ・ 香 ・|九
++---------------------------+
+先手の持駒：なし
+後手番
+`,
+        pre: ["1c1d"],
+        oneCycle: ["2f2e", "1e1f", "2e2f", "1f1e"],
+      },
+      {
+        initialPosition: `
+後手の持駒：なし
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|一
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|二
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|三
+| ・ ・ ・ ・ ・ ・ ・ ・v香|四
+| ・ ・ ・ ・ ・ ・ ・ ・v玉|五
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|六
+| ・ ・ ・ ・ ・ ・ ・ ・v歩|七
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+| ・ ・ ・ ・ 玉 ・ ・ 香 ・|九
++---------------------------+
+先手の持駒：飛
+先手番
+`,
+        pre: ["R*2e"],
+        oneCycle: ["1e1f", "2e2f", "1f1e", "2f2e"],
+      },
+      {
+        initialPosition: `
+後手の持駒：なし
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|一
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|二
+| ・ ・ ・ ・ ・ ・ ・ ・v香|三
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ ・v玉|五
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|六
+| ・ ・ ・ ・ ・ ・ ・ ・v歩|七
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+| ・ ・ ・ ・ 玉 ・ ・ 香 ・|九
++---------------------------+
+先手の持駒：飛
+後手番
+`,
+        pre: ["1c1d", "R*2e"],
+        oneCycle: ["1e1f", "2e2f", "1f1e", "2f2e"],
+      },
+    ];
+    for (const testCase of testCases) {
+      const record = importKI2(testCase.initialPosition) as Record;
+      for (const usi of testCase.pre) {
+        expect(record.append(record.position.createMoveByUSI(usi) as Move)).toBeTruthy();
+      }
+      for (let i = 0; i < 3; i++) {
+        for (const usi of testCase.oneCycle) {
+          expect(record.append(record.position.createMoveByUSI(usi) as Move)).toBeTruthy();
+        }
+      }
+      expect(record.repetition).toBeTruthy();
+      expect(record.perpetualCheck).toBeTruthy();
+
+      // SpecialMove/goBack
+      expect(record.append(SpecialMoveType.RESIGN)).toBeTruthy();
+      expect(record.repetition).toBeTruthy();
+      expect(record.goBack()).toBeTruthy();
+      expect(record.repetition).toBeTruthy();
+      expect(record.perpetualCheck).toBeTruthy();
+
+      // SpecialMove/append
+      expect(record.goBack()).toBeTruthy();
+      expect(record.repetition).toBeFalsy();
+      expect(record.perpetualCheck).toBeFalsy();
+      expect(record.append(SpecialMoveType.INTERRUPT)).toBeTruthy();
+      expect(record.repetition).toBeFalsy();
+      expect(record.perpetualCheck).toBeFalsy();
+      const lastMove = testCase.oneCycle[testCase.oneCycle.length - 1];
+      expect(record.append(record.position.createMoveByUSI(lastMove) as Move)).toBeTruthy();
+      expect(record.repetition).toBeTruthy();
+      expect(record.perpetualCheck).toBeTruthy();
+
+      // goBack/goForward
+      expect(record.goBack()).toBeTruthy();
+      expect(record.repetition).toBeFalsy();
+      expect(record.perpetualCheck).toBeFalsy();
+      expect(record.goForward()).toBeTruthy();
+      expect(record.repetition).toBeTruthy();
+      expect(record.perpetualCheck).toBeTruthy();
+      for (let i = 0; i < testCase.oneCycle.length * 2; i++) {
+        expect(record.goBack()).toBeTruthy();
+        expect(record.repetition).toBeFalsy();
+        expect(record.perpetualCheck).toBeFalsy();
+      }
+      for (let i = 0; i < testCase.oneCycle.length * 2; i++) {
+        expect(record.repetition).toBeFalsy();
+        expect(record.perpetualCheck).toBeFalsy();
+        expect(record.goForward()).toBeTruthy();
+      }
+      expect(record.repetition).toBeTruthy();
+      expect(record.perpetualCheck).toBeTruthy();
+    }
+  });
+
   it("swapWithNextBranch", () => {
     const data = `
 1 ７六歩(77) ( 0:00/0:00:00)
