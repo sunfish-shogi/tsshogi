@@ -730,13 +730,16 @@ export class Record implements ImmutableRecord {
       if (!this._position.doMove(move, opt)) {
         return false;
       }
-      this.incrementRepetition();
       isCheck = this.position.checked;
     }
 
     // 特殊な指し手のノードの場合は前のノードに戻る。
     if (this._current !== this.first && !(this._current.move instanceof Move)) {
       this._goBack();
+    }
+
+    if (move instanceof Move) {
+      this.incrementRepetition(this._current.ply + 1);
     }
 
     // 最終ノードの場合は単に新しいノードを追加する。
@@ -1010,13 +1013,13 @@ export class Record implements ImmutableRecord {
     return true;
   }
 
-  private incrementRepetition(): void {
+  private incrementRepetition(ply?: number): void {
     const sfen = this.position.sfen;
     if (this.repetitionCounts[sfen]) {
       this.repetitionCounts[sfen] += 1;
     } else {
       this.repetitionCounts[sfen] = 1;
-      this.repetitionStart[sfen] = this.current.ply;
+      this.repetitionStart[sfen] = ply ?? this.current.ply;
     }
   }
 
@@ -1058,7 +1061,7 @@ export class Record implements ImmutableRecord {
     let black = true;
     let white = true;
     let color = this.position.color;
-    for (let p = this.current; p.ply >= since; p = p.prev as Node) {
+    for (let p: Node | null = this.current; p && p.ply >= since; p = p.prev) {
       color = reverseColor(color);
       if (p.isCheck) {
         continue;
