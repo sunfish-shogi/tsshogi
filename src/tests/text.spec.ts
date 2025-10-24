@@ -20,6 +20,20 @@ describe("text", () => {
   it("formatSpecialMove", () => {
     expect(formatSpecialMove(SpecialMoveType.RESIGN)).toBe("投了");
     expect(formatSpecialMove(specialMove(SpecialMoveType.TIMEOUT))).toBe("切れ負け");
+    expect(formatSpecialMove(specialMove(SpecialMoveType.FOUL_LOSE))).toBe("反則負け");
+    expect(formatSpecialMove(specialMove(SpecialMoveType.FOUL_WIN))).toBe("反則勝ち");
+    expect(formatSpecialMove(specialMove(SpecialMoveType.FOUL_LOSE), Color.BLACK)).toBe(
+      "先手の反則負け",
+    );
+    expect(formatSpecialMove(specialMove(SpecialMoveType.FOUL_LOSE), Color.WHITE)).toBe(
+      "後手の反則負け",
+    );
+    expect(formatSpecialMove(specialMove(SpecialMoveType.FOUL_WIN), Color.BLACK)).toBe(
+      "後手の反則負け",
+    );
+    expect(formatSpecialMove(specialMove(SpecialMoveType.FOUL_WIN), Color.WHITE)).toBe(
+      "先手の反則負け",
+    );
     expect(formatSpecialMove(anySpecialMove("休憩"))).toBe("休憩");
   });
 

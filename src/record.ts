@@ -722,7 +722,7 @@ export class Record implements ImmutableRecord {
     const displayText =
       move instanceof Move
         ? formatMove(this.position, move, { lastMove })
-        : formatSpecialMove(move);
+        : formatSpecialMove(move, this.current.nextColor);
 
     // 局面を動かす。
     let isCheck = false;
