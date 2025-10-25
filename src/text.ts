@@ -186,14 +186,19 @@ const specialMoveToDisplayStringMap: {
  * 特殊な指し手の表示用の文字列を返します。
  * @param move
  */
-export function formatSpecialMove(move: SpecialMove | SpecialMoveType): string {
-  if (typeof move === "string") {
-    return specialMoveToDisplayStringMap[move];
+export function formatSpecialMove(move: SpecialMove | SpecialMoveType, color?: Color): string {
+  if (typeof move !== "string" && !isKnownSpecialMove(move)) {
+    return move.name;
   }
-  if (isKnownSpecialMove(move)) {
-    return specialMoveToDisplayStringMap[move.type];
+  const moveType = typeof move === "string" ? move : move.type;
+  if (color !== undefined) {
+    if (moveType === SpecialMoveType.FOUL_LOSE) {
+      return color === Color.BLACK ? "先手の反則負け" : "後手の反則負け";
+    } else if (moveType === SpecialMoveType.FOUL_WIN) {
+      return color === Color.BLACK ? "後手の反則負け" : "先手の反則負け";
+    }
   }
-  return move.name;
+  return specialMoveToDisplayStringMap[moveType];
 }
 
 /**
