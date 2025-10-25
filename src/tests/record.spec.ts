@@ -107,13 +107,77 @@ describe("record", () => {
         allMoves: true,
       }),
     ).toBe("position startpos moves 2g2f 8c8d 7g7f 8d8e");
-    expect(
-      record.getUSI({
-        startpos: true,
-        resign: true,
-        allMoves: true,
-      }),
-    ).toBe("position startpos moves 2g2f 8c8d 7g7f 8d8e resign");
+  });
+
+  it("getUSI/specialMoves", () => {
+    const precedingUSI = "position startpos moves 7g7f 3c3d 2g2f 8c8d";
+    const testCases = [
+      {
+        specialMove: SpecialMoveType.RESIGN,
+        opts: {},
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d",
+      },
+      {
+        specialMove: SpecialMoveType.RESIGN,
+        opts: { resign: true },
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d resign",
+      },
+      {
+        specialMove: SpecialMoveType.REPETITION_DRAW,
+        opts: {},
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d",
+      },
+      {
+        specialMove: SpecialMoveType.REPETITION_DRAW,
+        opts: { repDraw: true },
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d rep_draw",
+      },
+      {
+        specialMove: SpecialMoveType.DRAW,
+        opts: {},
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d",
+      },
+      {
+        specialMove: SpecialMoveType.DRAW,
+        opts: { draw: true },
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d draw",
+      },
+      {
+        specialMove: SpecialMoveType.TIMEOUT,
+        opts: {},
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d",
+      },
+      {
+        specialMove: SpecialMoveType.TIMEOUT,
+        opts: { timeout: true },
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d timeout",
+      },
+      {
+        specialMove: SpecialMoveType.INTERRUPT,
+        opts: {},
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d",
+      },
+      {
+        specialMove: SpecialMoveType.INTERRUPT,
+        opts: { break: true },
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d break",
+      },
+      {
+        specialMove: SpecialMoveType.ENTERING_OF_KING,
+        opts: {},
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d",
+      },
+      {
+        specialMove: SpecialMoveType.ENTERING_OF_KING,
+        opts: { win: true },
+        usi: "position startpos moves 7g7f 3c3d 2g2f 8c8d win",
+      },
+    ];
+    for (const testCase of testCases) {
+      const record = Record.newByUSI(precedingUSI) as Record;
+      record.append(testCase.specialMove);
+      expect(record.getUSI(testCase.opts)).toBe(testCase.usi);
+    }
   });
 
   it("usen/single", () => {

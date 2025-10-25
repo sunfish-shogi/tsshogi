@@ -364,7 +364,17 @@ export type USIFormatOptions = {
   startpos?: boolean;
   /** 投了 "resign" を出力に含めるかどうかを表します。デフォルトは false です。 */
   resign?: boolean;
-  /** 全ての指し手を含めるかどうかを指定します。デフォルトは false です。 */
+  /** 千日手 "rep_draw" を出力に含めるかどうかを表します。デフォルトは false です。 */
+  repDraw?: boolean;
+  /** 引き分け "draw" を出力に含めるかどうかを表します。デフォルトは false です。 */
+  draw?: boolean;
+  /** 時間切れ "timeout" を出力に含めるかどうかを表します。デフォルトは false です。 */
+  timeout?: boolean;
+  /** 中断 "break" を出力に含めるかどうかを表します。デフォルトは false です。 */
+  break?: boolean;
+  /** 宣言勝ち "win" を出力に含めるかどうかを表します。デフォルトは false です。 */
+  win?: boolean;
+  /** 全ての指し手を含めるかどうかを指定します。 false の場合は現在の局面までの指し手のみが含まれます。デフォルトは false です。 */
   allMoves?: boolean;
 };
 
@@ -1099,6 +1109,16 @@ export class Record implements ImmutableRecord {
         moves.push(p.move.usi);
       } else if (opts?.resign && p.move.type === SpecialMoveType.RESIGN) {
         moves.push("resign");
+      } else if (opts?.repDraw && p.move.type === SpecialMoveType.REPETITION_DRAW) {
+        moves.push("rep_draw");
+      } else if (opts?.draw && p.move.type === SpecialMoveType.DRAW) {
+        moves.push("draw");
+      } else if (opts?.timeout && p.move.type === SpecialMoveType.TIMEOUT) {
+        moves.push("timeout");
+      } else if (opts?.break && p.move.type === SpecialMoveType.INTERRUPT) {
+        moves.push("break");
+      } else if (opts?.win && p.move.type === SpecialMoveType.ENTERING_OF_KING) {
+        moves.push("win");
       }
       if (!p.next || (!opts?.allMoves && p === this.current)) {
         break;
