@@ -1485,6 +1485,42 @@ describe("record", () => {
     }
   });
 
+  it("newByUSI/special-moves", () => {
+    const testCases = [
+      {
+        input: "position startpos moves 2g2f 3c3d 7g7f 4c4d resign",
+        specialMove: SpecialMoveType.RESIGN,
+      },
+      {
+        input: "position startpos moves 2g2f 3c3d 7g7f 4c4d rep_draw",
+        specialMove: SpecialMoveType.REPETITION_DRAW,
+      },
+      {
+        input: "position startpos moves 2g2f 3c3d 7g7f 4c4d draw",
+        specialMove: SpecialMoveType.DRAW,
+      },
+      {
+        input: "position startpos moves 2g2f 3c3d 7g7f 4c4d timeout",
+        specialMove: SpecialMoveType.TIMEOUT,
+      },
+      {
+        input: "position startpos moves 2g2f 3c3d 7g7f 4c4d break",
+        specialMove: SpecialMoveType.INTERRUPT,
+      },
+      {
+        input: "position startpos moves 2g2f 3c3d 7g7f 4c4d win",
+        specialMove: SpecialMoveType.ENTERING_OF_KING,
+      },
+    ];
+    for (const testCase of testCases) {
+      const record = Record.newByUSI(testCase.input) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.length).toBe(5);
+      record.goto(5);
+      expect(record.current.move).toEqual(specialMove(testCase.specialMove));
+    }
+  });
+
   it("newByUSI/invalid", () => {
     const inputs = [
       "",
