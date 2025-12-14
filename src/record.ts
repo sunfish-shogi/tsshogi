@@ -1368,6 +1368,21 @@ export class Record implements ImmutableRecord {
       if (sections[i] === "resign") {
         record.append(SpecialMoveType.RESIGN);
         break;
+      } else if (sections[i] === "rep_draw") {
+        record.append(SpecialMoveType.REPETITION_DRAW);
+        break;
+      } else if (sections[i] === "draw") {
+        record.append(SpecialMoveType.DRAW);
+        break;
+      } else if (sections[i] === "timeout") {
+        record.append(SpecialMoveType.TIMEOUT);
+        break;
+      } else if (sections[i] === "break") {
+        record.append(SpecialMoveType.INTERRUPT);
+        break;
+      } else if (sections[i] === "win") {
+        record.append(SpecialMoveType.ENTERING_OF_KING);
+        break;
       }
       const parsed = parseUSIMove(sections[i]);
       if (!parsed) {
