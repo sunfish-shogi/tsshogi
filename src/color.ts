@@ -1,8 +1,8 @@
 export enum Color {
   /** 先手 */
-  BLACK = "black",
+  BLACK = 1,
   /** 後手 */
-  WHITE = "white",
+  WHITE = 2,
 }
 
 /**
@@ -10,7 +10,7 @@ export enum Color {
  * @param color
  */
 export function reverseColor(color: Color): Color {
-  return color === Color.BLACK ? Color.WHITE : Color.BLACK;
+  return (3 - color) as Color;
 }
 
 /**

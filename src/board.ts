@@ -244,7 +244,7 @@ export class Board {
    * @param option
    */
   hasPower(target: Square, color: Color, option?: PowerDetectionOption): boolean {
-    return !!directions.find((dir) => {
+    return directions.some((dir) => {
       let step = 0;
       for (let square = target.neighbor(dir); square.valid; square = square.neighbor(dir)) {
         step += 1;

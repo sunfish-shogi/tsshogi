@@ -115,50 +115,48 @@ export function rankToKanji(rank: number): string {
   return kanjiNumberStrings[rank - 1];
 }
 
-const pieceTypeToStringForMoveMap: {
-  [pieceType in PieceType]: string;
-} = {
-  king: "玉",
-  rook: "飛",
-  dragon: "龍",
-  bishop: "角",
-  horse: "馬",
-  gold: "金",
-  silver: "銀",
-  promSilver: "成銀",
-  knight: "桂",
-  promKnight: "成桂",
-  lance: "香",
-  promLance: "成香",
-  pawn: "歩",
-  promPawn: "と",
-};
+// 指し手表記 (index = PieceType)
+const PIECE_TYPE_TO_STRING_FOR_MOVE: string[] = [
+  "歩",   // PAWN
+  "香",   // LANCE
+  "桂",   // KNIGHT
+  "銀",   // SILVER
+  "金",   // GOLD
+  "角",   // BISHOP
+  "飛",   // ROOK
+  "玉",   // KING
+  "と",   // PROM_PAWN
+  "成香", // PROM_LANCE
+  "成桂", // PROM_KNIGHT
+  "成銀", // PROM_SILVER
+  "馬",   // HORSE
+  "龍",   // DRAGON
+];
 
 export function pieceTypeToStringForMove(pieceType: PieceType): string {
-  return pieceTypeToStringForMoveMap[pieceType];
+  return PIECE_TYPE_TO_STRING_FOR_MOVE[pieceType];
 }
 
-const pieceTypeToStringForBoardMap: {
-  [pieceType in PieceType]: string;
-} = {
-  king: "玉",
-  rook: "飛",
-  dragon: "龍",
-  bishop: "角",
-  horse: "馬",
-  gold: "金",
-  silver: "銀",
-  promSilver: "全",
-  knight: "桂",
-  promKnight: "圭",
-  lance: "香",
-  promLance: "杏",
-  pawn: "歩",
-  promPawn: "と",
-};
+// 盤面表記 (index = PieceType)
+const PIECE_TYPE_TO_STRING_FOR_BOARD: string[] = [
+  "歩",   // PAWN
+  "香",   // LANCE
+  "桂",   // KNIGHT
+  "銀",   // SILVER
+  "金",   // GOLD
+  "角",   // BISHOP
+  "飛",   // ROOK
+  "玉",   // KING
+  "と",   // PROM_PAWN
+  "杏",   // PROM_LANCE
+  "圭",   // PROM_KNIGHT
+  "全",   // PROM_SILVER
+  "馬",   // HORSE
+  "龍",   // DRAGON
+];
 
 export function pieceTypeToStringForBoard(pieceType: PieceType): string {
-  return pieceTypeToStringForBoardMap[pieceType];
+  return PIECE_TYPE_TO_STRING_FOR_BOARD[pieceType];
 }
 
 const specialMoveToDisplayStringMap: {

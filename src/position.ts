@@ -72,24 +72,15 @@ export function initialPositionTypeToSFEN(type: InitialPositionType): string {
   }[type];
 }
 
-const invalidRankMap: {
-  [color: string]: { [pieceType in PieceType]?: { [rank: number]: boolean } };
-} = {
-  black: {
-    pawn: { 1: true },
-    lance: { 1: true },
-    knight: { 1: true, 2: true },
-  },
-  white: {
-    pawn: { 9: true },
-    lance: { 9: true },
-    knight: { 9: true, 8: true },
-  },
-};
-
 function isInvalidRank(color: Color, type: PieceType, rank: number): boolean {
-  const rule = invalidRankMap[color][type];
-  return rule ? rule[rank] : false;
+  if (color === Color.BLACK) {
+    if (type === PieceType.PAWN || type === PieceType.LANCE) return rank === 1;
+    if (type === PieceType.KNIGHT) return rank <= 2;
+  } else {
+    if (type === PieceType.PAWN || type === PieceType.LANCE) return rank === 9;
+    if (type === PieceType.KNIGHT) return rank >= 8;
+  }
+  return false;
 }
 
 export function isPromotableRank(color: Color, rank: number): boolean {
@@ -341,7 +332,7 @@ export class Position {
       }
       return !this.board.hasPower(to, move.color, { filled: move.to });
     });
-    if (movable) {
+    if (movable !== undefined) {
       return false;
     }
     return !this.board.listSquaresByColor(king.color).find((from) => {
@@ -398,7 +389,7 @@ export class Position {
       if ((captured === null) !== (move.capturedPieceType === null)) {
         return false;
       }
-      if (captured && move.capturedPieceType && captured.type !== move.capturedPieceType) {
+      if (captured && move.capturedPieceType !== null && captured.type !== move.capturedPieceType) {
         return false;
       }
       if (move.promote) {
@@ -489,7 +480,7 @@ export class Position {
     this._color = reverseColor(this.color);
     if (move.from instanceof Square) {
       this._board.set(move.from, new Piece(this.color, move.pieceType));
-      if (move.capturedPieceType) {
+      if (move.capturedPieceType !== null) {
         const capturedPiece = new Piece(reverseColor(this.color), move.capturedPieceType);
         this._board.set(move.to, capturedPiece);
         if (capturedPiece.type !== PieceType.KING) {
@@ -523,7 +514,7 @@ export class Position {
         return false;
       }
     } else {
-      if (!from.color) {
+      if (from.color === undefined) {
         return false;
       }
       if (this.hand(from.color).count(from.type) === 0) {
@@ -715,39 +706,65 @@ export class Position {
 }
 
 type PieceCounts = {
-  [pieceType in PieceType]: number;
+  pawn: number;
+  lance: number;
+  knight: number;
+  silver: number;
+  gold: number;
+  bishop: number;
+  rook: number;
+  king: number;
+  promPawn: number;
+  promLance: number;
+  promKnight: number;
+  promSilver: number;
+  horse: number;
+  dragon: number;
 };
 
+// PieceType 数値インデックス → PieceCounts プロパティ名
+const PIECE_COUNT_KEYS: (keyof PieceCounts)[] = [
+  "pawn", "lance", "knight", "silver", "gold", "bishop", "rook", "king",
+  "promPawn", "promLance", "promKnight", "promSilver", "horse", "dragon",
+];
+
+/**
+ * PieceType から PieceCounts の値を取得します。
+ */
+export function getPieceCount(counts: PieceCounts, pieceType: PieceType): number {
+  return counts[PIECE_COUNT_KEYS[pieceType]];
+}
+
 export function countExistingPieces(position: ImmutablePosition): PieceCounts {
-  const result: PieceCounts = {
-    pawn: 0,
-    lance: 0,
-    knight: 0,
-    silver: 0,
-    gold: 0,
-    bishop: 0,
-    rook: 0,
-    king: 0,
-    promPawn: 0,
-    promLance: 0,
-    promKnight: 0,
-    promSilver: 0,
-    horse: 0,
-    dragon: 0,
-  };
+  const c = new Array(14).fill(0) as number[];
   Square.all.forEach((square) => {
     const piece = position.board.at(square);
     if (piece) {
-      result[piece.type] += 1;
+      c[piece.type] += 1;
     }
   });
   position.blackHand.forEach((pieceType, n) => {
-    result[pieceType] += n;
+    c[pieceType] += n;
   });
   position.whiteHand.forEach((pieceType, n) => {
-    result[pieceType] += n;
+    c[pieceType] += n;
   });
-  return result;
+  return {
+    pawn: c[PieceType.PAWN],
+    lance: c[PieceType.LANCE],
+    knight: c[PieceType.KNIGHT],
+    silver: c[PieceType.SILVER],
+    gold: c[PieceType.GOLD],
+    bishop: c[PieceType.BISHOP],
+    rook: c[PieceType.ROOK],
+    king: c[PieceType.KING],
+    promPawn: c[PieceType.PROM_PAWN],
+    promLance: c[PieceType.PROM_LANCE],
+    promKnight: c[PieceType.PROM_KNIGHT],
+    promSilver: c[PieceType.PROM_SILVER],
+    horse: c[PieceType.HORSE],
+    dragon: c[PieceType.DRAGON],
+  };
 }
 
 export function countNotExistingPieces(position: ImmutablePosition): PieceCounts {

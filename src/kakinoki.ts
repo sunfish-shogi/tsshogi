@@ -371,7 +371,7 @@ function readBoard(board: Board, data: string): Error | undefined {
     const index = x * 2 + 1;
     const pieceStr = data[index + 1];
     const pieceType = stringToPieceType(pieceStr);
-    if (!pieceType) {
+    if (pieceType === undefined) {
       board.remove(square);
       continue;
     }
@@ -393,7 +393,7 @@ function readHand(hand: Hand, data: string): Error | undefined {
     const numberStr = section.substring(1);
     const pieceType = stringToPieceType(pieceStr);
     const n = stringToNumber(numberStr) || 1;
-    if (!pieceType) {
+    if (pieceType === undefined) {
       return new InvalidHandPieceError(section);
     }
     hand.add(pieceType, n);

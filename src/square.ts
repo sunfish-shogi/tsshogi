@@ -81,7 +81,11 @@ export class Square {
    */
   neighbor(dir: Direction): Square;
   neighbor(arg0: number | Direction, arg1?: number): Square {
-    switch (arg0) {
+    if (arg1 !== undefined) {
+      // neighbor(dx, dy) overload
+      return new Square(this.file - (arg0 as number), this.rank + arg1);
+    }
+    switch (arg0 as Direction) {
       case Direction.UP:
         return new Square(this.file, this.rank - 1);
       case Direction.DOWN:
@@ -107,9 +111,7 @@ export class Square {
       case Direction.RIGHT_DOWN_KNIGHT:
         return new Square(this.file - 1, this.rank + 2);
     }
-    const dx = arg0 as number;
-    const dy = arg1 as number;
-    return new Square(this.file - dx, this.rank + dy);
+    return new Square(-1, -1); // unreachable
   }
 
   /** 指定したマスへの方向を返します。 */

@@ -448,7 +448,7 @@ function buildJKFMoves(
         ) {
           entry.move.promote = false;
         }
-        if (move.capturedPieceType) {
+        if (move.capturedPieceType !== null) {
           entry.move.capture = pieceTypeToJKF(move.capturedPieceType);
         }
       }

@@ -1,269 +1,226 @@
+import { Color } from "./color";
 import { Piece, PieceType } from "./piece";
 
 export enum Direction {
-  UP = "up",
-  DOWN = "down",
-  LEFT = "left",
-  RIGHT = "right",
-  LEFT_UP = "left_up",
-  RIGHT_UP = "right_up",
-  LEFT_DOWN = "left_down",
-  RIGHT_DOWN = "right_down",
-  LEFT_UP_KNIGHT = "left_up_knight",
-  RIGHT_UP_KNIGHT = "right_up_knight",
-  LEFT_DOWN_KNIGHT = "left_down_knight",
-  RIGHT_DOWN_KNIGHT = "right_down_knight",
+  UP = 0,
+  DOWN = 1,
+  LEFT = 2,
+  RIGHT = 3,
+  LEFT_UP = 4,
+  RIGHT_UP = 5,
+  LEFT_DOWN = 6,
+  RIGHT_DOWN = 7,
+  LEFT_UP_KNIGHT = 8,
+  RIGHT_UP_KNIGHT = 9,
+  LEFT_DOWN_KNIGHT = 10,
+  RIGHT_DOWN_KNIGHT = 11,
 }
 
-const reverseMap: {
-  [direction in Direction]: Direction;
-} = {
-  up: Direction.DOWN,
-  down: Direction.UP,
-  left: Direction.RIGHT,
-  right: Direction.LEFT,
-  left_up: Direction.RIGHT_DOWN,
-  right_up: Direction.LEFT_DOWN,
-  left_down: Direction.RIGHT_UP,
-  right_down: Direction.LEFT_UP,
-  left_up_knight: Direction.RIGHT_DOWN_KNIGHT,
-  right_up_knight: Direction.LEFT_DOWN_KNIGHT,
-  left_down_knight: Direction.RIGHT_UP_KNIGHT,
-  right_down_knight: Direction.LEFT_UP_KNIGHT,
-};
+// 反転方向テーブル (index = Direction)
+const REVERSE_DIR: Direction[] = [
+  Direction.DOWN,              // UP → DOWN
+  Direction.UP,                // DOWN → UP
+  Direction.RIGHT,             // LEFT → RIGHT
+  Direction.LEFT,              // RIGHT → LEFT
+  Direction.RIGHT_DOWN,        // LEFT_UP → RIGHT_DOWN
+  Direction.LEFT_DOWN,         // RIGHT_UP → LEFT_DOWN
+  Direction.RIGHT_UP,          // LEFT_DOWN → RIGHT_UP
+  Direction.LEFT_UP,           // RIGHT_DOWN → LEFT_UP
+  Direction.RIGHT_DOWN_KNIGHT, // LEFT_UP_KNIGHT → RIGHT_DOWN_KNIGHT
+  Direction.LEFT_DOWN_KNIGHT,  // RIGHT_UP_KNIGHT → LEFT_DOWN_KNIGHT
+  Direction.RIGHT_UP_KNIGHT,   // LEFT_DOWN_KNIGHT → RIGHT_UP_KNIGHT
+  Direction.LEFT_UP_KNIGHT,    // RIGHT_DOWN_KNIGHT → LEFT_UP_KNIGHT
+];
 
 /**
  * 反転した方向を返します。
  * @param dir
  */
 export function reverseDirection(dir: Direction): Direction {
-  return reverseMap[dir];
+  return REVERSE_DIR[dir];
 }
 
-export const directions: Direction[] = [
-  Direction.UP,
-  Direction.DOWN,
-  Direction.LEFT,
-  Direction.RIGHT,
-  Direction.LEFT_UP,
-  Direction.RIGHT_UP,
-  Direction.LEFT_DOWN,
-  Direction.RIGHT_DOWN,
-  Direction.LEFT_UP_KNIGHT,
-  Direction.RIGHT_UP_KNIGHT,
-  Direction.LEFT_DOWN_KNIGHT,
-  Direction.RIGHT_DOWN_KNIGHT,
-] as const;
+export const directions: Direction[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 
 export enum MoveType {
-  SHORT = "short",
-  LONG = "long",
+  SHORT = 1,
+  LONG = 2,
 }
 
-const movableDirectionMap: {
-  [color: string]: {
-    [pieceType in PieceType]: { [direction in Direction]?: MoveType | undefined };
-  };
-} = {
-  black: {
-    pawn: { up: MoveType.SHORT },
-    lance: { up: MoveType.LONG },
-    knight: { left_up_knight: MoveType.SHORT, right_up_knight: MoveType.SHORT },
-    silver: {
-      left_up: MoveType.SHORT,
-      up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left_down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-    },
-    gold: {
-      left_up: MoveType.SHORT,
-      up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      down: MoveType.SHORT,
-    },
-    bishop: {
-      left_up: MoveType.LONG,
-      right_up: MoveType.LONG,
-      left_down: MoveType.LONG,
-      right_down: MoveType.LONG,
-    },
-    rook: {
-      up: MoveType.LONG,
-      left: MoveType.LONG,
-      right: MoveType.LONG,
-      down: MoveType.LONG,
-    },
-    king: {
-      left_down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left_up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    promPawn: {
-      left_up: MoveType.SHORT,
-      up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      down: MoveType.SHORT,
-    },
-    promLance: {
-      left_up: MoveType.SHORT,
-      up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      down: MoveType.SHORT,
-    },
-    promKnight: {
-      left_up: MoveType.SHORT,
-      up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      down: MoveType.SHORT,
-    },
-    promSilver: {
-      left_up: MoveType.SHORT,
-      up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      down: MoveType.SHORT,
-    },
-    horse: {
-      left_up: MoveType.LONG,
-      right_up: MoveType.LONG,
-      left_down: MoveType.LONG,
-      right_down: MoveType.LONG,
-      up: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      down: MoveType.SHORT,
-    },
-    dragon: {
-      up: MoveType.LONG,
-      left: MoveType.LONG,
-      right: MoveType.LONG,
-      down: MoveType.LONG,
-      left_up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      left_down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-    },
-  },
-  white: {
-    pawn: { down: MoveType.SHORT },
-    lance: { down: MoveType.LONG },
-    knight: {
-      left_down_knight: MoveType.SHORT,
-      right_down_knight: MoveType.SHORT,
-    },
-    silver: {
-      left_down: MoveType.SHORT,
-      down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left_up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-    },
-    gold: {
-      left_down: MoveType.SHORT,
-      down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    bishop: {
-      left_down: MoveType.LONG,
-      right_down: MoveType.LONG,
-      left_up: MoveType.LONG,
-      right_up: MoveType.LONG,
-    },
-    rook: {
-      down: MoveType.LONG,
-      left: MoveType.LONG,
-      right: MoveType.LONG,
-      up: MoveType.LONG,
-    },
-    king: {
-      left_down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left_up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-      down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    promPawn: {
-      left_down: MoveType.SHORT,
-      down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    promLance: {
-      left_down: MoveType.SHORT,
-      down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    promKnight: {
-      left_down: MoveType.SHORT,
-      down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    promSilver: {
-      left_down: MoveType.SHORT,
-      down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    horse: {
-      left_down: MoveType.LONG,
-      right_down: MoveType.LONG,
-      left_up: MoveType.LONG,
-      right_up: MoveType.LONG,
-      down: MoveType.SHORT,
-      left: MoveType.SHORT,
-      right: MoveType.SHORT,
-      up: MoveType.SHORT,
-    },
-    dragon: {
-      down: MoveType.LONG,
-      left: MoveType.LONG,
-      right: MoveType.LONG,
-      up: MoveType.LONG,
-      left_down: MoveType.SHORT,
-      right_down: MoveType.SHORT,
-      left_up: MoveType.SHORT,
-      right_up: MoveType.SHORT,
-    },
-  },
-};
+// 移動可能テーブル: [(color-1) * 14 * 12 + pieceType * 12 + direction] = 0(不可) | MoveType
+// Color: BLACK=1, WHITE=2 / PieceType: 0-13 / Direction: 0-11
+const movableTable = new Uint8Array(2 * 14 * 12);
+
+function setMoves(
+  color: Color,
+  pieceType: PieceType,
+  moves: [Direction, MoveType][],
+): void {
+  const base = ((color - 1) * 14 + pieceType) * 12;
+  for (const [dir, moveType] of moves) {
+    movableTable[base + dir] = moveType;
+  }
+}
+
+// 先手
+setMoves(Color.BLACK, PieceType.PAWN, [
+  [Direction.UP, MoveType.SHORT],
+]);
+setMoves(Color.BLACK, PieceType.LANCE, [
+  [Direction.UP, MoveType.LONG],
+]);
+setMoves(Color.BLACK, PieceType.KNIGHT, [
+  [Direction.LEFT_UP_KNIGHT, MoveType.SHORT],
+  [Direction.RIGHT_UP_KNIGHT, MoveType.SHORT],
+]);
+setMoves(Color.BLACK, PieceType.SILVER, [
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+]);
+const goldMoves: [Direction, MoveType][] = [
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+  [Direction.LEFT, MoveType.SHORT],
+  [Direction.RIGHT, MoveType.SHORT],
+  [Direction.DOWN, MoveType.SHORT],
+];
+setMoves(Color.BLACK, PieceType.GOLD, goldMoves);
+setMoves(Color.BLACK, PieceType.BISHOP, [
+  [Direction.LEFT_UP, MoveType.LONG],
+  [Direction.RIGHT_UP, MoveType.LONG],
+  [Direction.LEFT_DOWN, MoveType.LONG],
+  [Direction.RIGHT_DOWN, MoveType.LONG],
+]);
+setMoves(Color.BLACK, PieceType.ROOK, [
+  [Direction.UP, MoveType.LONG],
+  [Direction.LEFT, MoveType.LONG],
+  [Direction.RIGHT, MoveType.LONG],
+  [Direction.DOWN, MoveType.LONG],
+]);
+setMoves(Color.BLACK, PieceType.KING, [
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+  [Direction.DOWN, MoveType.SHORT],
+  [Direction.LEFT, MoveType.SHORT],
+  [Direction.RIGHT, MoveType.SHORT],
+  [Direction.UP, MoveType.SHORT],
+]);
+setMoves(Color.BLACK, PieceType.PROM_PAWN, goldMoves);
+setMoves(Color.BLACK, PieceType.PROM_LANCE, goldMoves);
+setMoves(Color.BLACK, PieceType.PROM_KNIGHT, goldMoves);
+setMoves(Color.BLACK, PieceType.PROM_SILVER, goldMoves);
+setMoves(Color.BLACK, PieceType.HORSE, [
+  [Direction.LEFT_UP, MoveType.LONG],
+  [Direction.RIGHT_UP, MoveType.LONG],
+  [Direction.LEFT_DOWN, MoveType.LONG],
+  [Direction.RIGHT_DOWN, MoveType.LONG],
+  [Direction.UP, MoveType.SHORT],
+  [Direction.LEFT, MoveType.SHORT],
+  [Direction.RIGHT, MoveType.SHORT],
+  [Direction.DOWN, MoveType.SHORT],
+]);
+setMoves(Color.BLACK, PieceType.DRAGON, [
+  [Direction.UP, MoveType.LONG],
+  [Direction.LEFT, MoveType.LONG],
+  [Direction.RIGHT, MoveType.LONG],
+  [Direction.DOWN, MoveType.LONG],
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+]);
+
+// 後手
+setMoves(Color.WHITE, PieceType.PAWN, [
+  [Direction.DOWN, MoveType.SHORT],
+]);
+setMoves(Color.WHITE, PieceType.LANCE, [
+  [Direction.DOWN, MoveType.LONG],
+]);
+setMoves(Color.WHITE, PieceType.KNIGHT, [
+  [Direction.LEFT_DOWN_KNIGHT, MoveType.SHORT],
+  [Direction.RIGHT_DOWN_KNIGHT, MoveType.SHORT],
+]);
+setMoves(Color.WHITE, PieceType.SILVER, [
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+]);
+const goldMovesWhite: [Direction, MoveType][] = [
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+  [Direction.LEFT, MoveType.SHORT],
+  [Direction.RIGHT, MoveType.SHORT],
+  [Direction.UP, MoveType.SHORT],
+];
+setMoves(Color.WHITE, PieceType.GOLD, goldMovesWhite);
+setMoves(Color.WHITE, PieceType.BISHOP, [
+  [Direction.LEFT_DOWN, MoveType.LONG],
+  [Direction.RIGHT_DOWN, MoveType.LONG],
+  [Direction.LEFT_UP, MoveType.LONG],
+  [Direction.RIGHT_UP, MoveType.LONG],
+]);
+setMoves(Color.WHITE, PieceType.ROOK, [
+  [Direction.DOWN, MoveType.LONG],
+  [Direction.LEFT, MoveType.LONG],
+  [Direction.RIGHT, MoveType.LONG],
+  [Direction.UP, MoveType.LONG],
+]);
+setMoves(Color.WHITE, PieceType.KING, [
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+  [Direction.DOWN, MoveType.SHORT],
+  [Direction.LEFT, MoveType.SHORT],
+  [Direction.RIGHT, MoveType.SHORT],
+  [Direction.UP, MoveType.SHORT],
+]);
+setMoves(Color.WHITE, PieceType.PROM_PAWN, goldMovesWhite);
+setMoves(Color.WHITE, PieceType.PROM_LANCE, goldMovesWhite);
+setMoves(Color.WHITE, PieceType.PROM_KNIGHT, goldMovesWhite);
+setMoves(Color.WHITE, PieceType.PROM_SILVER, goldMovesWhite);
+setMoves(Color.WHITE, PieceType.HORSE, [
+  [Direction.LEFT_DOWN, MoveType.LONG],
+  [Direction.RIGHT_DOWN, MoveType.LONG],
+  [Direction.LEFT_UP, MoveType.LONG],
+  [Direction.RIGHT_UP, MoveType.LONG],
+  [Direction.DOWN, MoveType.SHORT],
+  [Direction.LEFT, MoveType.SHORT],
+  [Direction.RIGHT, MoveType.SHORT],
+  [Direction.UP, MoveType.SHORT],
+]);
+setMoves(Color.WHITE, PieceType.DRAGON, [
+  [Direction.DOWN, MoveType.LONG],
+  [Direction.LEFT, MoveType.LONG],
+  [Direction.RIGHT, MoveType.LONG],
+  [Direction.UP, MoveType.LONG],
+  [Direction.LEFT_DOWN, MoveType.SHORT],
+  [Direction.RIGHT_DOWN, MoveType.SHORT],
+  [Direction.LEFT_UP, MoveType.SHORT],
+  [Direction.RIGHT_UP, MoveType.SHORT],
+]);
 
 /**
  * 指定した駒の移動可能な方向を返します。
  * @param piece
  */
 export function movableDirections(piece: Piece): Direction[] {
-  return Object.keys(movableDirectionMap[piece.color as string][piece.type]) as Direction[];
+  const base = ((piece.color - 1) * 14 + piece.type) * 12;
+  const result: Direction[] = [];
+  for (let d = 0; d < 12; d++) {
+    if (movableTable[base + d]) result.push(d as Direction);
+  }
+  return result;
 }
 
 /**
@@ -272,25 +229,25 @@ export function movableDirections(piece: Piece): Direction[] {
  * @param direction
  */
 export function resolveMoveType(piece: Piece, direction: Direction): MoveType | undefined {
-  return movableDirectionMap[piece.color as string][piece.type][direction];
+  const v = movableTable[((piece.color - 1) * 14 + piece.type) * 12 + direction];
+  return v || undefined;
 }
 
-export const directionToDeltaMap: {
-  [direction in Direction]: { x: number; y: number };
-} = {
-  up: { x: 0, y: -1 },
-  down: { x: 0, y: 1 },
-  left: { x: -1, y: 0 },
-  right: { x: 1, y: 0 },
-  left_up: { x: -1, y: -1 },
-  right_up: { x: 1, y: -1 },
-  left_down: { x: -1, y: 1 },
-  right_down: { x: 1, y: 1 },
-  left_up_knight: { x: -1, y: -2 },
-  right_up_knight: { x: 1, y: -2 },
-  left_down_knight: { x: -1, y: 2 },
-  right_down_knight: { x: 1, y: 2 },
-};
+// 方向ベクトル (index = Direction) → { x, y }
+export const directionToDeltaMap: { x: number; y: number }[] = [
+  { x: 0, y: -1 },   // UP (0)
+  { x: 0, y: 1 },    // DOWN (1)
+  { x: -1, y: 0 },   // LEFT (2)
+  { x: 1, y: 0 },    // RIGHT (3)
+  { x: -1, y: -1 },  // LEFT_UP (4)
+  { x: 1, y: -1 },   // RIGHT_UP (5)
+  { x: -1, y: 1 },   // LEFT_DOWN (6)
+  { x: 1, y: 1 },    // RIGHT_DOWN (7)
+  { x: -1, y: -2 },  // LEFT_UP_KNIGHT (8)
+  { x: 1, y: -2 },   // RIGHT_UP_KNIGHT (9)
+  { x: -1, y: 2 },   // LEFT_DOWN_KNIGHT (10)
+  { x: 1, y: 2 },    // RIGHT_DOWN_KNIGHT (11)
+];
 
 /**
  * ベクトルを方向と距離に変換します。
@@ -318,7 +275,7 @@ export function vectorToDirectionAndDistance(
     return { direction: Direction.LEFT_DOWN_KNIGHT, distance: 1, ok: true };
   }
   if (x !== 0 && y !== 0 && Math.abs(x) !== Math.abs(y)) {
-    return { direction: "" as Direction, distance: 0, ok: false };
+    return { direction: Direction.UP, distance: 0, ok: false };
   }
   let dx = x;
   let dy = y;
@@ -355,13 +312,13 @@ export function vectorToDirectionAndDistance(
   if (dx === 1 && dy === 1) {
     return { direction: Direction.RIGHT_DOWN, distance, ok: true };
   }
-  return { direction: "" as Direction, distance: 0, ok: false };
+  return { direction: Direction.UP, distance: 0, ok: false };
 }
 
 export enum VDirection {
-  UP = "up",
-  NONE = "none",
-  DOWN = "down",
+  UP = 0,
+  NONE = 1,
+  DOWN = 2,
 }
 
 /**
@@ -388,9 +345,9 @@ export function directionToVDirection(direction: Direction): VDirection {
 }
 
 export enum HDirection {
-  LEFT = "left",
-  NONE = "none",
-  RIGHT = "right",
+  LEFT = 0,
+  NONE = 1,
+  RIGHT = 2,
 }
 
 /**
