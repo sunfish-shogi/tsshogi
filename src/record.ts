@@ -12,7 +12,7 @@ import {
 import { DoMoveOption, ImmutablePosition, InitialPositionSFEN, Position } from "./position";
 import { formatMove, formatSpecialMove } from "./text";
 import { PieceType } from "./piece";
-import { Square } from "./square";
+import { Square, squareByFileRank, squareFile, squareRank } from "./square";
 
 const usenHandTable = {
   [PieceType.PAWN]: 81 + 10,
@@ -1187,11 +1187,10 @@ export class Record implements ImmutableRecord {
         }
         return;
       }
-      const from =
-        move.from instanceof Square
-          ? (move.from.rank - 1) * 9 + (move.from.file - 1)
-          : usenHandTable[move.from];
-      const to = (move.to.rank - 1) * 9 + (move.to.file - 1);
+      const from = move.isDrop
+        ? usenHandTable[move.dropPieceType]
+        : (squareRank(move.from) - 1) * 9 + (squareFile(move.from) - 1);
+      const to = (squareRank(move.to) - 1) * 9 + (squareFile(move.to) - 1);
       const m = (from * 81 + to) * 2 + (move.promote ? 1 : 0);
       moves += m.toString(36).padStart(3, "0");
       lastPly = node.ply;
@@ -1388,7 +1387,10 @@ export class Record implements ImmutableRecord {
       if (!parsed) {
         break;
       }
-      let move = record.position.createMove(parsed.from, parsed.to);
+      let move =
+        parsed.from > 80
+          ? record.position.createDropMove((parsed.from - 81) as PieceType, parsed.to)
+          : record.position.createMove(parsed.from, parsed.to);
       if (!move) {
         return new InvalidMoveError(sections[i]);
       }
@@ -1425,12 +1427,13 @@ export class Record implements ImmutableRecord {
       for (let i = 0; i < moves.length; i += 3) {
         const m = parseInt(moves.slice(i, i + 3), 36);
         const f = Math.floor(m / 162);
-        const from =
-          f < 81 ? new Square((f % 9) + 1, Math.floor(f / 9) + 1) : usenHandReverseTable[f];
         const t = Math.floor((m % 162) / 2);
-        const to = new Square((t % 9) + 1, Math.floor(t / 9) + 1);
+        const to = squareByFileRank((t % 9) + 1, Math.floor(t / 9) + 1);
         const promote = m % 2 === 1;
-        const move = record.position.createMove(from, to);
+        const move =
+          f < 81
+            ? record.position.createMove(squareByFileRank((f % 9) + 1, Math.floor(f / 9) + 1), to)
+            : record.position.createDropMove(usenHandReverseTable[f] as PieceType, to);
         if (!move) {
           return new Error("Invalid move in USEN.");
         }

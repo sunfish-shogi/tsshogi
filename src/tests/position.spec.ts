@@ -1,12 +1,13 @@
 import {
   Color,
+  handDest,
   importKIF,
   InitialPositionType,
   Move,
   Piece,
   Position,
   Record,
-  Square,
+  squareByFileRank,
   PieceType,
   InitialPositionSFEN,
   judgeJishogiDeclaration,
@@ -14,13 +15,45 @@ import {
   JishogiDeclarationResult,
   countJishogiDeclarationPoint,
   countJishogiPoint,
+  SQ_13,
+  SQ_14,
+  SQ_22,
+  SQ_24,
+  SQ_26,
+  SQ_27,
+  SQ_28,
+  SQ_31,
+  SQ_33,
+  SQ_34,
+  SQ_41,
+  SQ_42,
+  SQ_43,
+  SQ_44,
+  SQ_47,
+  SQ_48,
+  SQ_49,
+  SQ_51,
+  SQ_52,
+  SQ_54,
+  SQ_55,
+  SQ_56,
+  SQ_58,
+  SQ_59,
+  SQ_64,
+  SQ_67,
+  SQ_72,
+  SQ_81,
+  SQ_82,
+  SQ_83,
+  SQ_85,
+  SQ_91,
 } from "../";
 
 describe("position", () => {
   it("getters", () => {
     const position = new Position();
     expect(position.color).toBe(Color.BLACK);
-    expect(position.board.at(new Square(8, 2))).toStrictEqual(
+    expect(position.board.at(SQ_82)).toStrictEqual(
       new Piece(Color.WHITE, PieceType.ROOK),
     );
     expect(position.hand(Color.BLACK).count(PieceType.PAWN)).toBe(0);
@@ -131,25 +164,25 @@ describe("position", () => {
   it("doMove", () => {
     const position = new Position();
     // 26FU(27)
-    let move = position.createMove(new Square(2, 7), new Square(2, 6));
+    let move = position.createMove(SQ_27, SQ_26);
     expect(move).toBeInstanceOf(Move);
     expect(move?.color).toBe(Color.BLACK);
     expect(position.isValidMove(move as Move)).toBeTruthy();
     expect(position.doMove(move as Move)).toBeTruthy();
-    expect(position.board.at(new Square(2, 7))).toBeNull();
-    expect(position.board.at(new Square(2, 6))).toStrictEqual(
+    expect(position.board.at(SQ_27)).toBeNull();
+    expect(position.board.at(SQ_26)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.PAWN),
     );
     // 34FU(33)
-    move = position.createMove(new Square(3, 3), new Square(3, 4));
+    move = position.createMove(SQ_33, SQ_34);
     expect(move?.color).toBe(Color.WHITE);
     expect(position.doMove(move as Move)).toBeTruthy();
-    expect(position.board.at(new Square(3, 3))).toBeNull();
-    expect(position.board.at(new Square(3, 4))).toStrictEqual(
+    expect(position.board.at(SQ_33)).toBeNull();
+    expect(position.board.at(SQ_34)).toStrictEqual(
       new Piece(Color.WHITE, PieceType.PAWN),
     );
     // Invalid
-    move = position.createMove(new Square(2, 8), new Square(2, 6));
+    move = position.createMove(SQ_28, SQ_26);
     expect(position.doMove(move as Move)).toBeFalsy();
     expect(position.color).toBe(Color.BLACK);
     expect(
@@ -158,12 +191,12 @@ describe("position", () => {
       }),
     ).toBeTruthy();
     expect(position.color).toBe(Color.WHITE);
-    expect(position.board.at(new Square(2, 8))).toBe(null);
-    expect(position.board.at(new Square(2, 6))).toStrictEqual(
+    expect(position.board.at(SQ_28)).toBe(null);
+    expect(position.board.at(SQ_26)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.ROOK),
     );
     // ignoreValidation でも移動元の駒が存在しない場合は false を返す
-    move = new Move(new Square(1, 4), new Square(1, 3), true, position.color, PieceType.PAWN, null);
+    move = new Move(SQ_14, SQ_13, true, position.color, PieceType.PAWN, null);
     expect(
       position.doMove(move, {
         ignoreValidation: true,
@@ -189,9 +222,9 @@ describe("position", () => {
 `;
       const position = (importKIF(data) as Record).position;
       const move = (ff: number, fr: number, tf: number, tr: number) =>
-        position.createMove(new Square(ff, fr), new Square(tf, tr)) as Move;
+        position.createMove(squareByFileRank(ff, fr), squareByFileRank(tf, tr)) as Move;
       const drop = (type: PieceType, tf: number, tr: number) =>
-        position.createMove(type, new Square(tf, tr)) as Move;
+        position.createDropMove(type, squareByFileRank(tf, tr)) as Move;
       // 合法手
       expect(position.isValidMove(move(2, 7, 2, 6))).toBeTruthy();
       expect(position.isValidMove(move(4, 7, 4, 6))).toBeTruthy();
@@ -270,9 +303,9 @@ describe("position", () => {
 `;
       const position = (importKIF(data) as Record).position;
       const move = (ff: number, fr: number, tf: number, tr: number) =>
-        position.createMove(new Square(ff, fr), new Square(tf, tr)) as Move;
+        position.createMove(squareByFileRank(ff, fr), squareByFileRank(tf, tr)) as Move;
       const drop = (type: PieceType, tf: number, tr: number) =>
-        position.createMove(type, new Square(tf, tr)) as Move;
+        position.createDropMove(type, squareByFileRank(tf, tr)) as Move;
       // 合法手
       expect(position.isValidMove(move(2, 7, 2, 8))).toBeTruthy();
       expect(position.isValidMove(move(2, 7, 2, 8).withPromote())).toBeTruthy();
@@ -331,7 +364,7 @@ describe("position", () => {
 先手の持駒：歩 
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(4, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_44) as Move;
       expect(position.isPawnDropMate(move)).toBeTruthy();
       expect(position.isValidMove(move)).toBeFalsy();
     });
@@ -354,7 +387,7 @@ describe("position", () => {
 先手の持駒：歩 
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(4, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_44) as Move;
       expect(position.isPawnDropMate(move)).toBeFalsy();
       expect(position.isValidMove(move)).toBeTruthy();
     });
@@ -377,7 +410,7 @@ describe("position", () => {
 先手の持駒：歩 
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(4, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_44) as Move;
       expect(position.isPawnDropMate(move)).toBeFalsy();
       expect(position.isValidMove(move)).toBeTruthy();
     });
@@ -400,7 +433,7 @@ describe("position", () => {
 先手の持駒：歩 
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(4, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_44) as Move;
       expect(position.isPawnDropMate(move)).toBeFalsy();
       expect(position.isValidMove(move)).toBeTruthy();
     });
@@ -424,7 +457,7 @@ describe("position", () => {
 後手番
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(6, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_64) as Move;
       expect(position.isPawnDropMate(move)).toBeTruthy();
       expect(position.isValidMove(move)).toBeFalsy();
     });
@@ -448,7 +481,7 @@ describe("position", () => {
 後手番
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(6, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_64) as Move;
       expect(position.isPawnDropMate(move)).toBeFalsy();
       expect(position.isValidMove(move)).toBeTruthy();
     });
@@ -472,7 +505,7 @@ describe("position", () => {
 後手番
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(6, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_64) as Move;
       expect(position.isPawnDropMate(move)).toBeFalsy();
       expect(position.isValidMove(move)).toBeTruthy();
     });
@@ -496,7 +529,7 @@ describe("position", () => {
 後手番
 `;
       const position = (importKIF(data) as Record).position;
-      const move = position.createMove(PieceType.PAWN, new Square(6, 4)) as Move;
+      const move = position.createDropMove(PieceType.PAWN, SQ_64) as Move;
       expect(position.isPawnDropMate(move)).toBeFalsy();
       expect(position.isValidMove(move)).toBeTruthy();
     });
@@ -507,43 +540,43 @@ describe("position", () => {
       "ln1gkg1nl/1r1s3s1/pppppp1pp/6B2/9/2P4P1/PP1PPPP1P/1S5R1/LN1GKGSNL w Pb 10",
     ) as Position;
     // Good: ☗49金 => 85
-    expect(position.isValidEditing(new Square(4, 9), new Square(8, 5))).toBeTruthy();
+    expect(position.isValidEditing(SQ_49, SQ_85)).toBeTruthy();
     // Good: ☗49金 <=> ⛉83歩
-    expect(position.isValidEditing(new Square(4, 9), new Square(8, 3))).toBeTruthy();
+    expect(position.isValidEditing(SQ_49, SQ_83)).toBeTruthy();
     // Bad: 48 => 85
-    expect(position.isValidEditing(new Square(4, 8), new Square(8, 5))).toBeFalsy();
+    expect(position.isValidEditing(SQ_48, SQ_85)).toBeFalsy();
     // Good: ⛉82飛 => ☗
-    expect(position.isValidEditing(new Square(8, 2), Color.BLACK)).toBeTruthy();
+    expect(position.isValidEditing(SQ_82, handDest(Color.BLACK))).toBeTruthy();
     // Good: ⛉82飛 => ⛉
-    expect(position.isValidEditing(new Square(8, 2), Color.WHITE)).toBeTruthy();
+    expect(position.isValidEditing(SQ_82, handDest(Color.WHITE))).toBeTruthy();
     // Bad: 72 => ⛉
-    expect(position.isValidEditing(new Square(7, 2), Color.WHITE)).toBeFalsy();
+    expect(position.isValidEditing(SQ_72, handDest(Color.WHITE))).toBeFalsy();
     // Good: ☗持歩 => ⛉
     expect(
-      position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), Color.WHITE),
+      position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), handDest(Color.WHITE)),
     ).toBeTruthy();
     // Bad: ☗持銀 => ⛉
     expect(
-      position.isValidEditing(new Piece(Color.BLACK, PieceType.BISHOP), Color.WHITE),
+      position.isValidEditing(new Piece(Color.BLACK, PieceType.BISHOP), handDest(Color.WHITE)),
     ).toBeFalsy();
     // Good: ⛉持角 => ☗
     expect(
-      position.isValidEditing(new Piece(Color.WHITE, PieceType.BISHOP), Color.BLACK),
+      position.isValidEditing(new Piece(Color.WHITE, PieceType.BISHOP), handDest(Color.BLACK)),
     ).toBeTruthy();
     // Bad: ⛉持銀 => ☗
     expect(
-      position.isValidEditing(new Piece(Color.WHITE, PieceType.PAWN), Color.BLACK),
+      position.isValidEditing(new Piece(Color.WHITE, PieceType.PAWN), handDest(Color.BLACK)),
     ).toBeFalsy();
     // Good: ☗持歩 => 31
     expect(
-      position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), new Square(3, 1)),
+      position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), SQ_31),
     ).toBeTruthy();
     // Bad: ☗持歩 => ⛉41金
     expect(
-      position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), new Square(4, 1)),
+      position.isValidEditing(new Piece(Color.BLACK, PieceType.PAWN), SQ_41),
     ).toBeFalsy();
     // Bad: ⛉51玉 => ⛉
-    expect(position.isValidEditing(new Square(5, 1), Color.WHITE)).toBeFalsy();
+    expect(position.isValidEditing(SQ_51, handDest(Color.WHITE))).toBeFalsy();
   });
 
   it("edit", () => {
@@ -551,45 +584,49 @@ describe("position", () => {
       "ln1gkg1nl/1r1s3s1/pppppp1pp/6B2/9/2P4P1/PP1PPPP1P/1S5R1/LN1GKGSNL w Pb 10",
     ) as Position;
     // Good: ☗49金 => 85
-    expect(position.edit({ move: { from: new Square(4, 9), to: new Square(8, 5) } })).toBeTruthy();
-    expect(position.board.at(new Square(4, 9))).toBeNull();
-    expect(position.board.at(new Square(8, 5))).toStrictEqual(
+    expect(position.edit({ move: { from: SQ_49, to: SQ_85 } })).toBeTruthy();
+    expect(position.board.at(SQ_49)).toBeNull();
+    expect(position.board.at(SQ_85)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.GOLD),
     );
     // Bad: ☗49金 => 85
-    expect(position.edit({ move: { from: new Square(4, 9), to: new Square(8, 5) } })).toBeFalsy();
-    expect(position.board.at(new Square(4, 9))).toBeNull();
-    expect(position.board.at(new Square(8, 5))).toStrictEqual(
+    expect(position.edit({ move: { from: SQ_49, to: SQ_85 } })).toBeFalsy();
+    expect(position.board.at(SQ_49)).toBeNull();
+    expect(position.board.at(SQ_85)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.GOLD),
     );
     // Good: ☗持歩 => 31
     expect(
       position.edit({
-        move: { from: new Piece(Color.BLACK, PieceType.PAWN), to: new Square(3, 1) },
+        move: { from: new Piece(Color.BLACK, PieceType.PAWN), to: SQ_31 },
       }),
     ).toBeTruthy();
-    expect(position.board.at(new Square(3, 1))).toStrictEqual(
+    expect(position.board.at(SQ_31)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.PAWN),
     );
     // Good: ☗31歩 => ☗31と
-    expect(position.edit({ rotate: new Square(3, 1) })).toBeTruthy();
-    expect(position.board.at(new Square(3, 1))).toStrictEqual(
+    expect(position.edit({ rotate: SQ_31 })).toBeTruthy();
+    expect(position.board.at(SQ_31)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.PROM_PAWN),
     );
     // Good: ☗31と => ⛉31歩
-    expect(position.edit({ rotate: new Square(3, 1) })).toBeTruthy();
-    expect(position.board.at(new Square(3, 1))).toStrictEqual(
+    expect(position.edit({ rotate: SQ_31 })).toBeTruthy();
+    expect(position.board.at(SQ_31)).toStrictEqual(
       new Piece(Color.WHITE, PieceType.PAWN),
     );
     // Good: ⛉持角 => ☗
     expect(
-      position.edit({ move: { from: new Piece(Color.WHITE, PieceType.BISHOP), to: Color.BLACK } }),
+      position.edit({
+        move: { from: new Piece(Color.WHITE, PieceType.BISHOP), to: handDest(Color.BLACK) },
+      }),
     ).toBeTruthy();
     expect(position.hand(Color.WHITE).count(PieceType.BISHOP)).toBe(0);
     expect(position.hand(Color.BLACK).count(PieceType.BISHOP)).toBe(1);
     // Good: ⛉81桂 => ⛉
-    expect(position.edit({ move: { from: new Square(8, 1), to: Color.WHITE } })).toBeTruthy();
-    expect(position.board.at(new Square(8, 1))).toBeNull();
+    expect(
+      position.edit({ move: { from: SQ_81, to: handDest(Color.WHITE) } }),
+    ).toBeTruthy();
+    expect(position.board.at(SQ_81)).toBeNull();
     expect(position.hand(Color.WHITE).count(PieceType.KNIGHT)).toBe(1);
   });
 
@@ -612,27 +649,27 @@ describe("position", () => {
 後手番
 `;
     const position = (importKIF(data) as Record).position;
-    expect(position.listAttackers(new Square(4, 4))).toStrictEqual([
-      new Square(5, 2),
-      new Square(2, 2),
-      new Square(3, 4),
-      new Square(4, 8),
+    expect(position.listAttackers(SQ_44)).toStrictEqual([
+      SQ_52,
+      SQ_22,
+      SQ_34,
+      SQ_48,
     ]);
-    expect(position.listAttackers(new Square(4, 2))).toStrictEqual([
-      new Square(5, 1),
-      new Square(4, 1),
-      new Square(4, 8),
+    expect(position.listAttackers(SQ_42)).toStrictEqual([
+      SQ_51,
+      SQ_41,
+      SQ_48,
     ]);
-    expect(position.listAttackers(new Square(5, 5))).toStrictEqual([
-      new Square(9, 1),
-      new Square(2, 2),
-      new Square(5, 4),
-      new Square(5, 6),
+    expect(position.listAttackers(SQ_55)).toStrictEqual([
+      SQ_91,
+      SQ_22,
+      SQ_54,
+      SQ_56,
     ]);
-    expect(position.listAttackers(new Square(5, 8))).toStrictEqual([
-      new Square(6, 7),
-      new Square(4, 8),
-      new Square(5, 9),
+    expect(position.listAttackers(SQ_58)).toStrictEqual([
+      SQ_67,
+      SQ_48,
+      SQ_59,
     ]);
   });
 
@@ -641,13 +678,13 @@ describe("position", () => {
     const position = Position.newBySFEN(sfen);
     expect(position).toBeInstanceOf(Position);
     expect(position?.color).toBe(Color.BLACK);
-    expect(position?.board.at(new Square(4, 7))).toStrictEqual(
+    expect(position?.board.at(SQ_47)).toStrictEqual(
       new Piece(Color.BLACK, PieceType.KING),
     );
-    expect(position?.board.at(new Square(4, 3))).toStrictEqual(
+    expect(position?.board.at(SQ_43)).toStrictEqual(
       new Piece(Color.WHITE, PieceType.LANCE),
     );
-    expect(position?.board.at(new Square(2, 4))).toStrictEqual(
+    expect(position?.board.at(SQ_24)).toStrictEqual(
       new Piece(Color.WHITE, PieceType.HORSE),
     );
     expect(position?.blackHand.count(PieceType.PAWN)).toBe(4);

@@ -8,7 +8,7 @@ import { Move } from "./move";
 import { Piece, PieceType, isPromotable } from "./piece";
 import { ImmutablePosition, InitialPositionSFEN, Position, isPromotableRank } from "./position";
 import { ImmutableNode, ImmutableRecord, Record } from "./record";
-import { Square } from "./square";
+import { Square, squareByFileRank, squareFile, squareRank } from "./square";
 import { getDirectionModifier } from "./text";
 
 export type JKF = {
@@ -316,7 +316,7 @@ export function importJKF(jkf: JKF): Record | Error {
                 for (let y = 1; y <= 9; y++) {
                   const piece = jkf.initial.data.board[x - 1][y - 1];
                   if (piece?.kind) {
-                    const square = new Square(x, y);
+                    const square = squareByFileRank(x, y);
                     const color = jkfToColor(piece.color);
                     const pieceType = jkfToPieceType(piece.kind);
                     position.board.set(square, new Piece(color, pieceType));
@@ -356,23 +356,22 @@ export function importJKF(jkf: JKF): Record | Error {
       for (const m of entry.moves) {
         const ply = record.current.ply;
         if (m.move) {
-          let from: Square | PieceType;
-          if (m.move.from) {
-            from = new Square(m.move.from.x, m.move.from.y);
-          } else if (m.move.relative && m.move.relative !== "H") {
-            return new Error("unnormalized-JKF not supported.");
-          } else {
-            from = jkfToPieceType(m.move.piece);
-          }
           let to: Square;
           if (m.move.to) {
-            to = new Square(m.move.to.x, m.move.to.y);
+            to = squareByFileRank(m.move.to.x, m.move.to.y);
           } else if (m.move.same && record.current.prev?.move instanceof Move) {
             to = record.current.prev.move.to;
           } else {
             return new Error("invalid move: " + JSON.stringify(m.move));
           }
-          let move = record.position.createMove(from, to);
+          let move: Move | null;
+          if (m.move.from) {
+            move = record.position.createMove(squareByFileRank(m.move.from.x, m.move.from.y), to);
+          } else if (m.move.relative && m.move.relative !== "H") {
+            return new Error("unnormalized-JKF not supported.");
+          } else {
+            move = record.position.createDropMove(jkfToPieceType(m.move.piece), to);
+          }
           if (!move) {
             return new Error("invalid move: " + JSON.stringify(m.move));
           }
@@ -427,14 +426,14 @@ function buildJKFMoves(
         color: colorToJKF(move.color),
         piece: pieceTypeToJKF(move.pieceType),
         to: {
-          x: move.to.file,
-          y: move.to.rank,
+          x: squareFile(move.to),
+          y: squareRank(move.to),
         },
       };
-      if (move.from instanceof Square) {
+      if (!move.isDrop) {
         entry.move.from = {
-          x: move.from.file,
-          y: move.from.rank,
+          x: squareFile(move.from),
+          y: squareRank(move.from),
         };
         if (node.prev?.move instanceof Move && node.prev.move.to === move.to) {
           entry.move.same = true;
@@ -443,12 +442,12 @@ function buildJKFMoves(
           entry.move.promote = true;
         } else if (
           isPromotable(move.pieceType) &&
-          (isPromotableRank(move.color, move.from.rank) ||
-            isPromotableRank(move.color, move.to.rank))
+          (isPromotableRank(move.color, squareRank(move.from)) ||
+            isPromotableRank(move.color, squareRank(move.to)))
         ) {
           entry.move.promote = false;
         }
-        if (move.capturedPieceType) {
+        if (move.capturedPieceType !== null) {
           entry.move.capture = pieceTypeToJKF(move.capturedPieceType);
         }
       }
@@ -563,8 +562,7 @@ export function exportJKF(record: ImmutableRecord): JKF {
             const board: JKFSquare[][] = [[], [], [], [], [], [], [], [], []];
             for (let x = 1; x <= 9; x++) {
               for (let y = 1; y <= 9; y++) {
-                const square = new Square(x, y);
-                const piece = record.initialPosition.board.at(square);
+                const piece = record.initialPosition.board.at(squareByFileRank(x, y));
                 board[x - 1][y - 1] = piece
                   ? {
                       color: colorToJKF(piece.color),

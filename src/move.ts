@@ -1,19 +1,41 @@
 import { Color } from "./color";
 import { Piece, PieceType, pieceTypeToSFEN } from "./piece";
-import { Square } from "./square";
+import { Square, squareByUSI, squareUSI } from "./square";
 
 /**
  * 指し手
+ * from: 0-80 = 盤上の移動元 (Square.index), 81+ = 持ち駒打ち (PieceType + 81)
+ * to:   0-80 = 移動先 (Square.index)
  */
 export class Move {
   constructor(
-    public from: Square | PieceType,
-    public to: Square,
+    public from: number,
+    public to: number,
     public promote: boolean,
     public color: Color,
     public pieceType: PieceType,
     public capturedPieceType: PieceType | null,
   ) {}
+
+  /** 持ち駒打ちかどうか */
+  get isDrop(): boolean {
+    return this.from > 80;
+  }
+
+  /** 移動元のマス (盤上の指し手のみ有効) */
+  get fromSquare(): Square {
+    return this.from;
+  }
+
+  /** 打つ駒の種類 (持ち駒打ちのみ有効) */
+  get dropPieceType(): PieceType {
+    return (this.from - 81) as PieceType;
+  }
+
+  /** 移動先のマス */
+  get toSquare(): Square {
+    return this.to;
+  }
 
   /**
    * 指し手が等しいかどうかを判定します。
@@ -24,13 +46,8 @@ export class Move {
       return false;
     }
     return (
-      ((this.from instanceof Square &&
-        move.from instanceof Square &&
-        this.from.equals(move.from)) ||
-        (!(this.from instanceof Square) &&
-          !(move.from instanceof Square) &&
-          this.from === move.from)) &&
-      this.to.equals(move.to) &&
+      this.from === move.from &&
+      this.to === move.to &&
       this.promote === move.promote &&
       this.color === move.color &&
       this.pieceType === move.pieceType &&
@@ -50,12 +67,12 @@ export class Move {
    */
   get usi(): string {
     let ret = "";
-    if (this.from instanceof Square) {
-      ret += this.from.usi;
+    if (this.isDrop) {
+      ret += pieceTypeToSFEN(this.dropPieceType) + "*";
     } else {
-      ret += pieceTypeToSFEN(this.from) + "*";
+      ret += squareUSI(this.from);
     }
-    ret += this.to.usi;
+    ret += squareUSI(this.to);
     if (this.promote) {
       ret += "+";
     }
@@ -68,30 +85,30 @@ export class Move {
  * @param usiMove
  */
 export function parseUSIMove(usiMove: string): {
-  from: Square | PieceType;
-  to: Square;
+  from: number;
+  to: number;
   promote: boolean;
 } | null {
-  let from: PieceType | Square;
+  let from: number;
   if (usiMove[1] === "*") {
     const piece = Piece.newBySFEN(usiMove[0]);
     if (!piece) {
       return null;
     }
-    from = piece.type;
+    from = 81 + piece.type;
   } else {
-    const square = Square.newByUSI(usiMove);
-    if (!square) {
+    const square = squareByUSI(usiMove);
+    if (square === null) {
       return null;
     }
     from = square;
   }
-  const to = Square.newByUSI(usiMove.substring(2));
-  if (!to) {
+  const toSquare = squareByUSI(usiMove.substring(2));
+  if (toSquare === null) {
     return null;
   }
   const promote = usiMove.length >= 5 && usiMove[4] === "+";
-  return { from, to, promote };
+  return { from, to: toSquare, promote };
 }
 
 export enum SpecialMoveType {

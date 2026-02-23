@@ -8,7 +8,7 @@ import {
   Record,
   specialMove,
   SpecialMoveType,
-  Square,
+  squareByFileRank,
   RecordMetadataKey,
   getBlackPlayerName,
   getBlackPlayerNamePreferShort,
@@ -331,7 +331,7 @@ describe("record", () => {
     record.on("changePosition", onChangePosition);
     record.on("addNode", onAddNode);
     const move = (ff: number, fr: number, tf: number, tr: number): Move => {
-      return record.position.createMove(new Square(ff, fr), new Square(tf, tr)) as Move;
+      return record.position.createMove(squareByFileRank(ff, fr), squareByFileRank(tf, tr)) as Move;
     };
     // 76歩
     expect(record.append(move(7, 7, 7, 6))).toBeTruthy();

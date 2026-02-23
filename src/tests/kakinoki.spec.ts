@@ -17,7 +17,16 @@ import {
   SpecialMove,
   specialMove,
   SpecialMoveType,
-  Square,
+  squareByFileRank,
+  SQ_13,
+  SQ_22,
+  SQ_57,
+  SQ_67,
+  SQ_68,
+  SQ_76,
+  SQ_77,
+  SQ_82,
+  SQ_88,
 } from "../";
 
 describe("kakinoki", () => {
@@ -25,8 +34,8 @@ describe("kakinoki", () => {
     const testCases = [
       {
         move: new Move(
-          new Square(7, 7),
-          new Square(7, 6),
+          SQ_77,
+          SQ_76,
           false,
           Color.BLACK,
           PieceType.PAWN,
@@ -36,8 +45,8 @@ describe("kakinoki", () => {
       },
       {
         move: new Move(
-          new Square(1, 3),
-          new Square(5, 7),
+          SQ_13,
+          SQ_57,
           true,
           Color.WHITE,
           PieceType.BISHOP,
@@ -47,8 +56,8 @@ describe("kakinoki", () => {
       },
       {
         move: new Move(
-          new Square(1, 3),
-          new Square(5, 7),
+          SQ_13,
+          SQ_57,
           true,
           Color.WHITE,
           PieceType.BISHOP,
@@ -56,8 +65,8 @@ describe("kakinoki", () => {
         ),
         options: {
           prev: new Move(
-            new Square(6, 8),
-            new Square(5, 7),
+            SQ_68,
+            SQ_57,
             false,
             Color.BLACK,
             PieceType.SILVER,
@@ -68,8 +77,8 @@ describe("kakinoki", () => {
       },
       {
         move: new Move(
-          new Square(1, 3),
-          new Square(5, 7),
+          SQ_13,
+          SQ_57,
           true,
           Color.WHITE,
           PieceType.BISHOP,
@@ -77,8 +86,8 @@ describe("kakinoki", () => {
         ),
         options: {
           prev: new Move(
-            new Square(6, 8),
-            new Square(6, 7),
+            SQ_68,
+            SQ_67,
             false,
             Color.BLACK,
             PieceType.SILVER,
@@ -406,8 +415,8 @@ describe("kakinoki", () => {
       "ZhangJingding",
     );
     expect(record.metadata.getStandardMetadata(RecordMetadataKey.UWATE_NAME)).toBe("Sota_FUJII");
-    expect(record.position.board.at(new Square(2, 2))).toBeNull();
-    expect(record.position.board.at(new Square(8, 2))).toStrictEqual(
+    expect(record.position.board.at(SQ_22)).toBeNull();
+    expect(record.position.board.at(SQ_82)).toStrictEqual(
       new Piece(Color.WHITE, PieceType.ROOK),
     );
     record.goto(104);
@@ -819,7 +828,7 @@ describe("kakinoki", () => {
     const record = importKIF(data) as Record;
     expect(record).toBeInstanceOf(Record);
     record.goto(5);
-    expect((record.current.move as Move).to).toStrictEqual(new Square(8, 8));
+    expect((record.current.move as Move).toSquare).toBe(SQ_88);
   });
 
   it("import/emSpaceAfterPieceType", () => {
@@ -858,7 +867,7 @@ describe("kakinoki", () => {
     const record = importKIF(data) as Record;
     expect(record).toBeInstanceOf(Record);
     record.goto(5);
-    expect((record.current.move as Move).to).toStrictEqual(new Square(8, 8));
+    expect((record.current.move as Move).toSquare).toBe(SQ_88);
   });
 
   it("import/multi-line-comment", () => {

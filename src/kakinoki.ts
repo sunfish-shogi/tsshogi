@@ -31,7 +31,7 @@ import {
   RecordMetadata,
   RecordMetadataKey,
 } from "./record";
-import { Square } from "./square";
+import { Square, squareByFileRank, squareByXY, squareFile, squareRank } from "./square";
 import {
   fileToMultiByteChar,
   formatMove,
@@ -367,11 +367,11 @@ function readBoard(board: Board, data: string): Error | undefined {
   }
   for (let x = 0; x < 9; x += 1) {
     const file = 9 - x;
-    const square = new Square(file, rank);
+    const square = squareByFileRank(file, rank);
     const index = x * 2 + 1;
     const pieceStr = data[index + 1];
     const pieceType = stringToPieceType(pieceStr);
-    if (!pieceType) {
+    if (pieceType === undefined) {
       board.remove(square);
       continue;
     }
@@ -393,7 +393,7 @@ function readHand(hand: Hand, data: string): Error | undefined {
     const numberStr = section.substring(1);
     const pieceType = stringToPieceType(pieceStr);
     const n = stringToNumber(numberStr) || 1;
-    if (!pieceType) {
+    if (pieceType === undefined) {
       return new InvalidHandPieceError(section);
     }
     hand.add(pieceType, n);
@@ -443,7 +443,6 @@ function readRegularMove(record: Record, data: string): Error | boolean {
   }
   record.goto(num - 1);
   let to: Square;
-  let from: Square | PieceType;
   if (toStr.startsWith("同")) {
     if (!(record.current.move instanceof Move)) {
       return new InvalidDestinationError(data);
@@ -452,16 +451,15 @@ function readRegularMove(record: Record, data: string): Error | boolean {
   } else {
     const file = stringToNumber(toStr[0]);
     const rank = stringToNumber(toStr[1]);
-    to = new Square(file, rank);
+    to = squareByFileRank(file, rank);
   }
-  if (fromStr === "打") {
-    from = stringToPieceType(pieceTypeStr);
-  } else {
-    const file = stringToNumber(fromStr[1]);
-    const rank = stringToNumber(fromStr[2]);
-    from = new Square(file, rank);
-  }
-  let move = record.position.createMove(from, to);
+  const isDrop = fromStr === "打";
+  let move = isDrop
+    ? record.position.createDropMove(stringToPieceType(pieceTypeStr) as PieceType, to)
+    : record.position.createMove(
+        squareByFileRank(stringToNumber(fromStr[1]), stringToNumber(fromStr[2])),
+        to,
+      );
   if (!move) {
     return new InvalidMoveError(data);
   }
@@ -753,7 +751,7 @@ function formatBOD(position: ImmutablePosition, options?: KIFExportOptions): str
   for (let y = 0; y < 9; y++) {
     ret += "|";
     for (let x = 0; x < 9; x++) {
-      const square = Square.newByXY(x, y);
+      const square = squareByXY(x, y);
       const piece = position.board.at(square);
       if (!piece) {
         ret += " ・";
@@ -782,18 +780,18 @@ function formatBOD(position: ImmutablePosition, options?: KIFExportOptions): str
  */
 export function formatKIFMove(move: Move, options?: { prev?: Move; padding?: boolean }): string {
   let ret = "";
-  if (options?.prev && move.to.equals(options.prev.to)) {
+  if (options?.prev && move.to === options.prev.to) {
     ret += "同\u3000";
   } else {
-    ret += fileToMultiByteChar(move.to.file);
-    ret += rankToKanji(move.to.rank);
+    ret += fileToMultiByteChar(squareFile(move.to));
+    ret += rankToKanji(squareRank(move.to));
   }
   ret += pieceTypeToStringForMove(move.pieceType);
   if (move.promote) {
     ret += "成";
   }
-  if (move.from instanceof Square) {
-    ret += "(" + move.from.file + move.from.rank + ")";
+  if (!move.isDrop) {
+    ret += "(" + squareFile(move.from) + squareRank(move.from) + ")";
     ret += ret.length === 7 && options?.padding ? "  " : "";
   } else {
     ret += "打";

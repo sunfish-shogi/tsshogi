@@ -10,7 +10,7 @@ import { InvalidMoveError } from "./errors";
 import { Move, SpecialMove, SpecialMoveType, isKnownSpecialMove } from "./move";
 import { PieceType, Piece, isPromotable } from "./piece";
 import { ImmutablePosition, isPromotableRank } from "./position";
-import { Square } from "./square";
+import { Square, squareByFileRank, squareDirectionTo, squareFile, squareRank } from "./square";
 
 const stringToNumberMap: { [s: string]: number } = {
   "1": 1,
@@ -115,50 +115,48 @@ export function rankToKanji(rank: number): string {
   return kanjiNumberStrings[rank - 1];
 }
 
-const pieceTypeToStringForMoveMap: {
-  [pieceType in PieceType]: string;
-} = {
-  king: "玉",
-  rook: "飛",
-  dragon: "龍",
-  bishop: "角",
-  horse: "馬",
-  gold: "金",
-  silver: "銀",
-  promSilver: "成銀",
-  knight: "桂",
-  promKnight: "成桂",
-  lance: "香",
-  promLance: "成香",
-  pawn: "歩",
-  promPawn: "と",
-};
+// 指し手表記 (index = PieceType)
+const PIECE_TYPE_TO_STRING_FOR_MOVE: string[] = [
+  "歩",   // PAWN
+  "香",   // LANCE
+  "桂",   // KNIGHT
+  "銀",   // SILVER
+  "金",   // GOLD
+  "角",   // BISHOP
+  "飛",   // ROOK
+  "玉",   // KING
+  "と",   // PROM_PAWN
+  "成香", // PROM_LANCE
+  "成桂", // PROM_KNIGHT
+  "成銀", // PROM_SILVER
+  "馬",   // HORSE
+  "龍",   // DRAGON
+];
 
 export function pieceTypeToStringForMove(pieceType: PieceType): string {
-  return pieceTypeToStringForMoveMap[pieceType];
+  return PIECE_TYPE_TO_STRING_FOR_MOVE[pieceType];
 }
 
-const pieceTypeToStringForBoardMap: {
-  [pieceType in PieceType]: string;
-} = {
-  king: "玉",
-  rook: "飛",
-  dragon: "龍",
-  bishop: "角",
-  horse: "馬",
-  gold: "金",
-  silver: "銀",
-  promSilver: "全",
-  knight: "桂",
-  promKnight: "圭",
-  lance: "香",
-  promLance: "杏",
-  pawn: "歩",
-  promPawn: "と",
-};
+// 盤面表記 (index = PieceType)
+const PIECE_TYPE_TO_STRING_FOR_BOARD: string[] = [
+  "歩",   // PAWN
+  "香",   // LANCE
+  "桂",   // KNIGHT
+  "銀",   // SILVER
+  "金",   // GOLD
+  "角",   // BISHOP
+  "飛",   // ROOK
+  "玉",   // KING
+  "と",   // PROM_PAWN
+  "杏",   // PROM_LANCE
+  "圭",   // PROM_KNIGHT
+  "全",   // PROM_SILVER
+  "馬",   // HORSE
+  "龍",   // DRAGON
+];
 
 export function pieceTypeToStringForBoard(pieceType: PieceType): string {
-  return pieceTypeToStringForBoardMap[pieceType];
+  return PIECE_TYPE_TO_STRING_FOR_BOARD[pieceType];
 }
 
 const specialMoveToDisplayStringMap: {
@@ -209,22 +207,24 @@ export function formatSpecialMove(move: SpecialMove | SpecialMoveType, color?: C
 export function getDirectionModifier(move: Move, position: ImmutablePosition): string {
   const piece = new Piece(move.color, move.pieceType);
 
+  const toSquare = move.to;
   // 同じマス目へ移動可能な同種の駒を列挙
-  const others = position.listAttackersByPiece(move.to, piece).filter((square) => {
-    return !(move.from instanceof Square) || !square.equals(move.from);
+  const others = position.listAttackersByPiece(toSquare, piece).filter((square) => {
+    return move.isDrop || square !== move.from;
   });
 
   // 移動可能な同じ駒がある場合に移動元を区別する文字を付ける。
-  if (move.from instanceof Square) {
+  if (!move.isDrop) {
+    const fromSquare = move.from;
     let ret = "";
     // この指し手の移動方向
-    let myDir = move.from.directionTo(move.to);
+    let myDir = squareDirectionTo(fromSquare, toSquare);
     myDir = move.color === Color.BLACK ? myDir : reverseDirection(myDir);
     const myVDir = directionToVDirection(myDir);
     const myHDir = directionToHDirection(myDir);
     // 他の駒の移動方向
     const otherDirs = others.map((square) => {
-      const dir = square.directionTo(move.to);
+      const dir = squareDirectionTo(square, toSquare);
       return move.color === Color.BLACK ? dir : reverseDirection(dir);
     });
     // 水平方向がこの指し手と同じものを列挙して、その垂直方向を保持する。
@@ -314,24 +314,26 @@ export function formatMove(
       break;
   }
 
+  const toSquare = move.to;
   // 移動先の筋・段を付与する。
-  if (opt?.lastMove && opt.lastMove.to.equals(move.to)) {
+  if (opt?.lastMove && opt.lastMove.to === move.to) {
     ret += "同　";
   } else {
-    ret += fileToMultiByteChar(move.to.file);
-    ret += rankToKanji(move.to.rank);
+    ret += fileToMultiByteChar(squareFile(toSquare));
+    ret += rankToKanji(squareRank(toSquare));
   }
   ret += pieceTypeToStringForMove(move.pieceType);
   ret += getDirectionModifier(move, position);
 
-  if (move.from instanceof Square) {
+  if (!move.isDrop) {
+    const fromSquare = move.from;
     // 「成」または「不成」を付ける。
     if (move.promote) {
       ret += "成";
     } else if (
-      move.from instanceof Square &&
       isPromotable(move.pieceType) &&
-      (isPromotableRank(move.color, move.from.rank) || isPromotableRank(move.color, move.to.rank))
+      (isPromotableRank(move.color, squareRank(fromSquare)) ||
+        isPromotableRank(move.color, squareRank(toSquare)))
     ) {
       ret += "不成";
     }
@@ -413,27 +415,29 @@ export function parseMoves(
     let to: Square;
     if (toStr.startsWith("同")) {
       if (pv.length > 0) {
-        to = pv[pv.length - 1].to;
+        to = pv[pv.length - 1].toSquare;
       } else if (lastMove) {
-        to = lastMove.to;
+        to = lastMove.toSquare;
       } else {
         return [pv, new InvalidMoveError(section)];
       }
     } else {
       const file = stringToNumber(toStr[0]);
       const rank = stringToNumber(toStr[1]);
-      to = new Square(file, rank);
+      to = squareByFileRank(file, rank);
     }
-    let from: Square | PieceType;
+    let from: Square | undefined;
+    let fromIsDrop = false;
+    let fromPieceType: PieceType = pieceType;
     if (promOrDropStr === "打") {
-      from = pieceType;
+      fromIsDrop = true;
     } else if (fromStr) {
       const file = stringToNumber(fromStr[1]);
       const rank = stringToNumber(fromStr[2]);
-      from = new Square(file, rank);
+      from = squareByFileRank(file, rank);
     } else {
       let squares = p.listAttackersByPiece(to, new Piece(p.color, pieceType)).filter((square) => {
-        let dir = square.directionTo(to);
+        let dir = squareDirectionTo(square, to);
         dir = p.color === Color.BLACK ? dir : reverseDirection(dir);
         const vDir = directionToVDirection(dir);
         const hDir = directionToHDirection(dir);
@@ -473,7 +477,7 @@ export function parseMoves(
       ) {
         // 馬や龍で "左" や "右" が使われ、 1 つに絞れなかった場合は真っ直ぐ進むものを除外する。
         squares = squares.filter((square) => {
-          let dir = square.directionTo(to);
+          let dir = squareDirectionTo(square, to);
           dir = p.color === Color.BLACK ? dir : reverseDirection(dir);
           const hDir = directionToHDirection(dir);
           return hDir !== HDirection.NONE;
@@ -482,12 +486,15 @@ export function parseMoves(
       if (squares.length === 1) {
         from = squares[0];
       } else if (squares.length === 0 && p.hand(p.color).count(pieceType) !== 0) {
-        from = pieceType;
+        fromIsDrop = true;
+        fromPieceType = pieceType;
       } else {
         return [pv, new InvalidMoveError(section)];
       }
     }
-    let move = p.createMove(from, to);
+    let move = fromIsDrop
+      ? p.createDropMove(fromPieceType, to)
+      : p.createMove(from as Square, to);
     if (!move) {
       return [pv, new InvalidMoveError(section)];
     }

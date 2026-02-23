@@ -1,12 +1,20 @@
 import { Board, ImmutableBoard } from "./board";
 import { Color, reverseColor, colorToSFEN, parseSFENColor, isValidSFENColor } from "./color";
 import { Move, parseUSIMove } from "./move";
-import { Square } from "./square";
+import {
+  Square,
+  squareFile,
+  squareRank,
+  squareX,
+  squareY,
+  squareValid,
+  squareNeighbor,
+  squareByFileRank,
+} from "./square";
 import { Hand, ImmutableHand } from "./hand";
 import { Piece, PieceType } from "./piece";
 import {
   Direction,
-  directionToDeltaMap,
   movableDirections,
   MoveType,
   resolveMoveType,
@@ -72,24 +80,15 @@ export function initialPositionTypeToSFEN(type: InitialPositionType): string {
   }[type];
 }
 
-const invalidRankMap: {
-  [color: string]: { [pieceType in PieceType]?: { [rank: number]: boolean } };
-} = {
-  black: {
-    pawn: { 1: true },
-    lance: { 1: true },
-    knight: { 1: true, 2: true },
-  },
-  white: {
-    pawn: { 9: true },
-    lance: { 9: true },
-    knight: { 9: true, 8: true },
-  },
-};
-
 function isInvalidRank(color: Color, type: PieceType, rank: number): boolean {
-  const rule = invalidRankMap[color][type];
-  return rule ? rule[rank] : false;
+  if (color === Color.BLACK) {
+    if (type === PieceType.PAWN || type === PieceType.LANCE) return rank === 1;
+    if (type === PieceType.KNIGHT) return rank <= 2;
+  } else {
+    if (type === PieceType.PAWN || type === PieceType.LANCE) return rank === 9;
+    if (type === PieceType.KNIGHT) return rank >= 8;
+  }
+  return false;
 }
 
 export function isPromotableRank(color: Color, rank: number): boolean {
@@ -101,12 +100,26 @@ export function isPromotableRank(color: Color, rank: number): boolean {
 
 function pawnExists(color: Color, board: Board, file: number): boolean {
   for (let rank = 1; rank <= 9; rank += 1) {
-    const piece = board.at(new Square(file, rank));
+    const piece = board.at(squareByFileRank(file, rank));
     if (piece && piece.type === PieceType.PAWN && piece.color === color) {
       return true;
     }
   }
   return false;
+}
+
+/**
+ * 持ち駒台への移動先を表します。
+ * `to: Square | HandDest` で駒台への移動を指定する際に使用します。
+ */
+export type HandDest = { readonly hand: Color };
+
+/**
+ * 持ち駒台への移動先を作成します。
+ * @param color
+ */
+export function handDest(color: Color): HandDest {
+  return { hand: color };
 }
 
 export type PositionChange = {
@@ -118,7 +131,7 @@ export type PositionChange = {
     /**
      * 移動先のマスまたは駒台を指定します。
      */
-    to: Square | Color;
+    to: Square | HandDest;
   };
   /**
    * 指定したマスの駒をローテートします。
@@ -156,11 +169,17 @@ export interface ImmutablePosition {
    */
   readonly checked: boolean;
   /**
-   * 現在の局面における指し手を生成します。
+   * 盤上の駒を動かす指し手を生成します。
    * @param from
    * @param to
    */
-  createMove(from: Square | PieceType, to: Square): Move | null;
+  createMove(from: Square, to: Square): Move | null;
+  /**
+   * 持ち駒を打つ指し手を生成します。
+   * @param type
+   * @param to
+   */
+  createDropMove(type: PieceType, to: Square): Move | null;
   /**
    * USI形式の指し手から Move オブジェクトを生成します。
    * @param usiMove
@@ -193,7 +212,7 @@ export interface ImmutablePosition {
    * @param from 移動元のマスまたは持ち駒を指定します。
    * @param to 移動先のマスまたは駒台を指定します。
    */
-  isValidEditing(from: Square | Piece, to: Square | Color): boolean;
+  isValidEditing(from: Square | Piece, to: Square | HandDest): boolean;
   /**
    * SFEN形式の文字列を返します。
    */
@@ -273,16 +292,10 @@ export class Position {
    * @param from
    * @param to
    */
-  createMove(from: Square | PieceType, to: Square): Move | null {
-    let pieceType: PieceType;
-    if (from instanceof Square) {
-      const piece = this._board.at(from);
-      if (!piece) {
-        return null;
-      }
-      pieceType = piece.type;
-    } else {
-      pieceType = from;
+  createMove(from: Square, to: Square): Move | null {
+    const piece = this._board.at(from);
+    if (!piece) {
+      return null;
     }
     const capturedPiece = this._board.at(to);
     return new Move(
@@ -290,7 +303,19 @@ export class Position {
       to,
       false,
       this.color,
-      pieceType,
+      piece.type,
+      capturedPiece ? capturedPiece.type : null,
+    );
+  }
+
+  createDropMove(type: PieceType, to: Square): Move | null {
+    const capturedPiece = this._board.at(to);
+    return new Move(
+      81 + type,
+      to,
+      false,
+      this.color,
+      type,
       capturedPiece ? capturedPiece.type : null,
     );
   }
@@ -304,7 +329,10 @@ export class Position {
     if (!m) {
       return null;
     }
-    let move = this.createMove(m.from, m.to);
+    let move =
+      m.from > 80
+        ? this.createDropMove((m.from - 81) as PieceType, m.to)
+        : this.createMove(m.from, m.to);
     if (!move) {
       return null;
     }
@@ -319,37 +347,41 @@ export class Position {
    * @param move
    */
   isPawnDropMate(move: Move): boolean {
-    if (move.from instanceof Square) {
+    if (!move.isDrop) {
       return false;
     }
     if (move.pieceType !== PieceType.PAWN) {
       return false;
     }
-    const kingSquare = move.to.neighbor(move.color === Color.BLACK ? Direction.UP : Direction.DOWN);
+    const toSquare = move.to;
+    const kingSquare = squareNeighbor(
+      toSquare,
+      move.color === Color.BLACK ? Direction.UP : Direction.DOWN,
+    );
     const king = this.board.at(kingSquare);
     if (!king || king.type !== PieceType.KING || king.color === move.color) {
       return false;
     }
     const movable = movableDirections(king).find((dir) => {
-      const to = kingSquare.neighbor(dir);
-      if (!to.valid) {
+      const to = squareNeighbor(kingSquare, dir);
+      if (!squareValid(to)) {
         return false;
       }
       const piece = this.board.at(to);
       if (piece && piece.color == king.color) {
         return false;
       }
-      return !this.board.hasPower(to, move.color, { filled: move.to });
+      return !this.board.hasPower(to, move.color, { filled: toSquare });
     });
-    if (movable) {
+    if (movable !== undefined) {
       return false;
     }
     return !this.board.listSquaresByColor(king.color).find((from) => {
       return (
-        !from.equals(kingSquare) &&
-        this.isMovable(from, move.to) &&
+        from !== kingSquare &&
+        this.isMovable(from, toSquare) &&
         !this.board.isChecked(king.color, {
-          filled: move.to,
+          filled: toSquare,
           ignore: from,
         })
       );
@@ -383,22 +415,24 @@ export class Position {
    * @param move
    */
   isValidMove(move: Move): boolean {
-    if (move.from instanceof Square) {
-      const target = this._board.at(move.from);
+    const toSquare = move.to;
+    if (!move.isDrop) {
+      const fromSquare = move.from;
+      const target = this._board.atByIndex(move.from);
       if (!target || target.color !== this.color || target.type !== move.pieceType) {
         return false;
       }
-      if (!this.isMovable(move.from, move.to)) {
+      if (!this.isMovable(fromSquare, toSquare)) {
         return false;
       }
-      const captured = this._board.at(move.to);
+      const captured = this._board.atByIndex(move.to);
       if (captured && captured.color === this.color) {
         return false;
       }
       if ((captured === null) !== (move.capturedPieceType === null)) {
         return false;
       }
-      if (captured && move.capturedPieceType && captured.type !== move.capturedPieceType) {
+      if (captured && move.capturedPieceType !== null && captured.type !== move.capturedPieceType) {
         return false;
       }
       if (move.promote) {
@@ -406,46 +440,47 @@ export class Position {
           return false;
         }
         if (
-          !isPromotableRank(this.color, move.from.rank) &&
-          !isPromotableRank(this.color, move.to.rank)
+          !isPromotableRank(this.color, squareRank(fromSquare)) &&
+          !isPromotableRank(this.color, squareRank(toSquare))
         ) {
           return false;
         }
-      } else if (isInvalidRank(this.color, target.type, move.to.rank)) {
+      } else if (isInvalidRank(this.color, target.type, squareRank(toSquare))) {
         return false;
       }
       if (
         move.pieceType !== PieceType.KING
           ? this._board.isChecked(this.color, {
-              filled: move.to,
-              ignore: move.from,
+              filled: toSquare,
+              ignore: fromSquare,
             })
-          : this._board.hasPower(move.to, reverseColor(this.color), {
-              ignore: move.from,
+          : this._board.hasPower(toSquare, reverseColor(this.color), {
+              ignore: fromSquare,
             })
       ) {
         return false;
       }
     } else {
+      const dropType = move.dropPieceType;
       if (move.promote) {
         return false;
       }
       if (move.color !== this.color) {
         return false;
       }
-      if (this.hand(this.color).count(move.from) === 0) {
+      if (this.hand(this.color).count(dropType) === 0) {
         return false;
       }
-      if (this._board.at(move.to)) {
+      if (this._board.atByIndex(move.to)) {
         return false;
       }
-      if (isInvalidRank(this.color, move.from, move.to.rank)) {
+      if (isInvalidRank(this.color, dropType, squareRank(toSquare))) {
         return false;
       }
-      if (move.from === PieceType.PAWN && pawnExists(this.color, this._board, move.to.file)) {
+      if (dropType === PieceType.PAWN && pawnExists(this.color, this._board, squareFile(toSquare))) {
         return false;
       }
-      if (this._board.isChecked(this.color, { filled: move.to })) {
+      if (this._board.isChecked(this.color, { filled: toSquare })) {
         return false;
       }
       if (this.isPawnDropMate(move)) {
@@ -464,20 +499,21 @@ export class Position {
     if (!(opt && opt.ignoreValidation) && !this.isValidMove(move)) {
       return false;
     }
-    if (move.from instanceof Square) {
-      const target = this._board.at(move.from);
+    if (!move.isDrop) {
+      const target = this._board.atByIndex(move.from);
       if (!target) {
         return false;
       }
-      const captured = this._board.at(move.to);
-      this._board.remove(move.from);
-      this._board.set(move.to, move.promote ? target.promoted() : target);
+      const captured = this._board.atByIndex(move.to);
+      this._board.removeByIndex(move.from);
+      this._board.setByIndex(move.to, move.promote ? target.promoted() : target);
       if (captured && captured.type !== PieceType.KING) {
         this.hand(this.color).add(captured.unpromoted().type, 1);
       }
     } else {
-      this.hand(this.color).reduce(move.from, 1);
-      this._board.set(move.to, new Piece(this.color, move.from));
+      const dropType = move.dropPieceType;
+      this.hand(this.color).reduce(dropType, 1);
+      this._board.setByIndex(move.to, new Piece(this.color, dropType));
     }
     this._color = reverseColor(this.color);
     return true;
@@ -490,20 +526,20 @@ export class Position {
    */
   undoMove(move: Move): void {
     this._color = reverseColor(this.color);
-    if (move.from instanceof Square) {
-      this._board.set(move.from, new Piece(this.color, move.pieceType));
-      if (move.capturedPieceType) {
+    if (!move.isDrop) {
+      this._board.setByIndex(move.from, new Piece(this.color, move.pieceType));
+      if (move.capturedPieceType !== null) {
         const capturedPiece = new Piece(reverseColor(this.color), move.capturedPieceType);
-        this._board.set(move.to, capturedPiece);
+        this._board.setByIndex(move.to, capturedPiece);
         if (capturedPiece.type !== PieceType.KING) {
           this.hand(this.color).reduce(capturedPiece.unpromoted().type, 1);
         }
       } else {
-        this._board.remove(move.to);
+        this._board.removeByIndex(move.to);
       }
     } else {
-      this.hand(this.color).add(move.from, 1);
-      this._board.remove(move.to);
+      this.hand(this.color).add(move.dropPieceType, 1);
+      this._board.removeByIndex(move.to);
     }
   }
 
@@ -512,31 +548,31 @@ export class Position {
    * @param from
    * @param to
    */
-  isValidEditing(from: Square | Piece, to: Square | Color): boolean {
-    if (from instanceof Square) {
+  isValidEditing(from: Square | Piece, to: Square | HandDest): boolean {
+    if (!(from instanceof Piece)) {
       const piece = this._board.at(from);
       if (!piece) {
         return false;
       }
-      if (to instanceof Square) {
-        if (from.equals(to)) {
+      if (typeof to === "number") {
+        if (from === to) {
           return false;
         }
       } else if (piece.type === PieceType.KING) {
         return false;
       }
     } else {
-      if (!from.color) {
+      if (from.color === undefined) {
         return false;
       }
       if (this.hand(from.color).count(from.type) === 0) {
         return false;
       }
-      if (to instanceof Square) {
+      if (typeof to === "number") {
         if (this._board.at(to)) {
           return false;
         }
-      } else if (from.color === to) {
+      } else if (from.color === to.hand) {
         return false;
       }
     }
@@ -552,16 +588,16 @@ export class Position {
       if (!this.isValidEditing(change.move.from, change.move.to)) {
         return false;
       }
-      if (!(change.move.from instanceof Square)) {
+      if (change.move.from instanceof Piece) {
         this.hand(change.move.from.color).reduce(change.move.from.type, 1);
-        if (change.move.to instanceof Square) {
+        if (typeof change.move.to === "number") {
           this._board.set(change.move.to, change.move.from);
         } else {
-          this.hand(change.move.to).add(change.move.from.type, 1);
+          this.hand(change.move.to.hand).add(change.move.from.type, 1);
         }
-      } else if (!(change.move.to instanceof Square)) {
+      } else if (typeof change.move.to !== "number") {
         const piece = this._board.remove(change.move.from) as Piece;
-        this.hand(change.move.to).add(piece.unpromoted().type, 1);
+        this.hand(change.move.to.hand).add(piece.unpromoted().type, 1);
       } else {
         this._board.swap(change.move.from, change.move.to);
       }
@@ -662,8 +698,8 @@ export class Position {
   }
 
   private isMovable(from: Square, to: Square): boolean {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
+    const dx = squareX(to) - squareX(from);
+    const dy = squareY(to) - squareY(from);
     const { direction, distance, ok } = vectorToDirectionAndDistance(dx, dy);
     if (!ok) {
       return false;
@@ -678,13 +714,12 @@ export class Position {
       case MoveType.SHORT:
         return distance === 1;
       case MoveType.LONG: {
-        const d = directionToDeltaMap[direction];
         for (
-          let square = from.neighbor(d.x, d.y);
-          square.valid;
-          square = square.neighbor(d.x, d.y)
+          let square = squareNeighbor(from, direction);
+          squareValid(square);
+          square = squareNeighbor(square, direction)
         ) {
-          if (square.equals(to)) {
+          if (square === to) {
             return true;
           }
           if (this._board.at(square)) {
@@ -718,39 +753,77 @@ export class Position {
 }
 
 type PieceCounts = {
-  [pieceType in PieceType]: number;
+  pawn: number;
+  lance: number;
+  knight: number;
+  silver: number;
+  gold: number;
+  bishop: number;
+  rook: number;
+  king: number;
+  promPawn: number;
+  promLance: number;
+  promKnight: number;
+  promSilver: number;
+  horse: number;
+  dragon: number;
 };
 
+// PieceType 数値インデックス → PieceCounts プロパティ名
+const PIECE_COUNT_KEYS: (keyof PieceCounts)[] = [
+  "pawn",
+  "lance",
+  "knight",
+  "silver",
+  "gold",
+  "bishop",
+  "rook",
+  "king",
+  "promPawn",
+  "promLance",
+  "promKnight",
+  "promSilver",
+  "horse",
+  "dragon",
+];
+
+/**
+ * PieceType から PieceCounts の値を取得します。
+ */
+export function getPieceCount(counts: PieceCounts, pieceType: PieceType): number {
+  return counts[PIECE_COUNT_KEYS[pieceType]];
+}
+
 export function countExistingPieces(position: ImmutablePosition): PieceCounts {
-  const result: PieceCounts = {
-    pawn: 0,
-    lance: 0,
-    knight: 0,
-    silver: 0,
-    gold: 0,
-    bishop: 0,
-    rook: 0,
-    king: 0,
-    promPawn: 0,
-    promLance: 0,
-    promKnight: 0,
-    promSilver: 0,
-    horse: 0,
-    dragon: 0,
-  };
-  Square.all.forEach((square) => {
-    const piece = position.board.at(square);
+  const c = new Array(14).fill(0) as number[];
+  for (let sq = 0; sq < 81; sq++) {
+    const piece = position.board.at(sq);
     if (piece) {
-      result[piece.type] += 1;
+      c[piece.type] += 1;
     }
-  });
+  }
   position.blackHand.forEach((pieceType, n) => {
-    result[pieceType] += n;
+    c[pieceType] += n;
   });
   position.whiteHand.forEach((pieceType, n) => {
-    result[pieceType] += n;
+    c[pieceType] += n;
   });
-  return result;
+  return {
+    pawn: c[PieceType.PAWN],
+    lance: c[PieceType.LANCE],
+    knight: c[PieceType.KNIGHT],
+    silver: c[PieceType.SILVER],
+    gold: c[PieceType.GOLD],
+    bishop: c[PieceType.BISHOP],
+    rook: c[PieceType.ROOK],
+    king: c[PieceType.KING],
+    promPawn: c[PieceType.PROM_PAWN],
+    promLance: c[PieceType.PROM_LANCE],
+    promKnight: c[PieceType.PROM_KNIGHT],
+    promSilver: c[PieceType.PROM_SILVER],
+    horse: c[PieceType.HORSE],
+    dragon: c[PieceType.DRAGON],
+  };
 }
 
 export function countNotExistingPieces(position: ImmutablePosition): PieceCounts {
@@ -788,7 +861,7 @@ function invadingPieces(board: ImmutableBoard, color: Color): Piece[] {
   return board
     .listNonEmptySquares()
     .filter((square) => {
-      if (!isPromotableRank(color, square.rank)) {
+      if (!isPromotableRank(color, squareRank(square))) {
         return false;
       }
       const piece = board.at(square);
@@ -807,13 +880,13 @@ function invadingPieces(board: ImmutableBoard, color: Color): Piece[] {
  */
 export function countJishogiPoint(position: ImmutablePosition, color: Color): number {
   let point = 0;
-  Square.all.forEach((square) => {
-    const piece = position.board.at(square);
+  for (let sq = 0; sq < 81; sq++) {
+    const piece = position.board.at(sq);
     if (piece?.color === color && piece.type !== PieceType.KING) {
       const type = piece.unpromoted().type;
       point += type === PieceType.BISHOP || type === PieceType.ROOK ? 5 : 1;
     }
-  });
+  }
   const hand = position.hand(color);
   point +=
     hand.count(PieceType.PAWN) +
@@ -892,7 +965,7 @@ export function judgeJishogiDeclaration(
 
   // 玉が敵陣に入っているか。
   const king = position.board.findKing(color);
-  if (!king || !isPromotableRank(color, king.rank)) {
+  if (!king || !isPromotableRank(color, squareRank(king))) {
     return JishogiDeclarationResult.LOSE;
   }
 

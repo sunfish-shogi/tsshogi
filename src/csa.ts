@@ -16,6 +16,7 @@ import { Piece, PieceType, promotedPieceType } from "./piece";
 import {
   Position,
   countNotExistingPieces,
+  getPieceCount,
   ImmutablePosition,
   InitialPositionSFEN,
 } from "./position";
@@ -28,7 +29,7 @@ import {
   getBlackPlayerName,
   getWhitePlayerName,
 } from "./record";
-import { Square } from "./square";
+import { Square, squareByFileRank, squareFile, squareRank } from "./square";
 
 enum LineType {
   VERSION,
@@ -188,7 +189,7 @@ function parsePosition(line: string, position: Position): void {
   for (let i = 2; i + 4 <= line.length; i += 4) {
     const file = Number(line[i]);
     const rank = Number(line[i + 1]);
-    position.board.remove(new Square(file, rank));
+    position.board.remove(squareByFileRank(file, rank));
   }
 }
 
@@ -214,10 +215,10 @@ function parseRank(line: string, position: Position): Error | undefined {
 
     const color = section[0] === "+" ? Color.BLACK : Color.WHITE;
     const pieceType = csaNameToPieceType[section.slice(1)];
-    if (!pieceType) {
+    if (pieceType === undefined) {
       return new InvalidPieceNameError(section);
     }
-    position.board.set(new Square(file, rank), new Piece(color, pieceType));
+    position.board.set(squareByFileRank(file, rank), new Piece(color, pieceType));
   }
 }
 
@@ -229,11 +230,11 @@ function parsePieces(line: string, position: Position): Error | undefined {
       const counts = countNotExistingPieces(position);
       if (color === Color.BLACK) {
         position.blackHand.forEach((pieceType) => {
-          position.blackHand.add(pieceType, counts[pieceType]);
+          position.blackHand.add(pieceType, getPieceCount(counts, pieceType));
         });
       } else {
         position.whiteHand.forEach((pieceType) => {
-          position.whiteHand.add(pieceType, counts[pieceType]);
+          position.whiteHand.add(pieceType, getPieceCount(counts, pieceType));
         });
       }
       return;
@@ -241,11 +242,11 @@ function parsePieces(line: string, position: Position): Error | undefined {
     const file = Number(section[0]);
     const rank = Number(section[1]);
     const pieceType = csaNameToPieceType[section.slice(2)];
-    if (!pieceType) {
+    if (pieceType === undefined) {
       return new InvalidPieceNameError(section);
     }
     if (file !== 0 && rank !== 0) {
-      position.board.set(new Square(file, rank), new Piece(color, pieceType));
+      position.board.set(squareByFileRank(file, rank), new Piece(color, pieceType));
     } else if (color === Color.BLACK) {
       position.blackHand.add(pieceType, 1);
     } else {
@@ -264,16 +265,19 @@ function parseMove(line: string, position: ImmutablePosition): Move | Error {
   const toFile = Number(line[3]);
   const toRank = Number(line[4]);
   const pieceType = csaNameToPieceType[line.slice(5, 7)];
-  if (!pieceType) {
+  if (pieceType === undefined) {
     return new InvalidPieceNameError(line);
   }
-  const from = fromFile === 0 && fromRank === 0 ? pieceType : new Square(fromFile, fromRank);
-  const to = new Square(toFile, toRank);
-  let move = position.createMove(from, to);
+  const isDrop = fromFile === 0 && fromRank === 0;
+  const to = squareByFileRank(toFile, toRank);
+  let move = isDrop
+    ? position.createDropMove(pieceType, to)
+    : position.createMove(squareByFileRank(fromFile, fromRank), to);
   if (!move) {
     return new InvalidMoveError(line);
   }
-  if (from instanceof Square) {
+  if (!isDrop) {
+    const from = squareByFileRank(fromFile, fromRank);
     const basePiece = position.board.at(from);
     if (!basePiece) {
       return new PieceNotExistsError(line);
@@ -526,24 +530,23 @@ function formatMetadata(metadata: ImmutableRecordMetadata, options?: CSAExportOp
   return ret;
 }
 
-const pieceTypeToString: {
-  [pieceType in PieceType]: string;
-} = {
-  king: "OU",
-  rook: "HI",
-  dragon: "RY",
-  bishop: "KA",
-  horse: "UM",
-  gold: "KI",
-  silver: "GI",
-  promSilver: "NG",
-  knight: "KE",
-  promKnight: "NK",
-  lance: "KY",
-  promLance: "NY",
-  pawn: "FU",
-  promPawn: "TO",
-};
+// CSA形式の駒文字列 (index = PieceType)
+const pieceTypeToString: string[] = [
+  "FU", // PAWN
+  "KY", // LANCE
+  "KE", // KNIGHT
+  "GI", // SILVER
+  "KI", // GOLD
+  "KA", // BISHOP
+  "HI", // ROOK
+  "OU", // KING
+  "TO", // PROM_PAWN
+  "NY", // PROM_LANCE
+  "NK", // PROM_KNIGHT
+  "NG", // PROM_SILVER
+  "UM", // HORSE
+  "RY", // DRAGON
+];
 
 function formatHand(hand: ImmutableHand): string {
   let ret = "";
@@ -581,7 +584,7 @@ function formatPosition(position: ImmutablePosition, options?: CSAExportOptions)
   for (let rank = 1; rank <= 9; rank += 1) {
     ret += "P" + rank;
     for (let file = 9; file >= 1; file -= 1) {
-      const piece = position.board.at(new Square(file, rank));
+      const piece = position.board.at(squareByFileRank(file, rank));
       if (!piece) {
         ret += " * ";
       } else if (piece.color === Color.BLACK) {
@@ -596,10 +599,6 @@ function formatPosition(position: ImmutablePosition, options?: CSAExportOptions)
   ret += "P-" + formatHand(position.whiteHand) + returnCode;
   ret += (position.color === Color.BLACK ? "+" : "-") + returnCode;
   return ret;
-}
-
-function formatSquare(square: Square | PieceType): string {
-  return square instanceof Square ? `${square.file}${square.rank}` : "00";
 }
 
 /**
@@ -642,10 +641,12 @@ export function getCSASpecialMoveName(move: SpecialMove, color: Color): string |
  * @param move
  */
 export function formatCSAMove(move: Move): string {
+  const fromStr = move.isDrop ? "00" : `${squareFile(move.from)}${squareRank(move.from)}`;
+  const toStr = `${squareFile(move.to)}${squareRank(move.to)}`;
   return (
     (move.color === Color.BLACK ? "+" : "-") +
-    formatSquare(move.from) +
-    formatSquare(move.to) +
+    fromStr +
+    toStr +
     pieceTypeToString[move.promote ? promotedPieceType(move.pieceType) : move.pieceType]
   );
 }

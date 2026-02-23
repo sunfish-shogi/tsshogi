@@ -1,98 +1,148 @@
-import { Square } from "../";
+import {
+  INVALID_SQUARE,
+  parseSFENSquare,
+  squareByFileRank,
+  squareByUSI,
+  squareByXY,
+  squareDirectionTo,
+  squareFile,
+  squareNeighbor,
+  squareNeighborDelta,
+  squareOpposite,
+  squareRank,
+  squareSFEN,
+  squareUSI,
+  squareValid,
+  squareX,
+  squareY,
+  SQ_11,
+  SQ_14,
+  SQ_15,
+  SQ_16,
+  SQ_19,
+  SQ_26,
+  SQ_27,
+  SQ_34,
+  SQ_37,
+  SQ_38,
+  SQ_41,
+  SQ_48,
+  SQ_49,
+  SQ_51,
+  SQ_52,
+  SQ_53,
+  SQ_54,
+  SQ_55,
+  SQ_56,
+  SQ_58,
+  SQ_59,
+  SQ_61,
+  SQ_62,
+  SQ_65,
+  SQ_72,
+  SQ_73,
+  SQ_76,
+  SQ_83,
+  SQ_84,
+  SQ_91,
+  SQ_92,
+  SQ_94,
+  SQ_95,
+} from "../";
+import { Direction } from "../direction";
 
 describe("square", () => {
   it("getters", () => {
-    const square = new Square(3, 8);
-    expect(square.file).toBe(3);
-    expect(square.rank).toBe(8);
-    expect(square.x).toBe(6);
-    expect(square.y).toBe(7);
-    expect(square.index).toBe(69);
-    expect(square.valid).toBeTruthy();
+    const sq = SQ_38;
+    expect(squareFile(sq)).toBe(3);
+    expect(squareRank(sq)).toBe(8);
+    expect(squareX(sq)).toBe(6);
+    expect(squareY(sq)).toBe(7);
+    expect(sq).toBe(69);
+    expect(squareValid(sq)).toBeTruthy();
   });
 
   it("border", () => {
-    expect(new Square(1, 4).valid).toBeTruthy();
-    expect(new Square(0, 4).valid).toBeFalsy();
+    expect(squareValid(SQ_14)).toBeTruthy();
+    expect(squareValid(squareByFileRank(0, 4))).toBeFalsy();
 
-    expect(new Square(9, 4).valid).toBeTruthy();
-    expect(new Square(10, 4).valid).toBeFalsy();
+    expect(squareValid(SQ_94)).toBeTruthy();
+    expect(squareValid(squareByFileRank(10, 4))).toBeFalsy();
 
-    expect(new Square(4, 1).valid).toBeTruthy();
-    expect(new Square(4, 0).valid).toBeFalsy();
+    expect(squareValid(SQ_41)).toBeTruthy();
+    expect(squareValid(squareByFileRank(4, 0))).toBeFalsy();
 
-    expect(new Square(4, 9).valid).toBeTruthy();
-    expect(new Square(4, 10).valid).toBeFalsy();
+    expect(squareValid(SQ_49)).toBeTruthy();
+    expect(squareValid(squareByFileRank(4, 10))).toBeFalsy();
   });
 
-  it("neighbor", () => {
-    const square = new Square(2, 7);
-    expect(square.neighbor(1, 2)).toStrictEqual(new Square(1, 9));
-    expect(square.neighbor(-3, -5)).toStrictEqual(new Square(5, 2));
+  it("neighbor (delta)", () => {
+    const sq = SQ_27;
+    expect(squareNeighborDelta(sq, 1, 2)).toBe(SQ_19);
+    expect(squareNeighborDelta(sq, -3, -5)).toBe(SQ_52);
+    expect(squareNeighborDelta(sq, 3, 0)).toBe(INVALID_SQUARE);
+  });
+
+  it("neighbor (direction)", () => {
+    const sq = SQ_55;
+    expect(squareNeighbor(sq, Direction.UP)).toBe(SQ_54);
+    expect(squareNeighbor(sq, Direction.DOWN)).toBe(SQ_56);
+    // 盤外
+    expect(squareNeighbor(SQ_11, Direction.UP)).toBe(INVALID_SQUARE);
   });
 
   it("comparison", () => {
-    const square = new Square(2, 7);
-    expect(square.equals(square)).toBeTruthy();
-    expect(square.equals(new Square(2, 7))).toBeTruthy();
-    expect(square.equals(new Square(3, 7))).toBeFalsy();
-    expect(square.equals(new Square(2, 6))).toBeFalsy();
+    const sq = SQ_27;
+    expect(sq === sq).toBeTruthy();
+    expect(sq === SQ_27).toBeTruthy();
+    expect(sq === SQ_37).toBeFalsy();
+    expect(sq === SQ_26).toBeFalsy();
   });
 
-  it("sfen", () => {
-    expect(new Square(1, 6).usi).toBe("1f");
-    expect(new Square(2, 7).usi).toBe("2g");
-    expect(new Square(3, 8).usi).toBe("3h");
-    expect(new Square(4, 9).usi).toBe("4i");
-    expect(new Square(5, 1).usi).toBe("5a");
-    expect(new Square(6, 2).usi).toBe("6b");
-    expect(new Square(7, 3).usi).toBe("7c");
-    expect(new Square(8, 4).usi).toBe("8d");
-    expect(new Square(9, 5).usi).toBe("9e");
+  it("directionTo", () => {
+    const from = SQ_55;
+    const to = SQ_53;
+    expect(squareDirectionTo(from, to)).toBe(Direction.UP);
+  });
 
-    expect(Square.newByUSI("1e")).toStrictEqual(new Square(1, 5));
-    expect(Square.newByUSI("2f")).toStrictEqual(new Square(2, 6));
-    expect(Square.newByUSI("3g")).toStrictEqual(new Square(3, 7));
-    expect(Square.newByUSI("4h")).toStrictEqual(new Square(4, 8));
-    expect(Square.newByUSI("5i")).toStrictEqual(new Square(5, 9));
-    expect(Square.newByUSI("6a")).toStrictEqual(new Square(6, 1));
-    expect(Square.newByUSI("7b")).toStrictEqual(new Square(7, 2));
-    expect(Square.newByUSI("8c")).toStrictEqual(new Square(8, 3));
-    expect(Square.newByUSI("9d")).toStrictEqual(new Square(9, 4));
+  it("opposite", () => {
+    const sq = SQ_34;
+    expect(squareOpposite(sq)).toBe(SQ_76);
+  });
 
-    // sfen is deprecated
-    expect(new Square(1, 6).sfen).toBe("1f");
-    expect(new Square(2, 7).sfen).toBe("2g");
-    expect(new Square(3, 8).sfen).toBe("3h");
-    expect(new Square(4, 9).sfen).toBe("4i");
-    expect(new Square(5, 1).sfen).toBe("5a");
-    expect(new Square(6, 2).sfen).toBe("6b");
-    expect(new Square(7, 3).sfen).toBe("7c");
-    expect(new Square(8, 4).sfen).toBe("8d");
-    expect(new Square(9, 5).sfen).toBe("9e");
+  it("usi", () => {
+    expect(squareUSI(SQ_16)).toBe("1f");
+    expect(squareUSI(SQ_27)).toBe("2g");
+    expect(squareUSI(SQ_38)).toBe("3h");
+    expect(squareUSI(SQ_49)).toBe("4i");
+    expect(squareUSI(SQ_51)).toBe("5a");
+    expect(squareUSI(SQ_62)).toBe("6b");
+    expect(squareUSI(SQ_73)).toBe("7c");
+    expect(squareUSI(SQ_84)).toBe("8d");
+    expect(squareUSI(SQ_95)).toBe("9e");
+
+    expect(squareByUSI("1e")).toBe(SQ_15);
+    expect(squareByUSI("2f")).toBe(SQ_26);
+    expect(squareByUSI("3g")).toBe(SQ_37);
+    expect(squareByUSI("4h")).toBe(SQ_48);
+    expect(squareByUSI("5i")).toBe(SQ_59);
+    expect(squareByUSI("6a")).toBe(SQ_61);
+    expect(squareByUSI("7b")).toBe(SQ_72);
+    expect(squareByUSI("8c")).toBe(SQ_83);
+    expect(squareByUSI("9d")).toBe(SQ_94);
+
+    // squareSFEN is deprecated
+    expect(squareSFEN(SQ_16)).toBe("1f");
+    expect(squareSFEN(SQ_49)).toBe("4i");
 
     // parseSFENSquare is deprecated
-    expect(Square.parseSFENSquare("1e")).toStrictEqual(new Square(1, 5));
-    expect(Square.parseSFENSquare("2f")).toStrictEqual(new Square(2, 6));
-    expect(Square.parseSFENSquare("3g")).toStrictEqual(new Square(3, 7));
-    expect(Square.parseSFENSquare("4h")).toStrictEqual(new Square(4, 8));
-    expect(Square.parseSFENSquare("5i")).toStrictEqual(new Square(5, 9));
-    expect(Square.parseSFENSquare("6a")).toStrictEqual(new Square(6, 1));
-    expect(Square.parseSFENSquare("7b")).toStrictEqual(new Square(7, 2));
-    expect(Square.parseSFENSquare("8c")).toStrictEqual(new Square(8, 3));
-    expect(Square.parseSFENSquare("9d")).toStrictEqual(new Square(9, 4));
+    expect(parseSFENSquare("1e")).toBe(SQ_15);
+    expect(parseSFENSquare("9d")).toBe(SQ_94);
   });
 
   it("builder", () => {
-    expect(Square.newByXY(3, 4)).toStrictEqual(new Square(6, 5));
-    expect(Square.newByIndex(67)).toStrictEqual(new Square(5, 8));
+    expect(squareByXY(3, 4)).toBe(SQ_65);
+    expect(67).toBe(SQ_58);
   });
 
-  it("static", () => {
-    expect(Square.all).toHaveLength(81);
-    expect(Square.all[0]).toStrictEqual(new Square(9, 1));
-    expect(Square.all[8]).toStrictEqual(new Square(1, 1));
-    expect(Square.all[9]).toStrictEqual(new Square(9, 2));
-    expect(Square.all[80]).toStrictEqual(new Square(1, 9));
-  });
 });

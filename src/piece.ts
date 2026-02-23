@@ -1,46 +1,34 @@
 import { Color, reverseColor } from "./color";
 
 export enum PieceType {
-  PAWN = "pawn",
-  LANCE = "lance",
-  KNIGHT = "knight",
-  SILVER = "silver",
-  GOLD = "gold",
-  BISHOP = "bishop",
-  ROOK = "rook",
-  KING = "king",
-  PROM_PAWN = "promPawn",
-  PROM_LANCE = "promLance",
-  PROM_KNIGHT = "promKnight",
-  PROM_SILVER = "promSilver",
-  HORSE = "horse",
-  DRAGON = "dragon",
+  PAWN = 0,
+  LANCE = 1,
+  KNIGHT = 2,
+  SILVER = 3,
+  GOLD = 4,
+  BISHOP = 5,
+  ROOK = 6,
+  KING = 7,
+  PROM_PAWN = 8,
+  PROM_LANCE = 9,
+  PROM_KNIGHT = 10,
+  PROM_SILVER = 11,
+  HORSE = 12,
+  DRAGON = 13,
 }
 
-const standardPieceNameMap: { [pieceType in PieceType]: string } = {
-  pawn: "歩",
-  lance: "香",
-  knight: "桂",
-  silver: "銀",
-  gold: "金",
-  bishop: "角",
-  rook: "飛",
-  king: "玉",
-  promPawn: "と",
-  promLance: "成香",
-  promKnight: "成桂",
-  promSilver: "成銀",
-  horse: "馬",
-  dragon: "竜",
-};
+// 駒の標準名 (index = PieceType)
+const PIECE_NAMES: string[] = [
+  "歩", "香", "桂", "銀", "金", "角", "飛", "玉",
+  "と", "成香", "成桂", "成銀", "馬", "竜",
+];
 
 /**
  * 標準的な駒の名前を返します。
  * @param type
  */
 export function standardPieceName(type: PieceType): string {
-  const val = standardPieceNameMap[type];
-  return val || "";
+  return PIECE_NAMES[type] ?? "";
 }
 
 export const pieceTypes: PieceType[] = [
@@ -70,106 +58,103 @@ export const handPieceTypes: PieceType[] = [
   PieceType.ROOK,
 ] as const;
 
-const promotable: { [pieceType in PieceType]: boolean } = {
-  pawn: true,
-  lance: true,
-  knight: true,
-  silver: true,
-  gold: false,
-  bishop: true,
-  rook: true,
-  king: false,
-  promPawn: false,
-  promLance: false,
-  promKnight: false,
-  promSilver: false,
-  horse: false,
-  dragon: false,
-};
+// 成ることができる駒か (index = PieceType)
+const PROMOTABLE: boolean[] = [
+  true,  // PAWN
+  true,  // LANCE
+  true,  // KNIGHT
+  true,  // SILVER
+  false, // GOLD
+  true,  // BISHOP
+  true,  // ROOK
+  false, // KING
+  false, // PROM_PAWN
+  false, // PROM_LANCE
+  false, // PROM_KNIGHT
+  false, // PROM_SILVER
+  false, // HORSE
+  false, // DRAGON
+];
 
 /**
  * 成ることができる駒かどうかを返します。
  * @param pieceType
  */
 export function isPromotable(pieceType: PieceType): boolean {
-  return !!promotable[pieceType];
+  return PROMOTABLE[pieceType];
 }
 
-const promoteMap: { [pieceType: string]: PieceType } = {
-  pawn: PieceType.PROM_PAWN,
-  lance: PieceType.PROM_LANCE,
-  knight: PieceType.PROM_KNIGHT,
-  silver: PieceType.PROM_SILVER,
-  bishop: PieceType.HORSE,
-  rook: PieceType.DRAGON,
-};
+// 成り先 (index = PieceType, 非成駒はそのまま返す)
+const PROMOTE: PieceType[] = [
+  PieceType.PROM_PAWN,    // PAWN → PROM_PAWN
+  PieceType.PROM_LANCE,   // LANCE → PROM_LANCE
+  PieceType.PROM_KNIGHT,  // KNIGHT → PROM_KNIGHT
+  PieceType.PROM_SILVER,  // SILVER → PROM_SILVER
+  PieceType.GOLD,         // GOLD → GOLD (成不可)
+  PieceType.HORSE,        // BISHOP → HORSE
+  PieceType.DRAGON,       // ROOK → DRAGON
+  PieceType.KING,         // KING → KING (成不可)
+  PieceType.PROM_PAWN,    // PROM_PAWN → PROM_PAWN
+  PieceType.PROM_LANCE,   // PROM_LANCE → PROM_LANCE
+  PieceType.PROM_KNIGHT,  // PROM_KNIGHT → PROM_KNIGHT
+  PieceType.PROM_SILVER,  // PROM_SILVER → PROM_SILVER
+  PieceType.HORSE,        // HORSE → HORSE
+  PieceType.DRAGON,       // DRAGON → DRAGON
+];
 
 /**
  * 成った時の駒の種類を返します。
  * @param pieceType
  */
 export function promotedPieceType(pieceType: PieceType): PieceType {
-  return promoteMap[pieceType] || pieceType;
+  return PROMOTE[pieceType];
 }
 
-const unpromoteMap: { [pieceType in PieceType]?: PieceType } = {
-  promPawn: PieceType.PAWN,
-  promLance: PieceType.LANCE,
-  promKnight: PieceType.KNIGHT,
-  promSilver: PieceType.SILVER,
-  horse: PieceType.BISHOP,
-  dragon: PieceType.ROOK,
-};
+// 成る前の駒 (index = PieceType)
+const UNPROMOTE: PieceType[] = [
+  PieceType.PAWN,    // PAWN → PAWN
+  PieceType.LANCE,   // LANCE → LANCE
+  PieceType.KNIGHT,  // KNIGHT → KNIGHT
+  PieceType.SILVER,  // SILVER → SILVER
+  PieceType.GOLD,    // GOLD → GOLD
+  PieceType.BISHOP,  // BISHOP → BISHOP
+  PieceType.ROOK,    // ROOK → ROOK
+  PieceType.KING,    // KING → KING
+  PieceType.PAWN,    // PROM_PAWN → PAWN
+  PieceType.LANCE,   // PROM_LANCE → LANCE
+  PieceType.KNIGHT,  // PROM_KNIGHT → KNIGHT
+  PieceType.SILVER,  // PROM_SILVER → SILVER
+  PieceType.BISHOP,  // HORSE → BISHOP
+  PieceType.ROOK,    // DRAGON → ROOK
+];
 
 /**
  * 成る前の駒の種類を返します。
  * @param pieceType
  */
 export function unpromotedPieceType(pieceType: PieceType): PieceType {
-  return unpromoteMap[pieceType] || pieceType;
+  return UNPROMOTE[pieceType];
 }
 
-const toSFENCharBlack: { [pieceType in PieceType]: string } = {
-  pawn: "P",
-  lance: "L",
-  knight: "N",
-  silver: "S",
-  gold: "G",
-  bishop: "B",
-  rook: "R",
-  king: "K",
-  promPawn: "+P",
-  promLance: "+L",
-  promKnight: "+N",
-  promSilver: "+S",
-  horse: "+B",
-  dragon: "+R",
-};
+// SFEN文字 (index = PieceType, 先手)
+const SFEN_CHARS_BLACK: string[] = [
+  "P", "L", "N", "S", "G", "B", "R", "K",
+  "+P", "+L", "+N", "+S", "+B", "+R",
+];
+
+// SFEN文字 (index = PieceType, 後手)
+const SFEN_CHARS_WHITE: string[] = [
+  "p", "l", "n", "s", "g", "b", "r", "k",
+  "+p", "+l", "+n", "+s", "+b", "+r",
+];
 
 /**
  * SFEN形式の駒種を表す文字列を返します。
  * @param type
  */
 export function pieceTypeToSFEN(type: PieceType): string {
-  return toSFENCharBlack[type];
+  return SFEN_CHARS_BLACK[type];
 }
-
-const toSFENCharWhite: { [pieceType in PieceType]: string } = {
-  pawn: "p",
-  lance: "l",
-  knight: "n",
-  silver: "s",
-  gold: "g",
-  bishop: "b",
-  rook: "r",
-  king: "k",
-  promPawn: "+p",
-  promLance: "+l",
-  promKnight: "+n",
-  promSilver: "+s",
-  horse: "+b",
-  dragon: "+r",
-};
 
 const sfenCharToTypeMap: { [sfen: string]: PieceType } = {
   P: PieceType.PAWN,
@@ -233,50 +218,56 @@ const sfenCharToColorMap: { [sfen: string]: Color } = {
   "+r": Color.WHITE,
 };
 
-type RotateResult = {
-  type: PieceType;
-  reverseColor: boolean;
-};
+// rotate 先の駒種 (index = PieceType)
+// 先手・歩 → 先手・と → 後手・歩 → 後手・と → 先手・歩 のサイクル
+const ROTATE_TYPE: PieceType[] = [
+  PieceType.PROM_PAWN,    // PAWN
+  PieceType.PROM_LANCE,   // LANCE
+  PieceType.PROM_KNIGHT,  // KNIGHT
+  PieceType.PROM_SILVER,  // SILVER
+  PieceType.GOLD,         // GOLD
+  PieceType.HORSE,        // BISHOP
+  PieceType.DRAGON,       // ROOK
+  PieceType.KING,         // KING
+  PieceType.PAWN,         // PROM_PAWN
+  PieceType.LANCE,        // PROM_LANCE
+  PieceType.KNIGHT,       // PROM_KNIGHT
+  PieceType.SILVER,       // PROM_SILVER
+  PieceType.BISHOP,       // HORSE
+  PieceType.ROOK,         // DRAGON
+];
 
-const rotateMap = new Map<PieceType, RotateResult>();
-rotateMap.set(PieceType.PAWN, {
-  type: PieceType.PROM_PAWN,
-  reverseColor: false,
-});
-rotateMap.set(PieceType.LANCE, {
-  type: PieceType.PROM_LANCE,
-  reverseColor: false,
-});
-rotateMap.set(PieceType.KNIGHT, {
-  type: PieceType.PROM_KNIGHT,
-  reverseColor: false,
-});
-rotateMap.set(PieceType.SILVER, {
-  type: PieceType.PROM_SILVER,
-  reverseColor: false,
-});
-rotateMap.set(PieceType.GOLD, { type: PieceType.GOLD, reverseColor: true });
-rotateMap.set(PieceType.BISHOP, { type: PieceType.HORSE, reverseColor: false });
-rotateMap.set(PieceType.ROOK, { type: PieceType.DRAGON, reverseColor: false });
-rotateMap.set(PieceType.KING, { type: PieceType.KING, reverseColor: true });
-rotateMap.set(PieceType.PROM_PAWN, {
-  type: PieceType.PAWN,
-  reverseColor: true,
-});
-rotateMap.set(PieceType.PROM_LANCE, {
-  type: PieceType.LANCE,
-  reverseColor: true,
-});
-rotateMap.set(PieceType.PROM_KNIGHT, {
-  type: PieceType.KNIGHT,
-  reverseColor: true,
-});
-rotateMap.set(PieceType.PROM_SILVER, {
-  type: PieceType.SILVER,
-  reverseColor: true,
-});
-rotateMap.set(PieceType.HORSE, { type: PieceType.BISHOP, reverseColor: true });
-rotateMap.set(PieceType.DRAGON, { type: PieceType.ROOK, reverseColor: true });
+// rotate 時に色を反転するか (index = PieceType)
+const ROTATE_REVERSE: boolean[] = [
+  false, // PAWN
+  false, // LANCE
+  false, // KNIGHT
+  false, // SILVER
+  true,  // GOLD
+  false, // BISHOP
+  false, // ROOK
+  true,  // KING
+  true,  // PROM_PAWN
+  true,  // PROM_LANCE
+  true,  // PROM_KNIGHT
+  true,  // PROM_SILVER
+  true,  // HORSE
+  true,  // DRAGON
+];
+
+// Piece.id 用の固定文字列 (index = (color-1) * 14 + type)
+const PIECE_IDS: string[] = [
+  // color = BLACK (1), type = 0-13
+  "black_pawn", "black_lance", "black_knight", "black_silver", "black_gold",
+  "black_bishop", "black_rook", "black_king",
+  "black_promPawn", "black_promLance", "black_promKnight", "black_promSilver",
+  "black_horse", "black_dragon",
+  // color = WHITE (1), type = 0-13
+  "white_pawn", "white_lance", "white_knight", "white_silver", "white_gold",
+  "white_bishop", "white_rook", "white_king",
+  "white_promPawn", "white_promLance", "white_promKnight", "white_promSilver",
+  "white_horse", "white_dragon",
+];
 
 /**
  * 駒(手番を含む)
@@ -319,23 +310,21 @@ export class Piece {
    * 成った駒を返します。
    */
   promoted(): Piece {
-    const type = promoteMap[this.type];
-    return new Piece(this.color, type || this.type);
+    return new Piece(this.color, PROMOTE[this.type]);
   }
 
   /**
    * 成る前の駒を返します。
    */
   unpromoted(): Piece {
-    const type = unpromoteMap[this.type];
-    return new Piece(this.color, type || this.type);
+    return new Piece(this.color, UNPROMOTE[this.type]);
   }
 
   /**
    * 成ることが可能な駒かどうかを返します。
    */
   isPromotable(): boolean {
-    return isPromotable(this.type);
+    return PROMOTABLE[this.type];
   }
 
   /**
@@ -343,32 +332,25 @@ export class Piece {
    * ex) 先手・歩 -> 先手・と -> 後手・歩 -> 後手・と -> 先手・歩
    */
   rotate(): Piece {
-    const r = rotateMap.get(this.type);
-    const piece = new Piece(this.color, r ? r.type : this.type);
-    if (r && r.reverseColor) {
-      piece.color = reverseColor(this.color);
-    }
-    return piece;
+    const newType = ROTATE_TYPE[this.type];
+    const newColor = ROTATE_REVERSE[this.type] ? reverseColor(this.color) : this.color;
+    return new Piece(newColor, newType);
   }
 
   /**
    * 手番と種類を一意に識別する ID を返します。
    */
   get id(): string {
-    return this.color + "_" + this.type;
+    return PIECE_IDS[(this.color - 1) * 14 + this.type];
   }
 
   /**
    * SFEN形式の文字列を取得します。
    */
   get sfen(): string {
-    switch (this.color) {
-      default:
-      case Color.BLACK:
-        return toSFENCharBlack[this.type] as string;
-      case Color.WHITE:
-        return toSFENCharWhite[this.type] as string;
-    }
+    return this.color === Color.BLACK
+      ? SFEN_CHARS_BLACK[this.type]
+      : SFEN_CHARS_WHITE[this.type];
   }
 
   /**
@@ -376,7 +358,7 @@ export class Piece {
    * @param sfen
    */
   static isValidSFEN(sfen: string): boolean {
-    return !!sfenCharToTypeMap[sfen];
+    return sfenCharToTypeMap[sfen] !== undefined;
   }
 
   /**
@@ -385,11 +367,11 @@ export class Piece {
    */
   static newBySFEN(sfen: string): Piece | null {
     const type = sfenCharToTypeMap[sfen];
-    if (!type) {
+    if (type === undefined) {
       return null;
     }
     const color = sfenCharToColorMap[sfen];
-    if (!color) {
+    if (color === undefined) {
       return null;
     }
     return new Piece(color, type);

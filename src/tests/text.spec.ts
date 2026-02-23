@@ -5,7 +5,6 @@ import {
   Position,
   Record,
   SpecialMoveType,
-  Square,
   formatMove,
   formatPV,
   formatSpecialMove,
@@ -14,6 +13,17 @@ import {
   specialMove,
   anySpecialMove,
   parseMoves,
+  SQ_13,
+  SQ_14,
+  SQ_22,
+  SQ_33,
+  SQ_34,
+  SQ_49,
+  SQ_58,
+  SQ_76,
+  SQ_77,
+  SQ_79,
+  SQ_88,
 } from "../";
 
 describe("text", () => {
@@ -133,11 +143,46 @@ describe("text", () => {
   it("formatPV", () => {
     const position = new Position();
     const pv = [
-      new Move(new Square(7, 7), new Square(7, 6), false, Color.BLACK, PieceType.PAWN, null),
-      new Move(new Square(3, 3), new Square(3, 4), false, Color.WHITE, PieceType.PAWN, null),
-      new Move(new Square(4, 9), new Square(5, 8), false, Color.BLACK, PieceType.GOLD, null),
-      new Move(new Square(2, 2), new Square(8, 8), true, Color.WHITE, PieceType.BISHOP, null),
-      new Move(new Square(7, 9), new Square(8, 8), false, Color.BLACK, PieceType.SILVER, null),
+      new Move(
+        SQ_77,
+        SQ_76,
+        false,
+        Color.BLACK,
+        PieceType.PAWN,
+        null,
+      ),
+      new Move(
+        SQ_33,
+        SQ_34,
+        false,
+        Color.WHITE,
+        PieceType.PAWN,
+        null,
+      ),
+      new Move(
+        SQ_49,
+        SQ_58,
+        false,
+        Color.BLACK,
+        PieceType.GOLD,
+        null,
+      ),
+      new Move(
+        SQ_22,
+        SQ_88,
+        true,
+        Color.WHITE,
+        PieceType.BISHOP,
+        null,
+      ),
+      new Move(
+        SQ_79,
+        SQ_88,
+        false,
+        Color.BLACK,
+        PieceType.SILVER,
+        null,
+      ),
     ];
     expect(formatPV(position, pv)).toBe("▲７六歩△３四歩▲５八金右△８八角成▲同　銀");
   });
@@ -145,9 +190,30 @@ describe("text", () => {
   it("formatPV/invalid move", () => {
     const position = new Position();
     const pv = [
-      new Move(new Square(7, 7), new Square(7, 6), false, Color.BLACK, PieceType.PAWN, null),
-      new Move(new Square(1, 4), new Square(1, 3), true, Color.WHITE, PieceType.PAWN, null),
-      new Move(new Square(3, 3), new Square(3, 4), false, Color.WHITE, PieceType.PAWN, null),
+      new Move(
+        SQ_77,
+        SQ_76,
+        false,
+        Color.BLACK,
+        PieceType.PAWN,
+        null,
+      ),
+      new Move(
+        SQ_14,
+        SQ_13,
+        true,
+        Color.WHITE,
+        PieceType.PAWN,
+        null,
+      ),
+      new Move(
+        SQ_33,
+        SQ_34,
+        false,
+        Color.WHITE,
+        PieceType.PAWN,
+        null,
+      ),
     ];
     expect(() => formatPV(position, pv)).not.toThrow();
     expect(formatPV(position, pv)).toBe("▲７六歩△１三歩成");
@@ -204,8 +270,8 @@ describe("text", () => {
 先手の持駒：歩三　
 `) as Record;
     const lastMove = new Move(
-      new Square(2, 2),
-      new Square(8, 8),
+      SQ_22,
+      SQ_88,
       true,
       Color.WHITE,
       PieceType.BISHOP,
