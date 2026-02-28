@@ -1187,11 +1187,11 @@ export class Record implements ImmutableRecord {
         }
         return;
       }
-      const from =
-        move.from instanceof Square
-          ? (move.from.rank - 1) * 9 + (move.from.file - 1)
-          : usenHandTable[move.from];
-      const to = (move.to.rank - 1) * 9 + (move.to.file - 1);
+      const toSquare = move.toSquare;
+      const from = move.isDrop
+        ? usenHandTable[move.dropPieceType]
+        : (move.fromSquare.rank - 1) * 9 + (move.fromSquare.file - 1);
+      const to = (toSquare.rank - 1) * 9 + (toSquare.file - 1);
       const m = (from * 81 + to) * 2 + (move.promote ? 1 : 0);
       moves += m.toString(36).padStart(3, "0");
       lastPly = node.ply;
@@ -1388,7 +1388,9 @@ export class Record implements ImmutableRecord {
       if (!parsed) {
         break;
       }
-      let move = record.position.createMove(parsed.from, parsed.to);
+      const fromArg: Square | PieceType =
+        parsed.from > 80 ? (parsed.from - 81) as PieceType : Square.all[parsed.from];
+      let move = record.position.createMove(fromArg, Square.all[parsed.to]);
       if (!move) {
         return new InvalidMoveError(sections[i]);
       }

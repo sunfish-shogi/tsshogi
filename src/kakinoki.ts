@@ -448,7 +448,7 @@ function readRegularMove(record: Record, data: string): Error | boolean {
     if (!(record.current.move instanceof Move)) {
       return new InvalidDestinationError(data);
     }
-    to = record.current.move.to;
+    to = record.current.move.toSquare;
   } else {
     const file = stringToNumber(toStr[0]);
     const rank = stringToNumber(toStr[1]);
@@ -782,18 +782,20 @@ function formatBOD(position: ImmutablePosition, options?: KIFExportOptions): str
  */
 export function formatKIFMove(move: Move, options?: { prev?: Move; padding?: boolean }): string {
   let ret = "";
-  if (options?.prev && move.to.equals(options.prev.to)) {
+  const toSquare = move.toSquare;
+  if (options?.prev && move.to === options.prev.to) {
     ret += "同\u3000";
   } else {
-    ret += fileToMultiByteChar(move.to.file);
-    ret += rankToKanji(move.to.rank);
+    ret += fileToMultiByteChar(toSquare.file);
+    ret += rankToKanji(toSquare.rank);
   }
   ret += pieceTypeToStringForMove(move.pieceType);
   if (move.promote) {
     ret += "成";
   }
-  if (move.from instanceof Square) {
-    ret += "(" + move.from.file + move.from.rank + ")";
+  if (!move.isDrop) {
+    const fromSquare = move.fromSquare;
+    ret += "(" + fromSquare.file + fromSquare.rank + ")";
     ret += ret.length === 7 && options?.padding ? "  " : "";
   } else {
     ret += "打";

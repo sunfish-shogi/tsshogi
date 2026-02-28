@@ -368,7 +368,7 @@ export function importJKF(jkf: JKF): Record | Error {
           if (m.move.to) {
             to = new Square(m.move.to.x, m.move.to.y);
           } else if (m.move.same && record.current.prev?.move instanceof Move) {
-            to = record.current.prev.move.to;
+            to = record.current.prev.move.toSquare;
           } else {
             return new Error("invalid move: " + JSON.stringify(m.move));
           }
@@ -423,18 +423,20 @@ function buildJKFMoves(
     };
     if (node.move instanceof Move) {
       const move = node.move;
+      const toSquare = move.toSquare;
       entry.move = {
         color: colorToJKF(move.color),
         piece: pieceTypeToJKF(move.pieceType),
         to: {
-          x: move.to.file,
-          y: move.to.rank,
+          x: toSquare.file,
+          y: toSquare.rank,
         },
       };
-      if (move.from instanceof Square) {
+      if (!move.isDrop) {
+        const fromSquare = move.fromSquare;
         entry.move.from = {
-          x: move.from.file,
-          y: move.from.rank,
+          x: fromSquare.file,
+          y: fromSquare.rank,
         };
         if (node.prev?.move instanceof Move && node.prev.move.to === move.to) {
           entry.move.same = true;
@@ -443,8 +445,8 @@ function buildJKFMoves(
           entry.move.promote = true;
         } else if (
           isPromotable(move.pieceType) &&
-          (isPromotableRank(move.color, move.from.rank) ||
-            isPromotableRank(move.color, move.to.rank))
+          (isPromotableRank(move.color, fromSquare.rank) ||
+            isPromotableRank(move.color, toSquare.rank))
         ) {
           entry.move.promote = false;
         }

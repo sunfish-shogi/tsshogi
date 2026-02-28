@@ -644,8 +644,8 @@ export function getCSASpecialMoveName(move: SpecialMove, color: Color): string |
 export function formatCSAMove(move: Move): string {
   return (
     (move.color === Color.BLACK ? "+" : "-") +
-    formatSquare(move.from) +
-    formatSquare(move.to) +
+    formatSquare(move.isDrop ? move.dropPieceType : move.fromSquare) +
+    formatSquare(move.toSquare) +
     pieceTypeToString[move.promote ? promotedPieceType(move.pieceType) : move.pieceType]
   );
 }

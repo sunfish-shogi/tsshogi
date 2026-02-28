@@ -207,22 +207,24 @@ export function formatSpecialMove(move: SpecialMove | SpecialMoveType, color?: C
 export function getDirectionModifier(move: Move, position: ImmutablePosition): string {
   const piece = new Piece(move.color, move.pieceType);
 
+  const toSquare = move.toSquare;
   // 同じマス目へ移動可能な同種の駒を列挙
-  const others = position.listAttackersByPiece(move.to, piece).filter((square) => {
-    return !(move.from instanceof Square) || !square.equals(move.from);
+  const others = position.listAttackersByPiece(toSquare, piece).filter((square) => {
+    return move.isDrop || !square.equals(move.fromSquare);
   });
 
   // 移動可能な同じ駒がある場合に移動元を区別する文字を付ける。
-  if (move.from instanceof Square) {
+  if (!move.isDrop) {
+    const fromSquare = move.fromSquare;
     let ret = "";
     // この指し手の移動方向
-    let myDir = move.from.directionTo(move.to);
+    let myDir = fromSquare.directionTo(toSquare);
     myDir = move.color === Color.BLACK ? myDir : reverseDirection(myDir);
     const myVDir = directionToVDirection(myDir);
     const myHDir = directionToHDirection(myDir);
     // 他の駒の移動方向
     const otherDirs = others.map((square) => {
-      const dir = square.directionTo(move.to);
+      const dir = square.directionTo(toSquare);
       return move.color === Color.BLACK ? dir : reverseDirection(dir);
     });
     // 水平方向がこの指し手と同じものを列挙して、その垂直方向を保持する。
@@ -312,24 +314,25 @@ export function formatMove(
       break;
   }
 
+  const toSquare = move.toSquare;
   // 移動先の筋・段を付与する。
-  if (opt?.lastMove && opt.lastMove.to.equals(move.to)) {
+  if (opt?.lastMove && opt.lastMove.to === move.to) {
     ret += "同　";
   } else {
-    ret += fileToMultiByteChar(move.to.file);
-    ret += rankToKanji(move.to.rank);
+    ret += fileToMultiByteChar(toSquare.file);
+    ret += rankToKanji(toSquare.rank);
   }
   ret += pieceTypeToStringForMove(move.pieceType);
   ret += getDirectionModifier(move, position);
 
-  if (move.from instanceof Square) {
+  if (!move.isDrop) {
+    const fromSquare = move.fromSquare;
     // 「成」または「不成」を付ける。
     if (move.promote) {
       ret += "成";
     } else if (
-      move.from instanceof Square &&
       isPromotable(move.pieceType) &&
-      (isPromotableRank(move.color, move.from.rank) || isPromotableRank(move.color, move.to.rank))
+      (isPromotableRank(move.color, fromSquare.rank) || isPromotableRank(move.color, toSquare.rank))
     ) {
       ret += "不成";
     }
@@ -409,9 +412,9 @@ export function parseMoves(
     let to: Square;
     if (toStr.startsWith("同")) {
       if (pv.length > 0) {
-        to = pv[pv.length - 1].to;
+        to = pv[pv.length - 1].toSquare;
       } else if (lastMove) {
-        to = lastMove.to;
+        to = lastMove.toSquare;
       } else {
         return [pv, new InvalidMoveError(section)];
       }

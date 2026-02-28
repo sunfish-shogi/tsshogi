@@ -85,33 +85,11 @@ export class Square {
       // neighbor(dx, dy) overload
       return new Square(this.file - (arg0 as number), this.rank + arg1);
     }
-    switch (arg0 as Direction) {
-      case Direction.UP:
-        return new Square(this.file, this.rank - 1);
-      case Direction.DOWN:
-        return new Square(this.file, this.rank + 1);
-      case Direction.LEFT:
-        return new Square(this.file + 1, this.rank);
-      case Direction.RIGHT:
-        return new Square(this.file - 1, this.rank);
-      case Direction.LEFT_UP:
-        return new Square(this.file + 1, this.rank - 1);
-      case Direction.RIGHT_UP:
-        return new Square(this.file - 1, this.rank - 1);
-      case Direction.LEFT_DOWN:
-        return new Square(this.file + 1, this.rank + 1);
-      case Direction.RIGHT_DOWN:
-        return new Square(this.file - 1, this.rank + 1);
-      case Direction.LEFT_UP_KNIGHT:
-        return new Square(this.file + 1, this.rank - 2);
-      case Direction.RIGHT_UP_KNIGHT:
-        return new Square(this.file - 1, this.rank - 2);
-      case Direction.LEFT_DOWN_KNIGHT:
-        return new Square(this.file + 1, this.rank + 2);
-      case Direction.RIGHT_DOWN_KNIGHT:
-        return new Square(this.file - 1, this.rank + 2);
+    const idx = this.index;
+    if (idx >= 0 && idx < 81) {
+      return NEIGHBOR_TABLE[idx * 12 + (arg0 as number)];
     }
-    return new Square(-1, -1); // unreachable
+    return INVALID_SQUARE;
   }
 
   /** 指定したマスへの方向を返します。 */
@@ -191,4 +169,38 @@ export class Square {
 
 for (let index = 0; index < 81; index += 1) {
   Square.all.push(Square.newByIndex(index));
+}
+
+// 盤外を示すセンチネル
+const INVALID_SQUARE = new Square(-1, -1);
+
+// 隣接マス事前計算テーブル: [squareIndex * 12 + direction] → Square (盤外は INVALID_SQUARE)
+const NEIGHBOR_TABLE: Square[] = new Array(81 * 12);
+
+for (let i = 0; i < 81; i++) {
+  const sq = Square.all[i];
+  for (let dir = 0; dir < 12; dir++) {
+    // 方向ごとの計算 (neighbor メソッドと同じロジック)
+    let f: number, r: number;
+    switch (dir) {
+      case 0:  f = sq.file;     r = sq.rank - 1; break; // UP
+      case 1:  f = sq.file;     r = sq.rank + 1; break; // DOWN
+      case 2:  f = sq.file + 1; r = sq.rank;     break; // LEFT
+      case 3:  f = sq.file - 1; r = sq.rank;     break; // RIGHT
+      case 4:  f = sq.file + 1; r = sq.rank - 1; break; // LEFT_UP
+      case 5:  f = sq.file - 1; r = sq.rank - 1; break; // RIGHT_UP
+      case 6:  f = sq.file + 1; r = sq.rank + 1; break; // LEFT_DOWN
+      case 7:  f = sq.file - 1; r = sq.rank + 1; break; // RIGHT_DOWN
+      case 8:  f = sq.file + 1; r = sq.rank - 2; break; // LEFT_UP_KNIGHT
+      case 9:  f = sq.file - 1; r = sq.rank - 2; break; // RIGHT_UP_KNIGHT
+      case 10: f = sq.file + 1; r = sq.rank + 2; break; // LEFT_DOWN_KNIGHT
+      default: f = sq.file - 1; r = sq.rank + 2; break; // RIGHT_DOWN_KNIGHT
+    }
+    if (f >= 1 && f <= 9 && r >= 1 && r <= 9) {
+      const idx = (r - 1) * 9 + (9 - f);
+      NEIGHBOR_TABLE[i * 12 + dir] = Square.all[idx];
+    } else {
+      NEIGHBOR_TABLE[i * 12 + dir] = INVALID_SQUARE;
+    }
+  }
 }

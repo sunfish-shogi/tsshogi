@@ -1,12 +1,5 @@
-import { Piece, PieceType } from "./piece";
+import { Piece, PieceType, pieceTypeToSFEN } from "./piece";
 import { Color } from "./color";
-
-function buildSFEN(n: number, piece: Piece): string {
-  if (n === 0) {
-    return "";
-  }
-  return (n !== 1 ? n : "") + piece.sfen;
-}
 
 /**
  * 持ち駒(読み取り専用)
@@ -41,21 +34,28 @@ export interface ImmutableHand {
   formatSFEN(color: Color): string;
 }
 
+// 持ち駒の SFEN 文字 (PieceType インデックス順, 後手は toLowerCase)
+// PieceType.PAWN=0 .. PieceType.ROOK=6
+// handPieceTypes の SFEN 出力順: R, B, G, S, N, L, P (降順)
+const HAND_ORDER: PieceType[] = [
+  PieceType.ROOK,
+  PieceType.BISHOP,
+  PieceType.GOLD,
+  PieceType.SILVER,
+  PieceType.KNIGHT,
+  PieceType.LANCE,
+  PieceType.PAWN,
+];
+
 /**
  * 持ち駒
  */
 export class Hand {
-  private pieces: Map<PieceType, number>;
+  // Int32Array でインデックスアクセス: index = PieceType (0=PAWN .. 6=ROOK)
+  private pieces: Int32Array;
 
   constructor() {
-    this.pieces = new Map<PieceType, number>();
-    this.pieces.set(PieceType.PAWN, 0);
-    this.pieces.set(PieceType.LANCE, 0);
-    this.pieces.set(PieceType.KNIGHT, 0);
-    this.pieces.set(PieceType.SILVER, 0);
-    this.pieces.set(PieceType.GOLD, 0);
-    this.pieces.set(PieceType.BISHOP, 0);
-    this.pieces.set(PieceType.ROOK, 0);
+    this.pieces = new Int32Array(7);
   }
 
   /**
@@ -78,7 +78,7 @@ export class Hand {
    * @param pieceType
    */
   count(pieceType: PieceType): number {
-    return Math.max(this.pieces.get(pieceType) as number, 0);
+    return Math.max(this.pieces[pieceType], 0);
   }
 
   /**
@@ -87,7 +87,7 @@ export class Hand {
    * @param count
    */
   set(pieceType: PieceType, count: number): void {
-    this.pieces.set(pieceType, count);
+    this.pieces[pieceType] = count;
   }
 
   /**
@@ -96,10 +96,7 @@ export class Hand {
    * @param n
    */
   add(pieceType: PieceType, n: number): number {
-    let c = this.pieces.get(pieceType) as number;
-    c += n;
-    this.pieces.set(pieceType, c);
-    return c;
+    return (this.pieces[pieceType] += n);
   }
 
   /**
@@ -108,10 +105,7 @@ export class Hand {
    * @param n
    */
   reduce(pieceType: PieceType, n: number): number {
-    let c = this.pieces.get(pieceType) as number;
-    c -= n;
-    this.pieces.set(pieceType, c);
-    return c;
+    return (this.pieces[pieceType] -= n);
   }
 
   /**
@@ -119,13 +113,13 @@ export class Hand {
    * @param handler
    */
   forEach(handler: (pieceType: PieceType, n: number) => void): void {
-    handler(PieceType.PAWN, this.pieces.get(PieceType.PAWN) as number);
-    handler(PieceType.LANCE, this.pieces.get(PieceType.LANCE) as number);
-    handler(PieceType.KNIGHT, this.pieces.get(PieceType.KNIGHT) as number);
-    handler(PieceType.SILVER, this.pieces.get(PieceType.SILVER) as number);
-    handler(PieceType.GOLD, this.pieces.get(PieceType.GOLD) as number);
-    handler(PieceType.BISHOP, this.pieces.get(PieceType.BISHOP) as number);
-    handler(PieceType.ROOK, this.pieces.get(PieceType.ROOK) as number);
+    handler(PieceType.PAWN, this.pieces[PieceType.PAWN]);
+    handler(PieceType.LANCE, this.pieces[PieceType.LANCE]);
+    handler(PieceType.KNIGHT, this.pieces[PieceType.KNIGHT]);
+    handler(PieceType.SILVER, this.pieces[PieceType.SILVER]);
+    handler(PieceType.GOLD, this.pieces[PieceType.GOLD]);
+    handler(PieceType.BISHOP, this.pieces[PieceType.BISHOP]);
+    handler(PieceType.ROOK, this.pieces[PieceType.ROOK]);
   }
 
   /**
@@ -147,18 +141,16 @@ export class Hand {
    * @param color
    */
   formatSFEN(color: Color): string {
+    const isBlack = color === Color.BLACK;
     let ret = "";
-    ret += buildSFEN(this.count(PieceType.ROOK) as number, new Piece(color, PieceType.ROOK));
-    ret += buildSFEN(this.count(PieceType.BISHOP) as number, new Piece(color, PieceType.BISHOP));
-    ret += buildSFEN(this.count(PieceType.GOLD) as number, new Piece(color, PieceType.GOLD));
-    ret += buildSFEN(this.count(PieceType.SILVER) as number, new Piece(color, PieceType.SILVER));
-    ret += buildSFEN(this.count(PieceType.KNIGHT) as number, new Piece(color, PieceType.KNIGHT));
-    ret += buildSFEN(this.count(PieceType.LANCE) as number, new Piece(color, PieceType.LANCE));
-    ret += buildSFEN(this.count(PieceType.PAWN) as number, new Piece(color, PieceType.PAWN));
-    if (ret === "") {
-      return "-";
+    for (const type of HAND_ORDER) {
+      const n = this.pieces[type];
+      if (n > 0) {
+        const ch = pieceTypeToSFEN(type);
+        ret += (n !== 1 ? n : "") + (isBlack ? ch : ch.toLowerCase());
+      }
     }
-    return ret;
+    return ret || "-";
   }
 
   /**
@@ -227,8 +219,6 @@ export class Hand {
    * @param hand
    */
   copyFrom(hand: Hand): void {
-    hand.pieces.forEach((n, pieceType) => {
-      this.pieces.set(pieceType, n);
-    });
+    this.pieces.set(hand.pieces); // Int32Array.set = memcpy
   }
 }

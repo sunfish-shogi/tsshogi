@@ -25,8 +25,8 @@ describe("kakinoki", () => {
     const testCases = [
       {
         move: new Move(
-          new Square(7, 7),
-          new Square(7, 6),
+          new Square(7, 7).index,
+          new Square(7, 6).index,
           false,
           Color.BLACK,
           PieceType.PAWN,
@@ -36,8 +36,8 @@ describe("kakinoki", () => {
       },
       {
         move: new Move(
-          new Square(1, 3),
-          new Square(5, 7),
+          new Square(1, 3).index,
+          new Square(5, 7).index,
           true,
           Color.WHITE,
           PieceType.BISHOP,
@@ -47,8 +47,8 @@ describe("kakinoki", () => {
       },
       {
         move: new Move(
-          new Square(1, 3),
-          new Square(5, 7),
+          new Square(1, 3).index,
+          new Square(5, 7).index,
           true,
           Color.WHITE,
           PieceType.BISHOP,
@@ -56,8 +56,8 @@ describe("kakinoki", () => {
         ),
         options: {
           prev: new Move(
-            new Square(6, 8),
-            new Square(5, 7),
+            new Square(6, 8).index,
+            new Square(5, 7).index,
             false,
             Color.BLACK,
             PieceType.SILVER,
@@ -68,8 +68,8 @@ describe("kakinoki", () => {
       },
       {
         move: new Move(
-          new Square(1, 3),
-          new Square(5, 7),
+          new Square(1, 3).index,
+          new Square(5, 7).index,
           true,
           Color.WHITE,
           PieceType.BISHOP,
@@ -77,8 +77,8 @@ describe("kakinoki", () => {
         ),
         options: {
           prev: new Move(
-            new Square(6, 8),
-            new Square(6, 7),
+            new Square(6, 8).index,
+            new Square(6, 7).index,
             false,
             Color.BLACK,
             PieceType.SILVER,
@@ -819,7 +819,7 @@ describe("kakinoki", () => {
     const record = importKIF(data) as Record;
     expect(record).toBeInstanceOf(Record);
     record.goto(5);
-    expect((record.current.move as Move).to).toStrictEqual(new Square(8, 8));
+    expect((record.current.move as Move).toSquare).toStrictEqual(new Square(8, 8));
   });
 
   it("import/emSpaceAfterPieceType", () => {
@@ -858,7 +858,7 @@ describe("kakinoki", () => {
     const record = importKIF(data) as Record;
     expect(record).toBeInstanceOf(Record);
     record.goto(5);
-    expect((record.current.move as Move).to).toStrictEqual(new Square(8, 8));
+    expect((record.current.move as Move).toSquare).toStrictEqual(new Square(8, 8));
   });
 
   it("import/multi-line-comment", () => {

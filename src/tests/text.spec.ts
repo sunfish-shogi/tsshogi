@@ -133,11 +133,11 @@ describe("text", () => {
   it("formatPV", () => {
     const position = new Position();
     const pv = [
-      new Move(new Square(7, 7), new Square(7, 6), false, Color.BLACK, PieceType.PAWN, null),
-      new Move(new Square(3, 3), new Square(3, 4), false, Color.WHITE, PieceType.PAWN, null),
-      new Move(new Square(4, 9), new Square(5, 8), false, Color.BLACK, PieceType.GOLD, null),
-      new Move(new Square(2, 2), new Square(8, 8), true, Color.WHITE, PieceType.BISHOP, null),
-      new Move(new Square(7, 9), new Square(8, 8), false, Color.BLACK, PieceType.SILVER, null),
+      new Move(new Square(7, 7).index, new Square(7, 6).index, false, Color.BLACK, PieceType.PAWN, null),
+      new Move(new Square(3, 3).index, new Square(3, 4).index, false, Color.WHITE, PieceType.PAWN, null),
+      new Move(new Square(4, 9).index, new Square(5, 8).index, false, Color.BLACK, PieceType.GOLD, null),
+      new Move(new Square(2, 2).index, new Square(8, 8).index, true, Color.WHITE, PieceType.BISHOP, null),
+      new Move(new Square(7, 9).index, new Square(8, 8).index, false, Color.BLACK, PieceType.SILVER, null),
     ];
     expect(formatPV(position, pv)).toBe("▲７六歩△３四歩▲５八金右△８八角成▲同　銀");
   });
@@ -193,8 +193,8 @@ describe("text", () => {
 先手の持駒：歩三　
 `) as Record;
     const lastMove = new Move(
-      new Square(2, 2),
-      new Square(8, 8),
+      new Square(2, 2).index,
+      new Square(8, 8).index,
       true,
       Color.WHITE,
       PieceType.BISHOP,

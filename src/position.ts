@@ -6,7 +6,6 @@ import { Hand, ImmutableHand } from "./hand";
 import { Piece, PieceType } from "./piece";
 import {
   Direction,
-  directionToDeltaMap,
   movableDirections,
   MoveType,
   resolveMoveType,
@@ -265,6 +264,8 @@ export class Position {
    * @param to
    */
   createMove(from: Square | PieceType, to: Square): Move | null {
+    const fromNum = from instanceof Square ? from.index : 81 + from;
+    const toNum = to.index;
     let pieceType: PieceType;
     if (from instanceof Square) {
       const piece = this._board.at(from);
@@ -277,8 +278,8 @@ export class Position {
     }
     const capturedPiece = this._board.at(to);
     return new Move(
-      from,
-      to,
+      fromNum,
+      toNum,
       false,
       this.color,
       pieceType,
@@ -295,7 +296,8 @@ export class Position {
     if (!m) {
       return null;
     }
-    let move = this.createMove(m.from, m.to);
+    const from: Square | PieceType = m.from > 80 ? (m.from - 81) as PieceType : Square.all[m.from];
+    let move = this.createMove(from, Square.all[m.to]);
     if (!move) {
       return null;
     }
@@ -310,13 +312,14 @@ export class Position {
    * @param move
    */
   isPawnDropMate(move: Move): boolean {
-    if (move.from instanceof Square) {
+    if (!move.isDrop) {
       return false;
     }
     if (move.pieceType !== PieceType.PAWN) {
       return false;
     }
-    const kingSquare = move.to.neighbor(move.color === Color.BLACK ? Direction.UP : Direction.DOWN);
+    const toSquare = move.toSquare;
+    const kingSquare = toSquare.neighbor(move.color === Color.BLACK ? Direction.UP : Direction.DOWN);
     const king = this.board.at(kingSquare);
     if (!king || king.type !== PieceType.KING || king.color === move.color) {
       return false;
@@ -330,7 +333,7 @@ export class Position {
       if (piece && piece.color == king.color) {
         return false;
       }
-      return !this.board.hasPower(to, move.color, { filled: move.to });
+      return !this.board.hasPower(to, move.color, { filled: toSquare });
     });
     if (movable !== undefined) {
       return false;
@@ -338,9 +341,9 @@ export class Position {
     return !this.board.listSquaresByColor(king.color).find((from) => {
       return (
         !from.equals(kingSquare) &&
-        this.isMovable(from, move.to) &&
+        this.isMovable(from, toSquare) &&
         !this.board.isChecked(king.color, {
-          filled: move.to,
+          filled: toSquare,
           ignore: from,
         })
       );
@@ -374,15 +377,17 @@ export class Position {
    * @param move
    */
   isValidMove(move: Move): boolean {
-    if (move.from instanceof Square) {
-      const target = this._board.at(move.from);
+    const toSquare = move.toSquare;
+    if (!move.isDrop) {
+      const fromSquare = move.fromSquare;
+      const target = this._board.atByIndex(move.from);
       if (!target || target.color !== this.color || target.type !== move.pieceType) {
         return false;
       }
-      if (!this.isMovable(move.from, move.to)) {
+      if (!this.isMovable(fromSquare, toSquare)) {
         return false;
       }
-      const captured = this._board.at(move.to);
+      const captured = this._board.atByIndex(move.to);
       if (captured && captured.color === this.color) {
         return false;
       }
@@ -397,46 +402,47 @@ export class Position {
           return false;
         }
         if (
-          !isPromotableRank(this.color, move.from.rank) &&
-          !isPromotableRank(this.color, move.to.rank)
+          !isPromotableRank(this.color, fromSquare.rank) &&
+          !isPromotableRank(this.color, toSquare.rank)
         ) {
           return false;
         }
-      } else if (isInvalidRank(this.color, target.type, move.to.rank)) {
+      } else if (isInvalidRank(this.color, target.type, toSquare.rank)) {
         return false;
       }
       if (
         move.pieceType !== PieceType.KING
           ? this._board.isChecked(this.color, {
-              filled: move.to,
-              ignore: move.from,
+              filled: toSquare,
+              ignore: fromSquare,
             })
-          : this._board.hasPower(move.to, reverseColor(this.color), {
-              ignore: move.from,
+          : this._board.hasPower(toSquare, reverseColor(this.color), {
+              ignore: fromSquare,
             })
       ) {
         return false;
       }
     } else {
+      const dropType = move.dropPieceType;
       if (move.promote) {
         return false;
       }
       if (move.color !== this.color) {
         return false;
       }
-      if (this.hand(this.color).count(move.from) === 0) {
+      if (this.hand(this.color).count(dropType) === 0) {
         return false;
       }
-      if (this._board.at(move.to)) {
+      if (this._board.atByIndex(move.to)) {
         return false;
       }
-      if (isInvalidRank(this.color, move.from, move.to.rank)) {
+      if (isInvalidRank(this.color, dropType, toSquare.rank)) {
         return false;
       }
-      if (move.from === PieceType.PAWN && pawnExists(this.color, this._board, move.to.file)) {
+      if (dropType === PieceType.PAWN && pawnExists(this.color, this._board, toSquare.file)) {
         return false;
       }
-      if (this._board.isChecked(this.color, { filled: move.to })) {
+      if (this._board.isChecked(this.color, { filled: toSquare })) {
         return false;
       }
       if (this.isPawnDropMate(move)) {
@@ -455,17 +461,18 @@ export class Position {
     if (!(opt && opt.ignoreValidation) && !this.isValidMove(move)) {
       return false;
     }
-    if (move.from instanceof Square) {
-      const target = this._board.at(move.from) as Piece;
-      const captured = this._board.at(move.to);
-      this._board.remove(move.from);
-      this._board.set(move.to, move.promote ? target.promoted() : target);
+    if (!move.isDrop) {
+      const target = this._board.atByIndex(move.from) as Piece;
+      const captured = this._board.atByIndex(move.to);
+      this._board.removeByIndex(move.from);
+      this._board.setByIndex(move.to, move.promote ? target.promoted() : target);
       if (captured && captured.type !== PieceType.KING) {
         this.hand(this.color).add(captured.unpromoted().type, 1);
       }
     } else {
-      this.hand(this.color).reduce(move.from, 1);
-      this._board.set(move.to, new Piece(this.color, move.from));
+      const dropType = move.dropPieceType;
+      this.hand(this.color).reduce(dropType, 1);
+      this._board.setByIndex(move.to, new Piece(this.color, dropType));
     }
     this._color = reverseColor(this.color);
     return true;
@@ -478,20 +485,20 @@ export class Position {
    */
   undoMove(move: Move): void {
     this._color = reverseColor(this.color);
-    if (move.from instanceof Square) {
-      this._board.set(move.from, new Piece(this.color, move.pieceType));
+    if (!move.isDrop) {
+      this._board.setByIndex(move.from, new Piece(this.color, move.pieceType));
       if (move.capturedPieceType !== null) {
         const capturedPiece = new Piece(reverseColor(this.color), move.capturedPieceType);
-        this._board.set(move.to, capturedPiece);
+        this._board.setByIndex(move.to, capturedPiece);
         if (capturedPiece.type !== PieceType.KING) {
           this.hand(this.color).reduce(capturedPiece.unpromoted().type, 1);
         }
       } else {
-        this._board.remove(move.to);
+        this._board.removeByIndex(move.to);
       }
     } else {
-      this.hand(this.color).add(move.from, 1);
-      this._board.remove(move.to);
+      this.hand(this.color).add(move.dropPieceType, 1);
+      this._board.removeByIndex(move.to);
     }
   }
 
@@ -666,11 +673,10 @@ export class Position {
       case MoveType.SHORT:
         return distance === 1;
       case MoveType.LONG: {
-        const d = directionToDeltaMap[direction];
         for (
-          let square = from.neighbor(d.x, d.y);
+          let square = from.neighbor(direction);
           square.valid;
-          square = square.neighbor(d.x, d.y)
+          square = square.neighbor(direction)
         ) {
           if (square.equals(to)) {
             return true;

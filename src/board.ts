@@ -28,6 +28,28 @@ function sfenCharToNumber(sfen: string): number | null {
   }
 }
 
+// Piece byte encoding:
+//   0       = empty
+//   1..14   = BLACK PAWN..DRAGON  (= type + 1)
+//   15..28  = WHITE PAWN..DRAGON  (= type + 15)
+// encode: (piece.color - 1) * 14 + piece.type + 1
+// decode: PIECE_TABLE[byte]
+
+const PIECE_TABLE: readonly (Piece | null)[] = (() => {
+  const table: (Piece | null)[] = [null];
+  for (let t = 0; t < 14; t++) {
+    table.push(new Piece(Color.BLACK, t as PieceType));
+  }
+  for (let t = 0; t < 14; t++) {
+    table.push(new Piece(Color.WHITE, t as PieceType));
+  }
+  return table;
+})();
+
+function encodePiece(piece: Piece): number {
+  return (piece.color - 1) * 14 + piece.type + 1;
+}
+
 type PowerDetectionOption = {
   filled?: Square;
   ignore?: Square;
@@ -74,13 +96,10 @@ export interface ImmutableBoard {
  * 盤面
  */
 export class Board {
-  private squares: Array<Piece | null>;
+  private squares: Uint8Array;
 
   constructor() {
-    this.squares = new Array<Piece>();
-    for (let i = 0; i < 81; i += 1) {
-      this.squares.push(null);
-    }
+    this.squares = new Uint8Array(81);
     this.resetBySFEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL");
   }
 
@@ -89,7 +108,26 @@ export class Board {
    * @param square
    */
   at(square: Square): Piece | null {
-    return this.squares[square.index];
+    const idx = square.index;
+    if (idx < 0 || idx >= 81) return null;
+    return PIECE_TABLE[this.squares[idx]];
+  }
+
+  /** 有効なインデックス (0-80) で駒を取得します。bounds check なし。 */
+  atByIndex(idx: number): Piece | null {
+    return PIECE_TABLE[this.squares[idx]];
+  }
+
+  /** 有効なインデックス (0-80) で駒を削除します。bounds check なし。 */
+  removeByIndex(idx: number): Piece | null {
+    const byte = this.squares[idx];
+    this.squares[idx] = 0;
+    return PIECE_TABLE[byte];
+  }
+
+  /** 有効なインデックス (0-80) で駒を配置します。bounds check なし。 */
+  setByIndex(idx: number, piece: Piece): void {
+    this.squares[idx] = encodePiece(piece);
   }
 
   /**
@@ -98,7 +136,7 @@ export class Board {
    * @param piece
    */
   set(square: Square, piece: Piece): void {
-    this.squares[square.index] = piece;
+    this.squares[square.index] = encodePiece(piece);
   }
 
   /**
@@ -117,18 +155,17 @@ export class Board {
    * @param square
    */
   remove(square: Square): Piece | null {
-    const removed = this.squares[square.index];
-    this.squares[square.index] = null;
-    return removed;
+    const idx = square.index;
+    const byte = this.squares[idx];
+    this.squares[idx] = 0;
+    return PIECE_TABLE[byte];
   }
 
   /**
    * 空ではないマスの一覧を取得します。
    */
   listNonEmptySquares(): Square[] {
-    return Square.all.filter((square) => {
-      return this.squares[square.index];
-    });
+    return Square.all.filter((square) => this.squares[square.index] !== 0);
   }
 
   /**
@@ -136,10 +173,14 @@ export class Board {
    * @param color
    */
   listSquaresByColor(color: Color): Square[] {
-    return Square.all.filter((square) => {
-      const piece = this.squares[square.index];
-      return piece && piece.color === color;
-    });
+    // BLACK: bytes 1..14, WHITE: bytes 15..28
+    if (color === Color.BLACK) {
+      return Square.all.filter((square) => {
+        const byte = this.squares[square.index];
+        return byte >= 1 && byte <= 14;
+      });
+    }
+    return Square.all.filter((square) => this.squares[square.index] >= 15);
   }
 
   /**
@@ -147,19 +188,15 @@ export class Board {
    * @param target
    */
   listSquaresByPiece(target: Piece): Square[] {
-    return Square.all.filter((square) => {
-      const piece = this.squares[square.index];
-      return piece && target.equals(piece);
-    });
+    const targetByte = encodePiece(target);
+    return Square.all.filter((square) => this.squares[square.index] === targetByte);
   }
 
   /**
    * 全てのマスの駒を取り除きます。
    */
   clear(): void {
-    Square.all.forEach((square) => {
-      this.squares[square.index] = null;
-    });
+    this.squares.fill(0);
   }
 
   /**
@@ -227,14 +264,8 @@ export class Board {
    * @param color
    */
   findKing(color: Color): Square | undefined {
-    const king = new Piece(color, PieceType.KING);
-    return Square.all.find((square) => {
-      const piece = this.at(square);
-      if (piece && king.equals(piece)) {
-        return true;
-      }
-      return;
-    });
+    const kingByte = encodePiece(new Piece(color, PieceType.KING));
+    return Square.all.find((square) => this.squares[square.index] === kingByte);
   }
 
   /**
@@ -254,13 +285,14 @@ export class Board {
         if (option && option.ignore && square.equals(option.ignore)) {
           continue;
         }
-        const piece = this.at(square);
-        if (piece) {
-          if (piece.color !== color) {
+        const byte = this.squares[square.index];
+        if (byte !== 0) {
+          const pieceColor = byte >= 15 ? Color.WHITE : Color.BLACK;
+          if (pieceColor !== color) {
             return false;
           }
           const rdir = reverseDirection(dir);
-          const type = resolveMoveType(piece, rdir);
+          const type = resolveMoveType(PIECE_TABLE[byte] as Piece, rdir);
           return type === MoveType.LONG || (type === MoveType.SHORT && step === 1);
         }
       }
@@ -322,8 +354,6 @@ export class Board {
    * @param board
    */
   copyFrom(board: Board): void {
-    Square.all.forEach((square) => {
-      this.squares[square.index] = board.at(square);
-    });
+    this.squares.set(board.squares); // Uint8Array.set = memcpy
   }
 }
