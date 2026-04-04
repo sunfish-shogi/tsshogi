@@ -142,6 +142,17 @@ describe("text", () => {
     expect(formatPV(position, pv)).toBe("▲７六歩△３四歩▲５八金右△８八角成▲同　銀");
   });
 
+  it("formatPV/invalid move", () => {
+    const position = new Position();
+    const pv = [
+      new Move(new Square(7, 7), new Square(7, 6), false, Color.BLACK, PieceType.PAWN, null),
+      new Move(new Square(1, 4), new Square(1, 3), true, Color.WHITE, PieceType.PAWN, null),
+      new Move(new Square(3, 3), new Square(3, 4), false, Color.WHITE, PieceType.PAWN, null),
+    ];
+    expect(() => formatPV(position, pv)).not.toThrow();
+    expect(formatPV(position, pv)).toBe("▲７六歩△１三歩成");
+  });
+
   it("parsePV", () => {
     const record = importKIF(`
 後手の持駒：

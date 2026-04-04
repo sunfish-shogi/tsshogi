@@ -162,6 +162,24 @@ describe("position", () => {
     expect(position.board.at(new Square(2, 6))).toStrictEqual(
       new Piece(Color.BLACK, PieceType.ROOK),
     );
+    const invalidPromoteMove = new Move(
+      new Square(1, 4),
+      new Square(1, 3),
+      true,
+      position.color,
+      PieceType.PAWN,
+      null,
+    );
+    expect(() =>
+      position.doMove(invalidPromoteMove, {
+        ignoreValidation: true,
+      }),
+    ).not.toThrow();
+    expect(
+      position.doMove(invalidPromoteMove, {
+        ignoreValidation: true,
+      }),
+    ).toBeFalsy();
   });
 
   describe("isValidMove", () => {

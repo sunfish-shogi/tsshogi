@@ -465,7 +465,10 @@ export class Position {
       return false;
     }
     if (move.from instanceof Square) {
-      const target = this._board.at(move.from) as Piece;
+      const target = this._board.at(move.from);
+      if (!target) {
+        return false;
+      }
       const captured = this._board.at(move.to);
       this._board.remove(move.from);
       this._board.set(move.to, move.promote ? target.promoted() : target);
