@@ -348,7 +348,9 @@ export function formatPV(position: ImmutablePosition, pv: Move[]): string {
       lastMove,
       compatible: true,
     })}`;
-    p.doMove(move, { ignoreValidation: true });
+    if (!p.doMove(move, { ignoreValidation: true })) {
+      break;
+    }
     lastMove = move;
   }
   return ret;

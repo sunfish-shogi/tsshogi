@@ -482,7 +482,9 @@ function buildJKFMoves(
     }
     moves.push(entry);
     if (node.move instanceof Move) {
-      position.doMove(node.move, { ignoreValidation: true });
+      if (!position.doMove(node.move, { ignoreValidation: true })) {
+        break;
+      }
     }
   }
   return moves;
