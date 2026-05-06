@@ -158,6 +158,34 @@ PI
     expect(record.current.move).toStrictEqual(specialMove(SpecialMoveType.FOUL_LOSE));
   });
 
+  it("import/black_illegal_action", () => {
+    const data = `V2.2
+PI
++
++7776FU
+-3334FU
+%+ILLEGAL_ACTION
+`;
+    const record = importCSA(data) as Record;
+    expect(record).toBeInstanceOf(Record);
+    record.goto(3);
+    expect(record.current.move).toStrictEqual(specialMove(SpecialMoveType.FOUL_LOSE));
+  });
+
+  it("import/black_illegal_action", () => {
+    const data = `V2.2
+PI
++
++7776FU
+-3334FU
+%-ILLEGAL_ACTION
+`;
+    const record = importCSA(data) as Record;
+    expect(record).toBeInstanceOf(Record);
+    record.goto(3);
+    expect(record.current.move).toStrictEqual(specialMove(SpecialMoveType.FOUL_WIN));
+  });
+
   it("import/jishogi", () => {
     const data = `V2.2
 PI
@@ -1173,6 +1201,37 @@ T0
 -3334FU
 T0
 %ILLEGAL_MOVE
+T0
+`);
+  });
+
+  it("export/black_illegal_action", () => {
+    const record = new Record();
+    record.append(record.position.createMoveByUSI("7g7f") as Move);
+    record.append(record.position.createMoveByUSI("3c3d") as Move);
+    record.append(SpecialMoveType.FOUL_WIN);
+    expect(exportCSA(record)).toBe(`V2.2
+PI
++
++7776FU
+T0
+-3334FU
+T0
+%-ILLEGAL_ACTION
+T0
+`);
+  });
+
+  it("export/white_illegal_action", () => {
+    const record = new Record();
+    record.append(record.position.createMoveByUSI("7g7f") as Move);
+    record.append(SpecialMoveType.FOUL_WIN);
+    expect(exportCSA(record)).toBe(`V2.2
+PI
++
++7776FU
+T0
+%+ILLEGAL_ACTION
 T0
 `);
   });

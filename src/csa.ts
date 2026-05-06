@@ -9,7 +9,7 @@ import {
   InvalidTurnError,
   PieceNotExistsError,
 } from "./errors";
-import { Color, reverseColor } from "./color";
+import { Color } from "./color";
 import { ImmutableHand } from "./hand";
 import { anySpecialMove, Move, specialMove, SpecialMove, SpecialMoveType } from "./move";
 import { Piece, PieceType, promotedPieceType } from "./piece";
@@ -318,11 +318,11 @@ export function getSpecialMoveByName(name: string, color: Color): SpecialMove {
       return specialMove(SpecialMoveType.FOUL_LOSE);
     case "+ILLEGAL_ACTION":
       return specialMove(
-        color == Color.BLACK ? SpecialMoveType.FOUL_WIN : SpecialMoveType.FOUL_LOSE,
+        color == Color.BLACK ? SpecialMoveType.FOUL_LOSE : SpecialMoveType.FOUL_WIN,
       );
     case "-ILLEGAL_ACTION":
       return specialMove(
-        color == Color.WHITE ? SpecialMoveType.FOUL_WIN : SpecialMoveType.FOUL_LOSE,
+        color == Color.WHITE ? SpecialMoveType.FOUL_LOSE : SpecialMoveType.FOUL_WIN,
       );
     case "KACHI":
       return specialMove(SpecialMoveType.ENTERING_OF_KING);
@@ -631,7 +631,7 @@ export function getCSASpecialMoveName(move: SpecialMove, color: Color): string |
     case SpecialMoveType.FOUL_LOSE:
       return "ILLEGAL_MOVE";
     case SpecialMoveType.FOUL_WIN:
-      return color == Color.BLACK ? "+ILLEGAL_ACTION" : "-ILLEGAL_ACTION";
+      return color == Color.BLACK ? "-ILLEGAL_ACTION" : "+ILLEGAL_ACTION";
     case SpecialMoveType.ENTERING_OF_KING:
       return "KACHI";
   }
@@ -675,7 +675,7 @@ export function exportCSA(record: ImmutableRecord, options?: CSAExportOptions): 
       if (node.move instanceof Move) {
         move = formatCSAMove(node.move);
       } else {
-        const name = getCSASpecialMoveName(node.move, reverseColor(node.nextColor));
+        const name = getCSASpecialMoveName(node.move, node.nextColor);
         if (name) {
           move = "%" + name;
         }
