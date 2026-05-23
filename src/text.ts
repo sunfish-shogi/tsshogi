@@ -359,6 +359,24 @@ export function formatPV(position: ImmutablePosition, pv: Move[]): string {
 const moveRegExp =
   /^[▲△▼▽☗☖]?([１２３４５６７８９一二三四五六七八九1-9]{2}|同)(王|玉|飛|龍|竜|角|馬|金|銀|成銀|全|桂|成桂|圭|香|成香|杏|歩|と)(左|直|右|)(引|寄|上|)(成|不成|打|)(\([1-9][1-9]\)|)/;
 
+// 指し手の読み込み時に無視する文言
+// NOTE: Shogi DB2 の KI2 形式が「投了」や「千日手」を指し手と同列で表記している。
+const ignoredKI2MoveNames = new Set([
+  "中断",
+  "投了",
+  "持将棋",
+  "千日手",
+  "詰み",
+  "詰",
+  "不詰",
+  "切れ負け",
+  "反則勝ち",
+  "反則負け",
+  "入玉勝ち",
+  "不戦勝",
+  "不戦敗",
+]);
+
 export function parsePV(position: ImmutablePosition, text: string): Move[] {
   return parseMoves(position, text)[0];
 }
@@ -399,6 +417,9 @@ export function parseMoves(
   const p = position.clone();
   const pv: Move[] = [];
   for (const section of sections) {
+    if (ignoredKI2MoveNames.has(section.substring(1))) {
+      break;
+    }
     const result = moveRegExp.exec(section);
     if (!result) {
       return [pv, new InvalidMoveError(section)];

@@ -1158,6 +1158,33 @@ describe("kakinoki", () => {
     );
   });
 
+  it("import/ki2/shogidb2", () => {
+    // Shogi DB2 の KI2 形式は「投了」や「千日手」を指し手と同列で表記している。
+    const testCases = [
+      {
+        data: "▲２六歩 △３四歩 ▲７六歩 △５四歩 ▲４八銀 △５二飛 ▲６八玉 △５五歩 ▲７八玉 △投了\nまで9手で先手の勝ち",
+        moveCount: 11,
+      },
+      {
+        data: "▲２六歩 △３四歩 ▲７六歩 △５四歩 ▲４八銀 △５二飛 ▲６八玉 △５五歩 △投了\nまで8手で後手の勝ち",
+        moveCount: 10,
+      },
+      {
+        data: "▲２六歩 △３四歩 ▲７六歩 △５四歩 ▲４八銀 △５二飛 ▲６八玉 △５五歩 ▲７八玉 △千日手\nまで9手で千日手",
+        moveCount: 11,
+      },
+      {
+        data: "▲２六歩 △３四歩 ▲７六歩 △５四歩 ▲４八銀 △５二飛 ▲６八玉 △５五歩 △千日手\nまで8手で千日手",
+        moveCount: 10,
+      },
+    ];
+    for (const { data, moveCount } of testCases) {
+      const record = importKI2(data) as Record;
+      expect(record).toBeInstanceOf(Record);
+      expect(record.moves).toHaveLength(moveCount);
+    }
+  });
+
   it("export/standard", () => {
     const record = new Record();
     record.metadata.setStandardMetadata(RecordMetadataKey.BLACK_NAME, "藤井");
