@@ -851,7 +851,7 @@ describe("position", () => {
         black24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
         black27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
         white24: JishogiDeclarationResult.DRAW, // お互い24点以上なので引き分け
-        white27: JishogiDeclarationResult.WIN, // 敵陣の駒が足りないので負け
+        white27: JishogiDeclarationResult.WIN, // 27点に達しているので勝ち
       },
       {
         title: "gote_11pieces_26points",
