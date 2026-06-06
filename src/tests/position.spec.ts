@@ -810,6 +810,91 @@ describe("position", () => {
         white24: JishogiDeclarationResult.LOSE,
         white27: JishogiDeclarationResult.LOSE,
       },
+      {
+        // https://www.youtube.com/live/mRVb8QlZat4?si=qpN7-KOdVOSei2MX&t=5831
+        title: "shitate_11pieces_27points",
+        sfen: "5+B+P2/K+P1+P+R+P3/+P+P+NPP4/7g1/6gg1/5+n1s1/3+p+p4/1+p3+n1k1/9 b G2SNL3Psl4p 1",
+        blackInvading: 11,
+        whiteInvading: 4,
+        blackTotalPoint: 27,
+        whiteTotalPoint: 27,
+        blackPoint: 27,
+        whitePoint: 22,
+        black24: JishogiDeclarationResult.DRAW, // お互い24点以上なので引き分け
+        black27: JishogiDeclarationResult.LOSE, // 28点に達していないので負け
+        white24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        white27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+      },
+      {
+        title: "uwate_4pieces_27points",
+        sfen: "5+B+P2/K+P1+P+R+P3/+P+P+NPP4/7g1/6gg1/5+n1s1/3+p+p4/1+p3+n1k1/9 w G2SNL3Psl4p 1",
+        blackInvading: 11,
+        whiteInvading: 4,
+        blackTotalPoint: 27,
+        whiteTotalPoint: 27,
+        blackPoint: 27,
+        whitePoint: 22,
+        black24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        black27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        white24: JishogiDeclarationResult.LOSE, // 敵陣の駒が足りないので負け
+        white27: JishogiDeclarationResult.LOSE, // 敵陣の駒が足りないので負け
+      },
+      {
+        title: "uwate_10pieces_27points",
+        sfen: "5+B+P2/K+P1+P+R+P3/+P+P+NPP4/9/9/9/2p+p+pgsg1/1+p1+n1+n1kg/9 w G2SNL3Psl3p 1",
+        blackInvading: 11,
+        whiteInvading: 10,
+        blackTotalPoint: 27,
+        whiteTotalPoint: 27,
+        blackPoint: 27,
+        whitePoint: 27,
+        black24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        black27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        white24: JishogiDeclarationResult.DRAW, // お互い24点以上なので引き分け
+        white27: JishogiDeclarationResult.WIN, // 27点に達しているので勝ち
+      },
+      {
+        title: "gote_11pieces_26points",
+        sfen: "5+B+P2/K+P+L+P+R+P3/+P+P+N1P4/9/9/9/2p+p+pgsg1/1+p1+n+b+n1kg/9 w G2SNL4Prs2l3p 1",
+        blackInvading: 11,
+        whiteInvading: 11,
+        blackTotalPoint: 28,
+        whiteTotalPoint: 26,
+        blackPoint: 28,
+        whitePoint: 26,
+        black24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        black27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        white24: JishogiDeclarationResult.DRAW, // お互い24点以上なので引き分け
+        white27: JishogiDeclarationResult.LOSE, // 27点に達していないので負け
+      },
+      {
+        title: "sente_11pieces_23points",
+        sfen: "5+B+P2/K+P+L+P+R+P3/+P+P+N1P4/1LSS1P3/3P5/9/2p+p+pgsg1/1+p1+n+b+n1kg/9 b GN2Prs2l3p 1",
+        blackInvading: 11,
+        whiteInvading: 11,
+        blackTotalPoint: 28,
+        whiteTotalPoint: 26,
+        blackPoint: 23,
+        whitePoint: 26,
+        black24: JishogiDeclarationResult.LOSE, // 24点に達していないので負け
+        black27: JishogiDeclarationResult.LOSE, // 27点に達していないので負け
+        white24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        white27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+      },
+      {
+        title: "sente_11pieces_24points",
+        sfen: "5+B+P2/K+P+L+P+R+P3/+P+P+N1P4/1LSS5/3P5/9/2p+p+pgsg1/1+p1+n+b+n1kg/9 b GN3Prs2l3p 1",
+        blackInvading: 11,
+        whiteInvading: 11,
+        blackTotalPoint: 28,
+        whiteTotalPoint: 26,
+        blackPoint: 24,
+        whitePoint: 26,
+        black24: JishogiDeclarationResult.DRAW, // お互い24点以上なので引き分け
+        black27: JishogiDeclarationResult.LOSE, // 27点に達していないので負け
+        white24: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+        white27: JishogiDeclarationResult.LOSE, // 手番ではないので負け
+      },
     ];
     for (const tc of testCases) {
       it(tc.title, () => {

@@ -912,18 +912,20 @@ export function judgeJishogiDeclaration(
   // 24 点法
   if (rule === JishogiDeclarationRule.GENERAL24) {
     return point >= 31
-      ? JishogiDeclarationResult.WIN
+      ? JishogiDeclarationResult.WIN // 31 点以上で勝ち
       : point >= 24
-        ? JishogiDeclarationResult.DRAW
-        : JishogiDeclarationResult.LOSE;
+        ? JishogiDeclarationResult.DRAW // 24 点以上31点未満で引き分け
+        : JishogiDeclarationResult.LOSE; // 24 点未満で負け
   }
 
   // 27 点法
   if (color === Color.BLACK) {
     // 先手は 28 点以上で勝ち
-    return point >= 28 ? JishogiDeclarationResult.WIN : JishogiDeclarationResult.DRAW;
+    // 足りなければ負け
+    return point >= 28 ? JishogiDeclarationResult.WIN : JishogiDeclarationResult.LOSE;
   } else {
     // 後手は 27 点以上で勝ち
-    return point >= 27 ? JishogiDeclarationResult.WIN : JishogiDeclarationResult.DRAW;
+    // 足りなければ負け
+    return point >= 27 ? JishogiDeclarationResult.WIN : JishogiDeclarationResult.LOSE;
   }
 }
