@@ -5,11 +5,11 @@
 # チェックリスト / Checklist
 
 - MUST
-  - [ ] I am human
   - [ ] `npm test` passed
   - [ ] `npm run lint` was applied without warnings
   - [ ] `console.log` not included (except script file)
 - MUST (for Outside Contributor)
   - [ ] understand [CONTRIBUTING.md](https://github.com/sunfish-shogi/tsshogi/blob/main/CONTRIBUTING.md)
+  - [ ] I am human
 - RECOMMENDED (it depends on what you change)
   - [ ] unit test added/updated
