@@ -10,5 +10,6 @@ assignees: sunfish-shogi
 ## Checklist
 
 - [ ] understand [CONTRIBUTING.md](https://github.com/sunfish-shogi/tsshogi/blob/main/CONTRIBUTING.md)
+- [ ] I am human
 
 ## 質問 / Question
