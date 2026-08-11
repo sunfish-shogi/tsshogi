@@ -44,10 +44,10 @@ const DEPENDENCY_FIELDS = [
 // maps the alias (the name it is installed under) to the real package it must resolve to.
 // Do not add entries here for our own dependencies: aliases are banned in package.json.
 const ALLOWED_TRANSITIVE_ALIASES = new Map([
-  // Requested by @isaacs/cliui to load the CommonJS builds alongside the ESM ones.
-  ["string-width-cjs", "string-width"],
-  ["strip-ansi-cjs", "strip-ansi"],
-  ["wrap-ansi-cjs", "wrap-ansi"],
+  // e.g.
+  //["string-width-cjs", "string-width"],
+  //["strip-ansi-cjs", "strip-ansi"],
+  //["wrap-ansi-cjs", "wrap-ansi"],
 ]);
 
 // Packages bundled inside their parent's tarball (bundleDependencies) have no tarball of
